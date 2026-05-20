@@ -1,15 +1,25 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { Category } from '../types';
+import { useMusic } from '../state/MusicContext';
 import { ALL_GENS, POKEMON_BY_GEN } from '../data/pokemon-data';
+import { TITLE_SCREEN } from '../utils/tracks';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
+  const { isMuted, toggleMute, play } = useMusic();
   const [selectedGens, setSelectedGens] = useState<Set<number>>(new Set([1]));
   const [expanded, setExpanded] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      play(TITLE_SCREEN);
+    }, [play])
+  );
 
   const totalPokemon = useMemo(() => {
     return Array.from(selectedGens).reduce(
@@ -45,6 +55,10 @@ export default function HomeScreen({ navigation }: Props) {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.muteBtn} onPress={toggleMute}>
+        <Text style={[styles.muteIcon, isMuted && styles.mutedIcon]}>♪</Text>
+        {isMuted && <View style={styles.muteStrike} />}
+      </TouchableOpacity>
       <Text style={styles.title}>Name It!</Text>
       <Text style={styles.subtitle}>Pick a category</Text>
 
@@ -100,6 +114,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#1a1a2e',
     padding: 24,
+  },
+  muteBtn: {
+    position: 'absolute',
+    top: 60,
+    right: 24,
+    width: 28,
+    alignItems: 'center',
+  },
+  muteIcon: {
+    fontSize: 20,
+    color: '#a0a0b0',
+  },
+  mutedIcon: {
+    opacity: 0.4,
+  },
+  muteStrike: {
+    position: 'absolute',
+    width: 24,
+    height: 2,
+    backgroundColor: '#e63946',
+    top: '50%',
+    transform: [{ rotate: '-45deg' }],
   },
   title: {
     fontSize: 42,

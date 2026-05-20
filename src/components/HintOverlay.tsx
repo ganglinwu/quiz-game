@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     height: 130,
   },
   silhouette: {
-    tintColor: '#0a0a1a',
+    tintColor: '#000000',
   },
   buttons: {
     width: '100%',

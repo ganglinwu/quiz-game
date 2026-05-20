@@ -1,59 +1,101 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { HintRecord } from '../types';
+import { useMusic } from '../state/MusicContext';
 import { calculateStats } from '../utils/statsCalculator';
 import { getPlayerColor } from '../utils/colors';
 import { getArtworkUrl } from '../utils/pokeApi';
+import { RESULT_BGM } from '../utils/tracks';
 import StatsPanel from '../components/StatsPanel';
 import HistoryModal from '../components/HistoryModal';
+import PokemonCardModal from '../components/PokemonCardModal';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Result'>;
 
-const REVEAL_DELAY = 3000;
-
-function SilhouetteCard({ hint }: { hint: HintRecord }) {
-  const [tapped, setTapped] = useState(false);
+function SilhouetteCard({
+  hint,
+  isCountdownBlocked,
+  onCountdownStart,
+  onCountdownEnd,
+  onCardTap,
+}: {
+  hint: HintRecord;
+  isCountdownBlocked: boolean;
+  onCountdownStart: () => void;
+  onCountdownEnd: () => void;
+  onCardTap: (h: HintRecord) => void;
+}) {
+  const [countdown, setCountdown] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval>>(null);
 
-  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+  useEffect(() => () => { if (intervalRef.current) clearInterval(intervalRef.current); }, []);
 
   const handleTap = () => {
-    if (revealed) return;
-    setTapped(true);
-    timerRef.current = setTimeout(() => setRevealed(true), REVEAL_DELAY);
+    if (revealed) {
+      onCardTap(hint);
+      return;
+    }
+    if (countdown !== null || isCountdownBlocked) return;
+
+    onCountdownStart();
+    setCountdown(3);
+    let count = 3;
+    intervalRef.current = setInterval(() => {
+      count--;
+      if (count <= 0) {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        setCountdown(null);
+        setRevealed(true);
+        onCountdownEnd();
+      } else {
+        setCountdown(count);
+      }
+    }, 1000);
   };
 
   return (
     <TouchableOpacity style={styles.hintCard} onPress={handleTap} activeOpacity={0.7}>
       <Image
         source={{ uri: getArtworkUrl(hint.pokemonId) }}
-        style={[styles.hintImage, !revealed && { tintColor: '#0a0a1a' }]}
+        style={[styles.hintImage, !revealed && { tintColor: '#000000' }]}
       />
       {revealed ? (
         <Text style={styles.hintName}>{hint.pokemonName}</Text>
+      ) : countdown !== null ? (
+        <Text style={styles.countdownText}>{countdown}</Text>
       ) : (
-        <Text style={styles.hintNameHidden}>{tapped ? '...' : '?'}</Text>
+        <Text style={styles.hintNameHidden}>?</Text>
       )}
     </TouchableOpacity>
   );
 }
 
-function RevealedCard({ hint }: { hint: HintRecord }) {
+function RevealedCard({ hint, onCardTap }: { hint: HintRecord; onCardTap: (h: HintRecord) => void }) {
   return (
-    <View style={styles.hintCard}>
+    <TouchableOpacity style={styles.hintCard} onPress={() => onCardTap(hint)} activeOpacity={0.7}>
       <Image source={{ uri: getArtworkUrl(hint.pokemonId) }} style={styles.hintImage} />
       <Text style={styles.hintName}>{hint.pokemonName}</Text>
-    </View>
+    </TouchableOpacity>
   );
 }
 
 export default function ResultScreen({ navigation, route }: Props) {
   const { winner, isDraw, eliminatedPlayers, players, turnRecords, gameStartTime, revealedHints } = route.params;
+  const { play } = useMusic();
   const [showStats, setShowStats] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false);
+  const [countdownActive, setCountdownActive] = useState(false);
+  const [selectedPokemon, setSelectedPokemon] = useState<HintRecord | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      play(RESULT_BGM);
+    }, [play])
+  );
 
   const hintPokemon = useMemo(() => revealedHints.filter((h) => h.source === 'hint'), [revealedHints]);
   const bonusPokemon = useMemo(() => revealedHints.filter((h) => h.source === 'bonus'), [revealedHints]);
@@ -123,7 +165,14 @@ export default function ResultScreen({ navigation, route }: Props) {
           <Text style={styles.hintsSubtext}>Tap to reveal</Text>
           <View style={styles.hintsRow}>
             {hintPokemon.map((hint, i) => (
-              <SilhouetteCard key={i} hint={hint} />
+              <SilhouetteCard
+                key={i}
+                hint={hint}
+                isCountdownBlocked={countdownActive}
+                onCountdownStart={() => setCountdownActive(true)}
+                onCountdownEnd={() => setCountdownActive(false)}
+                onCardTap={setSelectedPokemon}
+              />
             ))}
           </View>
         </View>
@@ -134,10 +183,19 @@ export default function ResultScreen({ navigation, route }: Props) {
           <Text style={styles.hintsTitle}>Try these next time!</Text>
           <View style={styles.hintsRow}>
             {bonusPokemon.map((hint, i) => (
-              <RevealedCard key={i} hint={hint} />
+              <RevealedCard key={i} hint={hint} onCardTap={setSelectedPokemon} />
             ))}
           </View>
         </View>
+      )}
+
+      {selectedPokemon && (
+        <PokemonCardModal
+          visible
+          pokemonName={selectedPokemon.pokemonName}
+          pokemonId={selectedPokemon.pokemonId}
+          onClose={() => setSelectedPokemon(null)}
+        />
       )}
 
       <TouchableOpacity
@@ -254,6 +312,13 @@ const styles = StyleSheet.create({
   hintNameHidden: {
     color: '#a0a0b0',
     fontSize: 14,
+    fontWeight: 'bold',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  countdownText: {
+    color: '#ffd166',
+    fontSize: 20,
     fontWeight: 'bold',
     marginTop: 4,
     textAlign: 'center',

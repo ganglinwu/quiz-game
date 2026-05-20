@@ -1,18 +1,22 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { Category, HintLimit } from '../types';
 import { GameProvider, useGame } from '../state/GameContext';
+import { useMusic } from '../state/MusicContext';
 import { findDuplicate, fuzzyMatchWithGenDetection, fuzzyMatch } from '../utils/fuzzyMatch';
 import { getPlayerColor } from '../utils/colors';
 import { getPokemonForGens, getAllPokemon, getGenForPokemon } from '../data/pokemon-data';
+import { GAME_BGM, HINT_BGM, HINT_SUCCESS_SFX } from '../utils/tracks';
 import MicButton from '../components/MicButton';
 import TextInputField from '../components/TextInputField';
 import ConfirmationOverlay from '../components/ConfirmationOverlay';
 import HintOverlay from '../components/HintOverlay';
 import HistoryModal from '../components/HistoryModal';
 import Toast from '../components/Toast';
+import SuccessBanner from '../components/SuccessBanner';
 import GenerationVoteOverlay from '../components/GenerationVoteOverlay';
 import GenerationSettingsModal from '../components/GenerationSettingsModal';
 import fruitsData from '../data/fruits.json';
@@ -21,11 +25,27 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
 
 function GameContent({ navigation, category }: { navigation: Props['navigation']; category: Category }) {
   const { state, dispatch } = useGame();
+  const { isMuted, toggleMute, play, playSfx } = useMusic();
   const [historyVisible, setHistoryVisible] = useState(false);
   const [highlightItem, setHighlightItem] = useState<string | null>(null);
   const [duplicateItem, setDuplicateItem] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const [hintSuccess, setHintSuccess] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      play(GAME_BGM);
+    }, [play])
+  );
+
+  useEffect(() => {
+    if (state.hintPhase !== 'none') {
+      play(HINT_BGM);
+    } else {
+      play(GAME_BGM);
+    }
+  }, [state.hintPhase, play]);
 
   const isPokemon = category.type === 'pokemon';
 
@@ -109,8 +129,14 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
   );
 
   const handleConfirm = () => {
+    const gotHintRight = state.hintPhase === 'silhouette' &&
+      state.confirmationItem === state.hintPokemonName;
     setDuplicateItem(null);
     dispatch({ type: 'CONFIRM_ITEM' });
+    if (gotHintRight) {
+      setHintSuccess(true);
+      playSfx(HINT_SUCCESS_SFX);
+    }
   };
 
   const handleRetry = () => {
@@ -200,6 +226,10 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity style={styles.muteBtn} onPress={toggleMute}>
+          <Text style={[styles.muteIcon, isMuted && styles.mutedIcon]}>♪</Text>
+          {isMuted && <View style={styles.muteStrike} />}
+        </TouchableOpacity>
         <Text style={[styles.turnLabel, { color: playerColor }]}>{state.currentPlayer}'s Turn</Text>
         {isPokemon && (
           <TouchableOpacity
@@ -329,6 +359,10 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
       {toastMessage && (
         <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />
       )}
+
+      {hintSuccess && (
+        <SuccessBanner onDismiss={() => setHintSuccess(false)} />
+      )}
     </View>
   );
 }
@@ -358,6 +392,28 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  muteBtn: {
+    position: 'absolute',
+    left: 0,
+    padding: 4,
+    width: 28,
+    alignItems: 'center',
+  },
+  muteIcon: {
+    fontSize: 20,
+    color: '#a0a0b0',
+  },
+  mutedIcon: {
+    opacity: 0.4,
+  },
+  muteStrike: {
+    position: 'absolute',
+    width: 24,
+    height: 2,
+    backgroundColor: '#e63946',
+    top: '50%',
+    transform: [{ rotate: '-45deg' }],
   },
   settingsBtn: {
     position: 'absolute',
