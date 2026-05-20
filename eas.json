@@ -1,0 +1,28 @@
+{
+  "cli": {
+    "version": ">= 18.13.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6770200029",
+        "ascApiKeyPath": "./AuthKey_3V9DH2ANMV.p8",
+        "ascApiKeyId": "3V9DH2ANMV",
+        "ascApiKeyIssuerId": "c89f19fb-bf79-4a7c-a539-2b086e704958"
+      }
+    }
+  }
+}
