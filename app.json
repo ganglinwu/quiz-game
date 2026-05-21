@@ -43,7 +43,8 @@
           "microphonePermission": "Allow $(PRODUCT_NAME) to use the microphone for voice input.",
           "speechRecognitionPermission": "Allow $(PRODUCT_NAME) to use speech recognition."
         }
-      ]
+      ],
+      "expo-audio"
     ],
     "extra": {
       "eas": {

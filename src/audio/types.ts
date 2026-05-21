@@ -1,10 +1,10 @@
-import type { AVPlaybackSource } from 'expo-av';
+import type { AudioSource } from 'expo-audio';
 
 export type TrackId = 'title' | 'game' | 'hint' | 'result';
 
 export interface TrackDefinition {
   id: TrackId;
-  source: AVPlaybackSource;
+  source: AudioSource;
   volume?: number;
 }
 

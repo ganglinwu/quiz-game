@@ -25,7 +25,7 @@ A turn-based naming game for iOS built with Expo (React Native + TypeScript). Pl
 - **Player elimination** — when a player gives up, they're out; game continues until one remains
 - **End-of-game stats** (per-player item counts, avg turn times, fastest/slowest turn, total game time) — hidden behind "Show Stats" button
 - **Hint success banner** — if a player answers the hinted Pokemon correctly while still in silhouette phase (before revealing), a gold "You got it right! No hints consumed!" banner pops up with the wild-pokemon-caught jingle
-- **Background music** via `expo-av` with a command-queue AudioManager (`src/audio/`) — guarantees only one BGM track at a time:
+- **Background music** via `expo-audio` with a command-queue AudioManager (`src/audio/`) — guarantees only one BGM track at a time:
   - Home/PlayerSetup: `title-screen`, Gameplay: `pallet-town`, Hint overlay: `wild-pokemon-battle`, Result: `pokemon-center`
   - `wild-pokemon-caught` plays as one-shot SFX on hint success
   - BGM auto-pauses during speech recognition and resumes after (with iOS audio session restore)
@@ -35,7 +35,6 @@ A turn-based naming game for iOS built with Expo (React Native + TypeScript). Pl
 - **Toast notifications** for voice errors and no-match results (centered on screen)
 
 ### Not Yet Implemented
-- Mic stops working after several rounds (root cause not yet isolated — needs dev build with console logging to debug)
 - Answer validation (checking if an answer is actually a valid Pokemon/fruit vs just matching the list)
 - Custom rules/filters (e.g., Pokemon Gen 1 only fire types)
 - Additional categories beyond Pokemon and Fruits
@@ -45,7 +44,7 @@ A turn-based naming game for iOS built with Expo (React Native + TypeScript). Pl
 ## Tech Stack
 - **Expo SDK 54** (managed workflow, TypeScript)
 - **expo-speech-recognition** — iOS speech recognition
-- **expo-av** — background music and sound effects
+- **expo-audio** — background music and sound effects
 - **expo-haptics** — haptic feedback
 - **React Navigation** (native stack) — 4 screens
 - **React Context + useReducer** — state management
@@ -108,7 +107,7 @@ src/
 - **Player colors assigned by index** in the original player order, persist even after elimination.
 - **Hint tracking**: revealed hints saved to game state (max 5). On game end, hinted-but-unnamed Pokemon become silhouette quizzes; remaining slots filled with random unnamed Pokemon as suggestions.
 - **Generation auto-detection**: if a player names a Pokemon from an inactive generation, a vote is triggered rather than rejecting the answer. Majority approval expands the pool mid-game.
-- **Audio manager as command queue**: `AudioManager` is a plain TypeScript class (not React) that serializes all BGM operations through an async queue. Only one `Audio.Sound` instance exists at a time. Superseded play commands are skipped. SFX bypasses the queue entirely. Screens declare intent via hooks (`useBGM`, `useBGMDynamic`) rather than calling play/stop directly.
+- **Audio manager as command queue**: `AudioManager` is a plain TypeScript class (not React) that serializes all BGM operations through an async queue. One persistent `AudioPlayer` swaps tracks via `replace()`. Superseded play commands are skipped. SFX bypasses the queue entirely. Screens declare intent via hooks (`useBGM`, `useBGMDynamic`) rather than calling play/stop directly. After speech recognition ends, `setAudioModeAsync()` is called to reclaim the iOS audio session before resuming playback.
 
 ## Build & Deploy
 ```bash
@@ -125,5 +124,4 @@ Bundle ID: `com.ganglinwu.quizgame`
 EAS Project ID: `137a8bd5-39c8-4de3-8949-194420b876a7`
 
 ## Known Issues
-- Speech recognition mic becomes unresponsive after several rounds — not yet debugged, needs console log investigation via dev build
 - `app.json` includes `NSPhotoLibraryUsageDescription` to satisfy App Store — Expo dependency pulls it in, app doesn't actually use photos

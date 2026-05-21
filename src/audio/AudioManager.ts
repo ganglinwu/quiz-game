@@ -1,12 +1,11 @@
-import { Audio } from 'expo-av';
-import type { AVPlaybackSource } from 'expo-av';
+import { createAudioPlayer, setAudioModeAsync, type AudioPlayer, type AudioSource } from 'expo-audio';
 import type { TrackId, AudioCommand, BGMState } from './types';
 import { TRACK_REGISTRY } from './tracks';
 
 type Listener = (state: BGMState) => void;
 
 export class AudioManager {
-  private currentSound: Audio.Sound | null = null;
+  private player: AudioPlayer | null = null;
   private currentTrackId: TrackId | null = null;
   private bgmState: BGMState = { status: 'idle' };
   private isMuted = false;
@@ -15,17 +14,17 @@ export class AudioManager {
   private listeners = new Set<Listener>();
 
   async initialize(): Promise<void> {
-    await Audio.setAudioModeAsync({
-      playsInSilentModeIOS: true,
-      staysActiveInBackground: false,
+    await setAudioModeAsync({
+      playsInSilentMode: true,
+      interruptionMode: 'doNotMix',
     });
   }
 
   dispose(): void {
     this.queue = [];
-    if (this.currentSound) {
-      this.currentSound.unloadAsync();
-      this.currentSound = null;
+    if (this.player) {
+      this.player.remove();
+      this.player = null;
       this.currentTrackId = null;
     }
     this.setBGMState({ status: 'idle' });
@@ -58,28 +57,29 @@ export class AudioManager {
 
   // --- SFX (independent, bypasses queue) ---
 
-  playSfx(source: AVPlaybackSource): void {
-    (async () => {
-      try {
-        const { sound } = await Audio.Sound.createAsync(source, {
-          isMuted: this.isMuted,
-          volume: 0.5,
-        });
-        await sound.playAsync();
-        sound.setOnPlaybackStatusUpdate((status) => {
-          if (status.isLoaded && status.didJustFinish) {
-            sound.unloadAsync();
-          }
-        });
-      } catch {}
-    })();
+  playSfx(source: AudioSource): void {
+    try {
+      const sfxPlayer = createAudioPlayer(source);
+      sfxPlayer.volume = 0.5;
+      sfxPlayer.muted = this.isMuted;
+      sfxPlayer.play();
+      sfxPlayer.addListener('playbackStatusUpdate', (status) => {
+        if (status.didJustFinish) {
+          sfxPlayer.remove();
+        }
+      });
+    } catch (e) {
+      console.error('[AudioManager] SFX error:', e);
+    }
   }
 
   // --- Mute ---
 
   setMuted(muted: boolean): void {
     this.isMuted = muted;
-    this.currentSound?.setIsMutedAsync(muted).catch(() => {});
+    if (this.player) {
+      this.player.muted = muted;
+    }
   }
 
   getMuted(): boolean {
@@ -113,9 +113,7 @@ export class AudioManager {
 
       if (cmd.type === 'play') {
         const lastPlayIdx = this.findLastIndex(this.queue, (c) => c.type === 'play');
-        if (lastPlayIdx >= 0) {
-          continue;
-        }
+        if (lastPlayIdx >= 0) continue;
       }
 
       await this.execute(cmd);
@@ -127,44 +125,41 @@ export class AudioManager {
   private async execute(cmd: AudioCommand): Promise<void> {
     switch (cmd.type) {
       case 'play': {
-        if (this.currentTrackId === cmd.trackId && this.bgmState.status === 'playing') {
-          return;
-        }
-
-        await this.unloadCurrent();
-
-        this.setBGMState({ status: 'loading', trackId: cmd.trackId });
+        if (this.currentTrackId === cmd.trackId && this.bgmState.status === 'playing') return;
 
         const track = TRACK_REGISTRY.get(cmd.trackId);
         if (!track) return;
 
-        const { sound } = await Audio.Sound.createAsync(track.source, {
-          isLooping: true,
-          isMuted: this.isMuted,
-          volume: track.volume ?? 0.3,
-        });
+        this.setBGMState({ status: 'loading', trackId: cmd.trackId });
 
-        if (this.queue.some((c) => c.type === 'play' || c.type === 'stop')) {
-          await sound.unloadAsync();
-          return;
+        if (this.player) {
+          this.player.replace(track.source);
+        } else {
+          this.player = createAudioPlayer(track.source);
         }
 
-        this.currentSound = sound;
+        this.player.loop = true;
+        this.player.volume = track.volume ?? 0.3;
+        this.player.muted = this.isMuted;
         this.currentTrackId = cmd.trackId;
-        await sound.playAsync();
+        this.player.play();
+
         this.setBGMState({ status: 'playing', trackId: cmd.trackId });
         break;
       }
 
       case 'stop': {
-        await this.unloadCurrent();
+        if (this.player) {
+          this.player.pause();
+        }
+        this.currentTrackId = null;
         this.setBGMState({ status: 'idle' });
         break;
       }
 
       case 'pause': {
-        if (this.currentSound && this.bgmState.status === 'playing') {
-          await this.currentSound.pauseAsync().catch(() => {});
+        if (this.player && this.bgmState.status === 'playing') {
+          this.player.pause();
           this.setBGMState({
             status: 'paused',
             trackId: this.currentTrackId!,
@@ -175,35 +170,19 @@ export class AudioManager {
       }
 
       case 'resume': {
-        if (this.currentSound && this.bgmState.status === 'paused') {
+        if (this.bgmState.status === 'paused' && this.currentTrackId && this.player) {
           if (cmd.reason === 'speech') {
-            await Audio.setAudioModeAsync({
-              playsInSilentModeIOS: true,
-              staysActiveInBackground: false,
+            // Reclaim the iOS audio session after speech recognition released it
+            await setAudioModeAsync({
+              playsInSilentMode: true,
+              interruptionMode: 'doNotMix',
             });
-            await new Promise((r) => setTimeout(r, 100));
           }
-
-          try {
-            const status = await this.currentSound.getStatusAsync();
-            if (status.isLoaded && !status.isPlaying) {
-              await this.currentSound.playAsync();
-            }
-          } catch {}
-          this.setBGMState({ status: 'playing', trackId: this.currentTrackId! });
+          this.player.play();
+          this.setBGMState({ status: 'playing', trackId: this.currentTrackId });
         }
         break;
       }
-    }
-  }
-
-  private async unloadCurrent(): Promise<void> {
-    if (this.currentSound) {
-      const old = this.currentSound;
-      this.currentSound = null;
-      this.currentTrackId = null;
-      await old.stopAsync().catch(() => {});
-      await old.unloadAsync().catch(() => {});
     }
   }
 
