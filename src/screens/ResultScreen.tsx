@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { HintRecord } from '../types';
@@ -7,6 +7,7 @@ import { useBGM } from '../audio';
 import { calculateStats } from '../utils/statsCalculator';
 import { getPlayerColor } from '../utils/colors';
 import { getArtworkUrl } from '../utils/pokeApi';
+import NetworkImage from '../components/NetworkImage';
 import StatsPanel from '../components/StatsPanel';
 import HistoryModal from '../components/HistoryModal';
 import PokemonCardModal from '../components/PokemonCardModal';
@@ -58,9 +59,10 @@ function SilhouetteCard({
   return (
     <TouchableOpacity style={styles.hintCard} onPress={handleTap} activeOpacity={0.7}>
       <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: getArtworkUrl(hint.pokemonId) }}
+        <NetworkImage
+          uri={getArtworkUrl(hint.pokemonId)}
           style={[styles.hintImage, !revealed && styles.silhouette]}
+          loaderSize={20}
         />
       </View>
       {revealed ? (
@@ -77,7 +79,7 @@ function SilhouetteCard({
 function RevealedCard({ hint, onCardTap }: { hint: HintRecord; onCardTap: (h: HintRecord) => void }) {
   return (
     <TouchableOpacity style={styles.hintCard} onPress={() => onCardTap(hint)} activeOpacity={0.7}>
-      <Image source={{ uri: getArtworkUrl(hint.pokemonId) }} style={styles.hintImage} />
+      <NetworkImage uri={getArtworkUrl(hint.pokemonId)} style={styles.hintImage} loaderSize={20} />
       <Text style={styles.hintName}>{hint.pokemonName}</Text>
     </TouchableOpacity>
   );

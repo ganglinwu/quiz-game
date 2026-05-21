@@ -96,6 +96,13 @@ export default function HomeScreen({ navigation }: Props) {
         <Text style={styles.cardTitle}>Fruits</Text>
         <Text style={styles.cardSubtitle}>90 Fruits</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.pokedexBtn}
+        onPress={() => navigation.navigate('Pokedex')}
+      >
+        <Text style={styles.pokedexBtnText}>Browse Pokédex</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -202,5 +209,18 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  pokedexBtn: {
+    marginTop: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 28,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#a0a0b0',
+  },
+  pokedexBtnText: {
+    color: '#a0a0b0',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

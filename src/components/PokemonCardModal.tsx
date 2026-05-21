@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   Modal,
   StyleSheet,
-  ActivityIndicator,
   ScrollView,
 } from 'react-native';
 import { getArtworkUrl } from '../utils/pokeApi';
+import PokeballLoader from './PokeballLoader';
+import NetworkImage from './NetworkImage';
 
 const TYPE_COLORS: Record<string, string> = {
   normal: '#A8A77A',
@@ -97,12 +97,12 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, onCl
 
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={cardColor} />
+              <PokeballLoader size={52} />
             </View>
           ) : (
             <ScrollView contentContainerStyle={styles.cardBody} bounces={false}>
               <View style={[styles.artFrame, { borderColor: cardColor }]}>
-                <Image source={{ uri: getArtworkUrl(pokemonId) }} style={styles.artwork} />
+                <NetworkImage uri={getArtworkUrl(pokemonId)} style={styles.artwork} loaderSize={36} />
               </View>
 
               <Text style={styles.dexNumber}>#{String(pokemonId).padStart(3, '0')}</Text>

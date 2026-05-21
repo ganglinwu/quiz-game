@@ -5,6 +5,7 @@ const trackList: TrackDefinition[] = [
   { id: 'game', source: require('../../assets/music/pallet-town.mp3') },
   { id: 'hint', source: require('../../assets/music/wild-pokemon-battle.mp3') },
   { id: 'result', source: require('../../assets/music/pokemon-center.mp3') },
+  { id: 'pokedex', source: require('../../assets/music/yellow-opening.mp3') },
 ];
 
 export const TRACK_REGISTRY = new Map<TrackId, TrackDefinition>(

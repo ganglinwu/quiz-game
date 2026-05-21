@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { HintPhase } from '../types';
 import { getArtworkUrl } from '../utils/pokeApi';
+import NetworkImage from './NetworkImage';
 
 interface Props {
   phase: HintPhase;
@@ -24,11 +25,11 @@ export default function HintOverlay({ phase, pokemonId, canReveal, onReveal, onD
       </Text>
 
       <View style={styles.imageContainer}>
-        <Image
+        <NetworkImage
           key={isSilhouette ? 'silhouette' : 'revealed'}
-          source={{ uri }}
+          uri={uri}
           style={[styles.image, isSilhouette && styles.silhouette]}
-          resizeMode="contain"
+          loaderSize={32}
         />
       </View>
 

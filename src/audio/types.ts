@@ -1,6 +1,6 @@
 import type { AudioSource } from 'expo-audio';
 
-export type TrackId = 'title' | 'game' | 'hint' | 'result';
+export type TrackId = 'title' | 'game' | 'hint' | 'result' | 'pokedex';
 
 export interface TrackDefinition {
   id: TrackId;
