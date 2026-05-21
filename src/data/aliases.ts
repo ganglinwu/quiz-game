@@ -287,6 +287,9 @@ export const aliases: Record<string, string> = {
   'gang are': 'Gengar',
   'ginger': 'Gengar',
   'gen gar': 'Gengar',
+  'ganga': 'Gengar',
+  'gang car': 'Gengar',
+  'gang ga': 'Gengar',
 
   // Drowzee
   'drowsy': 'Drowzee',
@@ -397,6 +400,8 @@ export const aliases: Record<string, string> = {
   'magic karp': 'Magikarp',
   'magic car': 'Magikarp',
   'magi car': 'Magikarp',
+  'magic cop': 'Magikarp',
+  'magic cup': 'Magikarp',
   'gyarados': 'Gyarados',
   'garados': 'Gyarados',
   'gyrados': 'Gyarados',

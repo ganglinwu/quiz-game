@@ -25,10 +25,12 @@ A turn-based naming game for iOS built with Expo (React Native + TypeScript). Pl
 - **Player elimination** — when a player gives up, they're out; game continues until one remains
 - **End-of-game stats** (per-player item counts, avg turn times, fastest/slowest turn, total game time) — hidden behind "Show Stats" button
 - **Hint success banner** — if a player answers the hinted Pokemon correctly while still in silhouette phase (before revealing), a gold "You got it right! No hints consumed!" banner pops up with the wild-pokemon-caught jingle
-- **Background music** via `expo-av` — screen-specific looping tracks with seamless transitions:
+- **Background music** via `expo-av` with a command-queue AudioManager (`src/audio/`) — guarantees only one BGM track at a time:
   - Home/PlayerSetup: `title-screen`, Gameplay: `pallet-town`, Hint overlay: `wild-pokemon-battle`, Result: `pokemon-center`
   - `wild-pokemon-caught` plays as one-shot SFX on hint success
-  - Mute button (♪) on Home and Game screens, mute state persists across screens via MusicContext
+  - BGM auto-pauses during speech recognition and resumes after (with iOS audio session restore)
+  - Mute button (♪) on Home and Game screens, mute state persists across screens via AudioProvider
+  - Screens use declarative hooks: `useBGM('title')`, `useBGMDynamic(trackId)`, `useAudioSpeechBridge(isListening)`
 - **Haptic feedback** on mic button press/release
 - **Toast notifications** for voice errors and no-match results (centered on screen)
 
@@ -78,10 +80,17 @@ src/
 │   ├── PlayerSetupScreen.tsx     # Enter 2-8 player names, configure hints
 │   ├── GameScreen.tsx            # Main gameplay
 │   └── ResultScreen.tsx          # Winner + elimination order + stats + learning section
+├── audio/
+│   ├── AudioManager.ts           # Singleton class: command queue, single-sound guarantee
+│   ├── AudioProvider.tsx          # React Context wrapping the manager
+│   ├── useAudioSpeechBridge.ts   # Pauses/resumes BGM around speech recognition
+│   ├── useBGM.ts                 # useBGM(trackId) and useBGMDynamic(trackId) hooks
+│   ├── tracks.ts                 # Track registry (Map<TrackId, source>)
+│   ├── types.ts                  # TrackId, AudioCommand, BGMState
+│   └── index.ts                  # Barrel exports
 ├── state/
 │   ├── GameContext.tsx            # React Context provider
-│   ├── gameReducer.ts            # Game state machine (turns, elimination, hints, gen votes)
-│   └── MusicContext.tsx           # BGM/SFX provider (play, stop, mute, playSfx)
+│   └── gameReducer.ts            # Game state machine (turns, elimination, hints, gen votes)
 ├── types/
 │   └── index.ts
 └── utils/
@@ -89,8 +98,7 @@ src/
     ├── fuzzyMatch.ts             # Levenshtein matching + alias lookup + gen detection
     ├── levenshtein.ts            # Edit distance algorithm
     ├── pokeApi.ts                # PokeAPI artwork URL helper
-    ├── statsCalculator.ts        # End-of-game stats computation
-    └── tracks.ts                 # Music track references (require() for bundled mp3s)
+    └── statsCalculator.ts        # End-of-game stats computation
 ```
 
 ## Key Design Decisions
@@ -100,6 +108,7 @@ src/
 - **Player colors assigned by index** in the original player order, persist even after elimination.
 - **Hint tracking**: revealed hints saved to game state (max 5). On game end, hinted-but-unnamed Pokemon become silhouette quizzes; remaining slots filled with random unnamed Pokemon as suggestions.
 - **Generation auto-detection**: if a player names a Pokemon from an inactive generation, a vote is triggered rather than rejecting the answer. Majority approval expands the pool mid-game.
+- **Audio manager as command queue**: `AudioManager` is a plain TypeScript class (not React) that serializes all BGM operations through an async queue. Only one `Audio.Sound` instance exists at a time. Superseded play commands are skipped. SFX bypasses the queue entirely. Screens declare intent via hooks (`useBGM`, `useBGMDynamic`) rather than calling play/stop directly.
 
 ## Build & Deploy
 ```bash

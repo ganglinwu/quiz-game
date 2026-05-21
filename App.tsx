@@ -1,15 +1,15 @@
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import RootNavigator from './src/navigation/RootNavigator';
-import { MusicProvider } from './src/state/MusicContext';
+import { AudioProvider } from './src/audio';
 
 export default function App() {
   return (
-    <MusicProvider>
+    <AudioProvider>
       <NavigationContainer>
         <StatusBar style="light" />
         <RootNavigator />
       </NavigationContainer>
-    </MusicProvider>
+    </AudioProvider>
   );
 }

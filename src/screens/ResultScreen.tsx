@@ -1,14 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { HintRecord } from '../types';
-import { useMusic } from '../state/MusicContext';
+import { useBGM } from '../audio';
 import { calculateStats } from '../utils/statsCalculator';
 import { getPlayerColor } from '../utils/colors';
 import { getArtworkUrl } from '../utils/pokeApi';
-import { RESULT_BGM } from '../utils/tracks';
 import StatsPanel from '../components/StatsPanel';
 import HistoryModal from '../components/HistoryModal';
 import PokemonCardModal from '../components/PokemonCardModal';
@@ -59,10 +57,12 @@ function SilhouetteCard({
 
   return (
     <TouchableOpacity style={styles.hintCard} onPress={handleTap} activeOpacity={0.7}>
-      <Image
-        source={{ uri: getArtworkUrl(hint.pokemonId) }}
-        style={[styles.hintImage, !revealed && { tintColor: '#000000' }]}
-      />
+      <View style={styles.imageContainer}>
+        <Image
+          source={{ uri: getArtworkUrl(hint.pokemonId) }}
+          style={[styles.hintImage, !revealed && styles.silhouette]}
+        />
+      </View>
       {revealed ? (
         <Text style={styles.hintName}>{hint.pokemonName}</Text>
       ) : countdown !== null ? (
@@ -85,17 +85,11 @@ function RevealedCard({ hint, onCardTap }: { hint: HintRecord; onCardTap: (h: Hi
 
 export default function ResultScreen({ navigation, route }: Props) {
   const { winner, isDraw, eliminatedPlayers, players, turnRecords, gameStartTime, revealedHints } = route.params;
-  const { play } = useMusic();
+  useBGM('result');
   const [showStats, setShowStats] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false);
   const [countdownActive, setCountdownActive] = useState(false);
   const [selectedPokemon, setSelectedPokemon] = useState<HintRecord | null>(null);
-
-  useFocusEffect(
-    useCallback(() => {
-      play(RESULT_BGM);
-    }, [play])
-  );
 
   const hintPokemon = useMemo(() => revealedHints.filter((h) => h.source === 'hint'), [revealedHints]);
   const bonusPokemon = useMemo(() => revealedHints.filter((h) => h.source === 'bonus'), [revealedHints]);
@@ -299,9 +293,20 @@ const styles = StyleSheet.create({
     padding: 8,
     width: 90,
   },
-  hintImage: {
+  imageContainer: {
     width: 64,
     height: 64,
+    backgroundColor: '#2a4a6e',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hintImage: {
+    width: 56,
+    height: 56,
+  },
+  silhouette: {
+    tintColor: '#000000',
   },
   hintName: {
     color: '#ffffff',

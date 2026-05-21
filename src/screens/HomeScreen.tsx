@@ -1,25 +1,18 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { Category } from '../types';
-import { useMusic } from '../state/MusicContext';
+import { useAudio, useBGM } from '../audio';
 import { ALL_GENS, POKEMON_BY_GEN } from '../data/pokemon-data';
-import { TITLE_SCREEN } from '../utils/tracks';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
-  const { isMuted, toggleMute, play } = useMusic();
+  const { isMuted, toggleMute } = useAudio();
+  useBGM('title');
   const [selectedGens, setSelectedGens] = useState<Set<number>>(new Set([1]));
   const [expanded, setExpanded] = useState(false);
-
-  useFocusEffect(
-    useCallback(() => {
-      play(TITLE_SCREEN);
-    }, [play])
-  );
 
   const totalPokemon = useMemo(() => {
     return Array.from(selectedGens).reduce(

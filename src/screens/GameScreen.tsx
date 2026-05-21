@@ -1,15 +1,14 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { Category, HintLimit } from '../types';
 import { GameProvider, useGame } from '../state/GameContext';
-import { useMusic } from '../state/MusicContext';
+import { useAudio, useBGMDynamic, useAudioSpeechBridge, HINT_SUCCESS_SFX } from '../audio';
+import type { TrackId } from '../audio';
 import { findDuplicate, fuzzyMatchWithGenDetection, fuzzyMatch } from '../utils/fuzzyMatch';
 import { getPlayerColor } from '../utils/colors';
 import { getPokemonForGens, getAllPokemon, getGenForPokemon } from '../data/pokemon-data';
-import { GAME_BGM, HINT_BGM, HINT_SUCCESS_SFX } from '../utils/tracks';
 import MicButton from '../components/MicButton';
 import TextInputField from '../components/TextInputField';
 import ConfirmationOverlay from '../components/ConfirmationOverlay';
@@ -25,27 +24,26 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
 
 function GameContent({ navigation, category }: { navigation: Props['navigation']; category: Category }) {
   const { state, dispatch } = useGame();
-  const { isMuted, toggleMute, play, playSfx } = useMusic();
+  const { isMuted, toggleMute, manager } = useAudio();
   const [historyVisible, setHistoryVisible] = useState(false);
   const [highlightItem, setHighlightItem] = useState<string | null>(null);
   const [duplicateItem, setDuplicateItem] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [hintSuccess, setHintSuccess] = useState(false);
+  const pendingHintRef = useRef<string | null>(null);
 
-  useFocusEffect(
-    useCallback(() => {
-      play(GAME_BGM);
-    }, [play])
-  );
+  const bgmTrack: TrackId = state.hintPhase === 'silhouette' ? 'hint' : 'game';
+  useBGMDynamic(bgmTrack);
+  useAudioSpeechBridge(state.isListening);
 
   useEffect(() => {
-    if (state.hintPhase !== 'none') {
-      play(HINT_BGM);
-    } else {
-      play(GAME_BGM);
+    if (state.hintPhase === 'silhouette' && state.hintPokemonName) {
+      pendingHintRef.current = state.hintPokemonName;
+    } else if (state.hintPhase === 'revealed') {
+      pendingHintRef.current = null;
     }
-  }, [state.hintPhase, play]);
+  }, [state.hintPhase, state.hintPokemonName]);
 
   const isPokemon = category.type === 'pokemon';
 
@@ -129,13 +127,14 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
   );
 
   const handleConfirm = () => {
-    const gotHintRight = state.hintPhase === 'silhouette' &&
-      state.confirmationItem === state.hintPokemonName;
+    const gotHintRight = pendingHintRef.current !== null &&
+      state.confirmationItem === pendingHintRef.current;
     setDuplicateItem(null);
     dispatch({ type: 'CONFIRM_ITEM' });
+    pendingHintRef.current = null;
     if (gotHintRight) {
       setHintSuccess(true);
-      playSfx(HINT_SUCCESS_SFX);
+      manager.playSfx(HINT_SUCCESS_SFX);
     }
   };
 
