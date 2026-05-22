@@ -191,39 +191,55 @@
   </div>
 
   <div class="card">
-    <h2><span class="icon">📦</span> Information We Collect <span class="badge">Minimal</span></h2>
+    <h2><span class="icon">📦</span> Information We Collect</h2>
     <p>We do not require you to create an account or provide any personal information to play.</p>
-    <p>The app may store the following data <strong>locally on your device only</strong>:</p>
+    <p>The following data is stored <strong>locally on your device</strong> and never transmitted:</p>
     <ul>
-      <li>Your high scores and quiz progress</li>
       <li>Game preferences and settings you choose</li>
     </ul>
-    <p>This data stays on your device and is not transmitted to any server.</p>
+    <p>When you use voice input, the app also collects and transmits the following data to a private Google Sheet for the purpose of improving speech recognition accuracy:</p>
+    <ul>
+      <li>The text transcript of what the speech recognizer heard</li>
+      <li>Confidence scores and related metadata returned by the speech engine</li>
+    </ul>
+    <p>
+      <strong>Audio is never recorded or stored.</strong> Only the text output of the speech recognition
+      engine is logged. This data is not linked to any personal identifier.
+    </p>
   </div>
 
   <div class="card">
     <h2><span class="icon">🚫</span> Information We Do NOT Collect</h2>
     <ul>
       <li>Your name, email address, or other personal identifiers</li>
+      <li>Raw audio recordings</li>
       <li>Location data</li>
       <li>Contacts or other device data</li>
       <li>Payment information</li>
-      <li>Usage analytics or crash reports sent off-device</li>
     </ul>
   </div>
 
   <div class="card">
     <h2><span class="icon">🌐</span> Third-Party Services</h2>
     <p>
-      The app fetches Pokémon data from <a href="https://pokeapi.co" target="_blank" rel="noopener">PokéAPI</a>,
-      a free and open Pokémon data API. PokéAPI does not collect any personally identifiable
-      information from users of apps that access it. You can review their terms at
-      <a href="https://pokeapi.co/docs/v2" target="_blank" rel="noopener">pokeapi.co</a>.
+      <strong>Apple Speech Recognition:</strong> Voice input is processed by iOS's built-in speech
+      recognition engine, which may transmit audio to Apple's servers for processing. This is
+      handled entirely by Apple and is subject to
+      <a href="https://www.apple.com/legal/privacy/" target="_blank" rel="noopener">Apple's Privacy Policy</a>.
     </p>
     <p>
-      If you download the app through the Apple App Store or Google Play, Apple and Google
-      may collect device and usage information under their own privacy policies. We encourage
-      you to review those policies separately.
+      <strong>Google Sheets:</strong> Speech recognition transcripts and confidence scores are logged
+      to a private Google Sheet accessible only to the developer. This data is used solely to
+      improve voice recognition accuracy in future updates and is subject to
+      <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>.
+    </p>
+    <p>
+      <strong>PokéAPI:</strong> The app fetches Pokémon data from <a href="https://pokeapi.co" target="_blank" rel="noopener">PokéAPI</a>,
+      a free public API. PokéAPI does not collect any personally identifiable information.
+    </p>
+    <p>
+      If you download the app through the Apple App Store, Apple may collect device and usage
+      information under their own privacy policies.
     </p>
   </div>
 
@@ -232,17 +248,17 @@
     <p>
       This app is suitable for all ages. We do not knowingly collect any personal information
       from children under 13 (or the applicable age of digital consent in your region).
-      Because we collect no personal data at all, we believe the app is fully compliant
-      with COPPA and similar regulations.
+      The voice recognition logs we collect contain no personal identifiers. We believe the
+      app is fully compliant with COPPA and similar regulations.
     </p>
   </div>
 
   <div class="card">
     <h2><span class="icon">🔒</span> Data Security</h2>
     <p>
-      Since all game data is stored locally on your device, it is protected by your
-      device's built-in security. We do not transmit your data to external servers,
-      so there is no server-side risk.
+      Game preferences are stored locally on your device and protected by its built-in security.
+      Voice recognition logs sent to Google Sheets are stored in a private spreadsheet
+      accessible only to the developer and are not shared with any third parties.
     </p>
   </div>
 
