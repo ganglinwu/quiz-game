@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — Pokémon Quiz Game</title>
+  <style>
+    :root {
+      --red: #CC0000;
+      --dark-red: #990000;
+      --yellow: #FFCB05;
+      --blue: #3B4CCA;
+      --light-bg: #f9f9f9;
+      --card-bg: #ffffff;
+      --text: #1a1a2e;
+      --muted: #555;
+      --border: #e0e0e0;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--light-bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    header {
+      background: var(--red);
+      color: white;
+      padding: 40px 24px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: "";
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: var(--yellow);
+    }
+
+    header .pokeball {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      display: block;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      opacity: 0.85;
+      margin-top: 6px;
+      font-size: 0.95rem;
+    }
+
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--red);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h2 .icon {
+      font-size: 1.2rem;
+    }
+
+    p {
+      color: var(--muted);
+      margin-bottom: 10px;
+      font-size: 0.97rem;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    ul {
+      color: var(--muted);
+      padding-left: 20px;
+      font-size: 0.97rem;
+    }
+
+    ul li {
+      margin-bottom: 6px;
+    }
+
+    a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      margin-left: 8px;
+      vertical-align: middle;
+      letter-spacing: 0.02em;
+    }
+
+    .effective-date {
+      text-align: center;
+      color: #999;
+      font-size: 0.85rem;
+      margin-top: 36px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 28px 24px;
+      border-top: 1px solid var(--border);
+      color: #aaa;
+      font-size: 0.82rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <!-- Pokéball SVG -->
+  <svg class="pokeball" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle cx="32" cy="32" r="30" fill="white" stroke="white" stroke-width="2"/>
+    <!-- top half red -->
+    <path d="M2 32 A30 30 0 0 1 62 32 Z" fill="white"/>
+    <path d="M2 32 A30 30 0 0 1 62 32 Z" fill="#CC0000"/>
+    <!-- divider line -->
+    <line x1="2" y1="32" x2="62" y2="32" stroke="#1a1a1a" stroke-width="4"/>
+    <!-- center circle -->
+    <circle cx="32" cy="32" r="10" fill="white" stroke="#1a1a1a" stroke-width="4"/>
+    <circle cx="32" cy="32" r="5" fill="#f0f0f0"/>
+  </svg>
+  <h1>Privacy Policy</h1>
+  <p>Pokémon Quiz Game</p>
+</header>
+
+<main>
+
+  <div class="card">
+    <h2><span class="icon">👋</span> Overview</h2>
+    <p>
+      Welcome to the Pokémon Quiz Game. This Privacy Policy explains how we handle
+      information when you use our app. The short version: <strong>we collect very little,
+      and we never sell your data.</strong>
+    </p>
+    <p>
+      This game is a fan-made project and is not affiliated with, endorsed by, or connected
+      to Nintendo, Game Freak, or The Pokémon Company.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">📦</span> Information We Collect <span class="badge">Minimal</span></h2>
+    <p>We do not require you to create an account or provide any personal information to play.</p>
+    <p>The app may store the following data <strong>locally on your device only</strong>:</p>
+    <ul>
+      <li>Your high scores and quiz progress</li>
+      <li>Game preferences and settings you choose</li>
+    </ul>
+    <p>This data stays on your device and is not transmitted to any server.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🚫</span> Information We Do NOT Collect</h2>
+    <ul>
+      <li>Your name, email address, or other personal identifiers</li>
+      <li>Location data</li>
+      <li>Contacts or other device data</li>
+      <li>Payment information</li>
+      <li>Usage analytics or crash reports sent off-device</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🌐</span> Third-Party Services</h2>
+    <p>
+      The app fetches Pokémon data from <a href="https://pokeapi.co" target="_blank" rel="noopener">PokéAPI</a>,
+      a free and open Pokémon data API. PokéAPI does not collect any personally identifiable
+      information from users of apps that access it. You can review their terms at
+      <a href="https://pokeapi.co/docs/v2" target="_blank" rel="noopener">pokeapi.co</a>.
+    </p>
+    <p>
+      If you download the app through the Apple App Store or Google Play, Apple and Google
+      may collect device and usage information under their own privacy policies. We encourage
+      you to review those policies separately.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">👶</span> Children's Privacy</h2>
+    <p>
+      This app is suitable for all ages. We do not knowingly collect any personal information
+      from children under 13 (or the applicable age of digital consent in your region).
+      Because we collect no personal data at all, we believe the app is fully compliant
+      with COPPA and similar regulations.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🔒</span> Data Security</h2>
+    <p>
+      Since all game data is stored locally on your device, it is protected by your
+      device's built-in security. We do not transmit your data to external servers,
+      so there is no server-side risk.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">✏️</span> Changes to This Policy</h2>
+    <p>
+      If we make material changes to this Privacy Policy, we will update the date at the
+      bottom of this page. We encourage you to review this page periodically.
+      Continued use of the app after changes constitutes your acceptance of the updated policy.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">📬</span> Contact</h2>
+    <p>
+      If you have any questions or concerns about this Privacy Policy, feel free to reach out:
+    </p>
+    <p>
+      <strong>Email:</strong> <a href="mailto:ganglin.wu@gmail.com">ganglin.wu@gmail.com</a><br/>
+      <strong>GitHub:</strong> <a href="https://github.com/ganglinwu/quiz-game" target="_blank" rel="noopener">github.com/ganglinwu/quiz-game</a>
+    </p>
+  </div>
+
+  <p class="effective-date">Effective date: May 22, 2026</p>
+
+</main>
+
+<footer>
+  &copy; 2026 Ganglin Wu &nbsp;·&nbsp; Pokémon Quiz Game &nbsp;·&nbsp;
+  Pokémon and all related names are trademarks of Nintendo / Game Freak / The Pokémon Company.
+</footer>
+
+</body>
+</html>
