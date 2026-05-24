@@ -32,14 +32,19 @@ export default function QuizQuestionBanner({
     return rows;
   }, [question.constraints, activeGens]);
 
-  const showFeedback = feedback && !hardcore;
+  const isSuccess = feedback !== null && feedback.every(f => f.passed);
+  const showFeedback = feedback && (!hardcore || isSuccess);
 
   return (
-    <View style={styles.banner}>
+    <View style={[styles.banner, isSuccess && styles.bannerSuccess]}>
       {showFeedback && feedbackName && (
-        <Text style={styles.feedbackName}>{feedbackName}</Text>
+        <Text style={[styles.feedbackName, isSuccess && styles.feedbackNameSuccess]}>
+          {feedbackName}
+        </Text>
       )}
-      <Text style={styles.header}>Name a Pokemon that is...</Text>
+      <Text style={[styles.header, isSuccess && styles.headerSuccess]}>
+        {isSuccess ? 'Correct!' : 'Name a Pokemon that is...'}
+      </Text>
       {displayRows.map((label, i) => {
         const fb = showFeedback ? feedback[i] : null;
         const icon = fb ? (fb.passed ? '✓' : '✗') : '·';
@@ -52,7 +57,7 @@ export default function QuizQuestionBanner({
           </View>
         );
       })}
-      {!hardcore && (
+      {!hardcore && !isSuccess && (
         <Text style={styles.meta}>{question.validAnswerCount} possible</Text>
       )}
     </View>
@@ -66,6 +71,11 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 20,
   },
+  bannerSuccess: {
+    backgroundColor: '#1a4a2e',
+    borderColor: '#4ade80',
+    borderWidth: 1,
+  },
   feedbackName: {
     color: '#ef4444',
     fontSize: 14,
@@ -73,11 +83,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 6,
   },
+  feedbackNameSuccess: {
+    color: '#4ade80',
+  },
   header: {
     color: '#ffd700',
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 8,
+  },
+  headerSuccess: {
+    color: '#4ade80',
   },
   row: {
     flexDirection: 'row',

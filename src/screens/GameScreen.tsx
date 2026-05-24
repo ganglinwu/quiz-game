@@ -43,6 +43,7 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
   const [hintSuccess, setHintSuccess] = useState(false);
   const [constraintFeedback, setConstraintFeedback] = useState<ConstraintFeedback | null>(null);
   const [feedbackName, setFeedbackName] = useState<string | null>(null);
+  const [quizSuccessItem, setQuizSuccessItem] = useState<string | null>(null);
   const pendingHintRef = useRef<string | null>(null);
 
   const bgmTrack: TrackId = state.hintPhase === 'silhouette' ? 'hint' : 'game';
@@ -65,6 +66,19 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
     setConstraintFeedback(null);
     setFeedbackName(null);
   }, [state.currentQuestion]);
+
+  useEffect(() => {
+    if (!quizSuccessItem) return;
+    const timer = setTimeout(() => {
+      setDuplicateItem(null);
+      dispatch({ type: 'CONFIRM_ITEM' });
+      pendingHintRef.current = null;
+      setQuizSuccessItem(null);
+      setConstraintFeedback(null);
+      setFeedbackName(null);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [quizSuccessItem]);
 
   useEffect(() => {
     if (!isQuizMode || state.currentQuestion || state.isGameOver) return;
@@ -146,22 +160,7 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
             dispatch({ type: 'SET_ERROR', message: `No match for "${text}", try again` });
           }
         } else if (isQuizMode && state.currentQuestion && result.match) {
-          const feedback = validateAnswerPerConstraint(result.match, state.currentQuestion, state.activeGenerations);
-          const allPassed = feedback.every((f) => f.passed);
-          if (allPassed) {
-            dispatch({ type: 'PROPOSE_ITEM', item: result.match });
-          } else {
-            if (!isHardcore) {
-              setConstraintFeedback(feedback);
-              setFeedbackName(result.match);
-            }
-            const msg = isHardcore ? 'Wrong! Try again' : `${result.match} doesn't match!`;
-            if (isVoice) {
-              setToastMessage(msg);
-            } else {
-              dispatch({ type: 'SET_ERROR', message: msg });
-            }
-          }
+          dispatch({ type: 'PROPOSE_ITEM', item: result.match });
         } else if (result.generation && !state.activeGenerations.includes(result.generation)) {
           dispatch({
             type: 'PROPOSE_GEN_CHANGE',
@@ -197,6 +196,49 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
   const handleConfirm = () => {
     const gotHintRight = pendingHintRef.current !== null &&
       state.confirmationItem === pendingHintRef.current;
+
+    if (isQuizMode && state.currentQuestion && state.confirmationItem) {
+      const feedback = validateAnswerPerConstraint(
+        state.confirmationItem, state.currentQuestion, state.activeGenerations
+      );
+      const allPassed = feedback.every((f) => f.passed);
+
+      if (lastVoiceInputRef.current && state.confirmationItem) {
+        logVoiceResult({
+          raw: lastVoiceInputRef.current,
+          matched: state.confirmationItem,
+          confidence: 'exact',
+          distance: 0,
+          source: 'voice',
+          category: 'pokemon',
+          confirmed: state.confirmationItem,
+        });
+      }
+      lastVoiceInputRef.current = null;
+
+      if (!allPassed) {
+        if (!isHardcore) {
+          setConstraintFeedback(feedback);
+          setFeedbackName(state.confirmationItem);
+        }
+        setDuplicateItem(null);
+        dispatch({ type: 'REJECT_ITEM' });
+        const msg = isHardcore ? 'Wrong! Try again' : `${state.confirmationItem} doesn't match!`;
+        dispatch({ type: 'SET_ERROR', message: msg });
+        return;
+      }
+
+      setConstraintFeedback(feedback);
+      setFeedbackName(state.confirmationItem);
+      setQuizSuccessItem(state.confirmationItem);
+      if (gotHintRight) {
+        pendingHintRef.current = null;
+        setHintSuccess(true);
+        manager.playSfx(HINT_SUCCESS_SFX);
+      }
+      return;
+    }
+
     if (lastVoiceInputRef.current && state.confirmationItem) {
       logVoiceResult({
         raw: lastVoiceInputRef.current,
@@ -412,7 +454,7 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
         />
       </View>
 
-      {hasConfirmation && (
+      {hasConfirmation && !quizSuccessItem && (
         <ConfirmationOverlay
           item={state.confirmationItem!}
           onConfirm={handleConfirm}
