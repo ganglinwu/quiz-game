@@ -67,6 +67,9 @@ export default function PlayerSetupScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+        <Text style={styles.backText}>← Back</Text>
+      </TouchableOpacity>
       <Text style={styles.title}>Players</Text>
       <Text style={styles.subtitle}>
         {category.type === 'pokemon'
@@ -143,7 +146,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1a1a2e',
     padding: 24,
-    paddingTop: 80,
+    paddingTop: 60,
+  },
+  backBtn: {
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+  },
+  backText: {
+    color: '#5e9eff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   title: {
     fontSize: 32,
