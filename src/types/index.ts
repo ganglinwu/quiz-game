@@ -26,6 +26,7 @@ export interface QuizFilter {
 export interface QuizConfig {
   difficulty: QuizDifficulty;
   filter: QuizFilter;
+  hardcore: boolean;
 }
 
 export type Category =

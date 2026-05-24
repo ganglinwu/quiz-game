@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Switch } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Switch, LayoutAnimation } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { Category, QuizDifficulty, QuizFilter } from '../types';
@@ -21,6 +21,7 @@ export default function HomeScreen({ navigation }: Props) {
     includeMythical: true,
   });
   const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [quizHardcore, setQuizHardcore] = useState(false);
 
   const totalPokemon = useMemo(() => {
     return Array.from(selectedGens).reduce(
@@ -49,6 +50,7 @@ export default function HomeScreen({ navigation }: Props) {
         quizConfig: {
           difficulty: quizDifficulty,
           filter: quizFilter,
+          hardcore: quizHardcore,
         },
       }),
     };
@@ -71,7 +73,10 @@ export default function HomeScreen({ navigation }: Props) {
 
       <TouchableOpacity
         style={[styles.card, styles.pokemonCard]}
-        onPress={() => setExpanded(!expanded)}
+        onPress={() => {
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+          setExpanded(!expanded);
+        }}
         activeOpacity={0.8}
       >
         <Text style={styles.cardTitle}>Pokemon</Text>
@@ -102,7 +107,10 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.quizToggleLabel}>Quiz Mode</Text>
             <Switch
               value={quizMode}
-              onValueChange={setQuizMode}
+              onValueChange={(v) => {
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                setQuizMode(v);
+              }}
               trackColor={{ false: '#2a2a3e', true: '#4361ee' }}
             />
           </View>
@@ -154,6 +162,8 @@ export default function HomeScreen({ navigation }: Props) {
         onClose={() => setFilterModalVisible(false)}
         filter={quizFilter}
         onFilterChange={setQuizFilter}
+        hardcore={quizHardcore}
+        onHardcoreChange={setQuizHardcore}
       />
     </View>
   );

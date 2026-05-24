@@ -5,9 +5,10 @@ import { RootStackParamList } from '../navigation/RootNavigator';
 import { Category, HintLimit, QuizConfig } from '../types';
 import {
   generateQuestion,
-  validateAnswerAgainstQuestion,
+  validateAnswerPerConstraint,
   constraintsToQuery,
   buildBaselineQuery,
+  type ConstraintFeedback,
 } from '../utils/quizQuestionGenerator';
 import { queryPokemon } from '../data/pokemon-db';
 import { GameProvider, useGame } from '../state/GameContext';
@@ -25,6 +26,7 @@ import Toast from '../components/Toast';
 import SuccessBanner from '../components/SuccessBanner';
 import GenerationVoteOverlay from '../components/GenerationVoteOverlay';
 import GenerationSettingsModal from '../components/GenerationSettingsModal';
+import QuizQuestionBanner from '../components/QuizQuestionBanner';
 import { getAllFruits } from '../data/pokemon-db';
 import { logVoiceResult } from '../utils/voiceLogger';
 
@@ -39,6 +41,8 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [hintSuccess, setHintSuccess] = useState(false);
+  const [constraintFeedback, setConstraintFeedback] = useState<ConstraintFeedback | null>(null);
+  const [feedbackName, setFeedbackName] = useState<string | null>(null);
   const pendingHintRef = useRef<string | null>(null);
 
   const bgmTrack: TrackId = state.hintPhase === 'silhouette' ? 'hint' : 'game';
@@ -55,6 +59,12 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
 
   const isPokemon = category.type === 'pokemon';
   const isQuizMode = isPokemon && !!category.quizConfig;
+  const isHardcore = isQuizMode && (category.quizConfig?.hardcore ?? false);
+
+  useEffect(() => {
+    setConstraintFeedback(null);
+    setFeedbackName(null);
+  }, [state.currentQuestion]);
 
   useEffect(() => {
     if (!isQuizMode || state.currentQuestion || state.isGameOver) return;
@@ -89,6 +99,8 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
   const processInput = useCallback(
     (text: string, isVoice: boolean) => {
       setDuplicateItem(null);
+      setConstraintFeedback(null);
+      setFeedbackName(null);
       const source = isVoice ? 'voice' : 'text' as const;
       const cat = isPokemon ? 'pokemon' : 'fruits';
 
@@ -133,32 +145,30 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
           } else {
             dispatch({ type: 'SET_ERROR', message: `No match for "${text}", try again` });
           }
-        } else if (result.generation && !state.activeGenerations.includes(result.generation)) {
-          if (isQuizMode) {
-            if (isVoice) {
-              setToastMessage(`Heard "${text}" — no match found`);
-            } else {
-              dispatch({ type: 'SET_ERROR', message: `No match for "${text}", try again` });
-            }
-          } else {
-            dispatch({
-              type: 'PROPOSE_GEN_CHANGE',
-              generation: result.generation,
-              triggerPokemon: result.match!,
-              source: 'auto-detect',
-            });
-          }
         } else if (isQuizMode && state.currentQuestion && result.match) {
-          if (!validateAnswerAgainstQuestion(result.match, state.currentQuestion, state.activeGenerations)) {
-            const msg = `${result.match} doesn't match: "${state.currentQuestion.promptText}"`;
+          const feedback = validateAnswerPerConstraint(result.match, state.currentQuestion, state.activeGenerations);
+          const allPassed = feedback.every((f) => f.passed);
+          if (allPassed) {
+            dispatch({ type: 'PROPOSE_ITEM', item: result.match });
+          } else {
+            if (!isHardcore) {
+              setConstraintFeedback(feedback);
+              setFeedbackName(result.match);
+            }
+            const msg = isHardcore ? 'Wrong! Try again' : `${result.match} doesn't match!`;
             if (isVoice) {
               setToastMessage(msg);
             } else {
               dispatch({ type: 'SET_ERROR', message: msg });
             }
-          } else {
-            dispatch({ type: 'PROPOSE_ITEM', item: result.match });
           }
+        } else if (result.generation && !state.activeGenerations.includes(result.generation)) {
+          dispatch({
+            type: 'PROPOSE_GEN_CHANGE',
+            generation: result.generation,
+            triggerPokemon: result.match!,
+            source: 'auto-detect',
+          });
         } else {
           dispatch({ type: 'PROPOSE_ITEM', item: result.match! });
         }
@@ -181,7 +191,7 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
         }
       }
     },
-    [isPokemon, itemNames, allPokemonNames, state.usedItems, state.activeGenerations, dispatch]
+    [isPokemon, isQuizMode, isHardcore, itemNames, allPokemonNames, state.usedItems, state.activeGenerations, state.currentQuestion, dispatch]
   );
 
   const handleConfirm = () => {
@@ -327,12 +337,13 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
       </Text>
 
       {isQuizMode && state.currentQuestion && (
-        <View style={styles.questionBanner}>
-          <Text style={styles.questionText}>{state.currentQuestion.promptText}</Text>
-          <Text style={styles.questionMeta}>
-            {state.currentQuestion.validAnswerCount} possible
-          </Text>
-        </View>
+        <QuizQuestionBanner
+          question={state.currentQuestion}
+          activeGens={state.activeGenerations}
+          feedback={constraintFeedback}
+          feedbackName={feedbackName}
+          hardcore={isHardcore}
+        />
       )}
 
       <View style={styles.textInputWrapper}>
@@ -524,24 +535,6 @@ const styles = StyleSheet.create({
   },
   categoryLabelQuiz: {
     marginBottom: 12,
-  },
-  questionBanner: {
-    backgroundColor: '#2a4a6e',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  questionText: {
-    color: '#ffd700',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  questionMeta: {
-    color: '#a0a0b0',
-    fontSize: 12,
-    marginTop: 4,
   },
   textInputWrapper: {
     width: '100%',

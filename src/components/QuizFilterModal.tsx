@@ -27,9 +27,11 @@ interface Props {
   onClose: () => void;
   filter: QuizFilter;
   onFilterChange: (filter: QuizFilter) => void;
+  hardcore: boolean;
+  onHardcoreChange: (value: boolean) => void;
 }
 
-export default function QuizFilterModal({ visible, onClose, filter, onFilterChange }: Props) {
+export default function QuizFilterModal({ visible, onClose, filter, onFilterChange, hardcore, onHardcoreChange }: Props) {
   const selectedTypes = new Set(filter.types ?? []);
   const allTypesSelected = selectedTypes.size === 0;
   const selectedStages = new Set(filter.evolutionStages ?? []);
@@ -87,6 +89,19 @@ export default function QuizFilterModal({ visible, onClose, filter, onFilterChan
         <View style={styles.modal}>
           <ScrollView showsVerticalScrollIndicator={false}>
             <Text style={styles.title}>Quiz Filters</Text>
+
+            <Text style={styles.sectionTitle}>Mode</Text>
+            <View style={styles.switchRow}>
+              <View>
+                <Text style={styles.switchLabel}>Hardcore</Text>
+                <Text style={styles.switchHint}>No feedback on wrong answers</Text>
+              </View>
+              <Switch
+                value={hardcore}
+                onValueChange={onHardcoreChange}
+                trackColor={{ false: '#2a2a3e', true: '#e63946' }}
+              />
+            </View>
 
             <Text style={styles.sectionTitle}>Types</Text>
             <View style={styles.chipGrid}>
@@ -239,6 +254,11 @@ const styles = StyleSheet.create({
   switchLabel: {
     color: '#ffffff',
     fontSize: 16,
+  },
+  switchHint: {
+    color: '#a0a0b0',
+    fontSize: 12,
+    marginTop: 2,
   },
   chipRow: {
     flexDirection: 'row',

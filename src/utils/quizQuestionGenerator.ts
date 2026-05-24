@@ -130,6 +130,25 @@ function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+export function constraintToLabel(constraint: QuizConstraint): string {
+  switch (constraint.kind) {
+    case 'generation':
+      return `Gen ${constraint.generation}`;
+    case 'type':
+      return `${capitalize(constraint.pokemonType)} type`;
+    case 'legendary':
+      return 'Legendary';
+    case 'mythical':
+      return 'Mythical';
+    case 'evolutionStage': {
+      const labels = { base: 'Unevolved', middle: 'Middle evolution', final: 'Fully evolved' };
+      return labels[constraint.stage];
+    }
+    case 'dualType':
+      return constraint.value ? 'Dual-type' : 'Mono-type';
+  }
+}
+
 export function buildPromptText(constraints: QuizConstraint[]): string {
   const parts: string[] = [];
 
@@ -234,4 +253,34 @@ export function validateAnswerAgainstQuestion(
   const query = constraintsToQuery({ generations: activeGens }, question.constraints);
   const results = queryPokemon(query);
   return results.some((p) => p.name === pokemonName);
+}
+
+export type ConstraintFeedback = { label: string; passed: boolean }[];
+
+export function validateAnswerPerConstraint(
+  pokemonName: string,
+  question: QuizQuestion,
+  activeGens: number[],
+): ConstraintFeedback {
+  const results: ConstraintFeedback = [];
+
+  const hasGenConstraint = question.constraints.some((c) => c.kind === 'generation');
+  if (!hasGenConstraint) {
+    const genResults = queryPokemon({ generations: activeGens });
+    results.push({
+      label: activeGens.length === 1 ? `Gen ${activeGens[0]}` : `Gen ${activeGens.join(', ')}`,
+      passed: genResults.some((p) => p.name === pokemonName),
+    });
+  }
+
+  for (const constraint of question.constraints) {
+    const query = constraintsToQuery({}, [constraint]);
+    const matches = queryPokemon(query);
+    results.push({
+      label: constraintToLabel(constraint),
+      passed: matches.some((p) => p.name === pokemonName),
+    });
+  }
+
+  return results;
 }
