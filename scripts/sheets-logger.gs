@@ -6,8 +6,10 @@
 //    - Who has access: Anyone
 // 4. Copy the URL into src/utils/voiceLogger.ts
 
+var SHEET_ID = '1pKd_MMwZebjErhxFmdqYzYdmQF42jf39_MqBtulv7Do';
+
 function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var sheet = SpreadsheetApp.openById(SHEET_ID).getActiveSheet();
 
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(['Timestamp', 'Raw', 'Matched', 'Confidence', 'Distance', 'Source', 'Category', 'Confirmed']);

@@ -1,4 +1,4 @@
-const ENDPOINT = 'https://script.google.com/macros/s/AKfycbx22J1x9cS8GlyDoTB6o8QhuLw2rFXmZvyZ1NlJt7QZrV5AH8OzuzqqmI3-UZxUlQ8S/exec';
+const ENDPOINT = 'https://script.google.com/macros/s/AKfycbxiJzxI4CtNRJf2ZsruZZ4yGXA7f2J1svJm11fQ6dXgrwoPreyNgyuIFGBPe8C5_erS/exec';
 
 interface VoiceLog {
   raw: string;
