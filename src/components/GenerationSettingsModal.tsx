@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
-import { ALL_GENS, POKEMON_BY_GEN } from '../data/pokemon-data';
-import { getGenForPokemon } from '../data/pokemon-data';
+import { ALL_GENS, getPokemonCountByGen, getGenForPokemon } from '../data/pokemon-db';
 
 interface Props {
   visible: boolean;
@@ -32,7 +31,7 @@ export default function GenerationSettingsModal({
 
           {ALL_GENS.map((gen) => {
             const active = activeGenerations.includes(gen);
-            const count = POKEMON_BY_GEN[gen]?.length ?? 0;
+            const count = getPokemonCountByGen(gen);
             const hasUsedItems = usedGens.has(gen);
             const canRemove = active && activeGenerations.length > 1 && !hasUsedItems;
 

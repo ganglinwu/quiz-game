@@ -36,7 +36,7 @@ A turn-based naming game for iOS built with Expo (React Native + TypeScript). Pl
 
 ### Not Yet Implemented
 - Answer validation (checking if an answer is actually a valid Pokemon/fruit vs just matching the list)
-- Custom rules/filters (e.g., Pokemon Gen 1 only fire types)
+- Multi-dimensional game modes (e.g., "name a Gen 2 electric Pokemon") — data is in SQLite, game mode UI not built yet
 - Additional categories beyond Pokemon and Fruits
 - Android support
 - Online multiplayer
@@ -48,7 +48,8 @@ A turn-based naming game for iOS built with Expo (React Native + TypeScript). Pl
 - **expo-haptics** — haptic feedback
 - **React Navigation** (native stack) — 4 screens
 - **React Context + useReducer** — state management
-- No backend/database — all data is local JSON
+- **expo-sqlite** — pre-populated SQLite database for Pokemon/fruit/alias data
+- No backend — all data is local (SQLite database bundled as asset)
 
 ## Project Structure
 ```
@@ -66,12 +67,9 @@ src/
 │   ├── TextInputField.tsx        # Text input with submit
 │   └── Toast.tsx                 # Auto-dismissing centered toast
 ├── data/
-│   ├── aliases.ts                # ~400 speech recognition alias mappings (Gen 1-3)
-│   ├── fruits.json               # ~90 fruits
-│   ├── pokemon-data.ts           # Helper to load/filter Pokemon by generation
-│   ├── pokemon-gen1.json         # 151 Gen 1 Pokemon
-│   ├── pokemon-gen2.json         # 100 Gen 2 Pokemon
-│   └── pokemon-gen3.json         # 135 Gen 3 Pokemon
+│   ├── aliases.ts                # ~500 speech recognition alias mappings (Gen 1-3) — build-script input
+│   ├── migrations.ts             # Runtime schema migration runner (PRAGMA user_version)
+│   └── pokemon-db.ts             # SQLite data access layer (replaces JSON imports)
 ├── navigation/
 │   └── RootNavigator.tsx         # Stack: Home → PlayerSetup → Game → Result
 ├── screens/
@@ -108,9 +106,13 @@ src/
 - **Hint tracking**: revealed hints saved to game state (max 5). On game end, hinted-but-unnamed Pokemon become silhouette quizzes; remaining slots filled with random unnamed Pokemon as suggestions.
 - **Generation auto-detection**: if a player names a Pokemon from an inactive generation, a vote is triggered rather than rejecting the answer. Majority approval expands the pool mid-game.
 - **Audio manager as command queue**: `AudioManager` is a plain TypeScript class (not React) that serializes all BGM operations through an async queue. One persistent `AudioPlayer` swaps tracks via `replace()`. Superseded play commands are skipped. SFX bypasses the queue entirely. Screens declare intent via hooks (`useBGM`, `useBGMDynamic`) rather than calling play/stop directly. After speech recognition ends, `setAudioModeAsync()` is called to reclaim the iOS audio session before resuming playback.
+- **SQLite data layer**: Pokemon data (386 Pokemon with types, generation, legendary/mythical status, evolution chains, height, weight), ~500 voice aliases, and ~90 fruits stored in a pre-populated `assets/quiz.db`. Generated at build time by `scripts/generate-db.ts` which fetches from PokeAPI and caches in `scripts/pokeapi-cache.json`. `src/data/pokemon-db.ts` provides sync query functions via `expo-sqlite`'s `openDatabaseSync`. Includes `queryPokemon()` for multi-dimensional queries (by type, generation, legendary status, etc.).
 
 ## Build & Deploy
 ```bash
+# Generate/regenerate the SQLite database from PokeAPI + aliases
+npm run generate-db
+
 # Development build (for console logging)
 eas build -p ios --profile development
 npx expo start --dev-client
@@ -122,6 +124,7 @@ eas submit --platform ios
 
 Bundle ID: `com.ganglinwu.quizgame`
 EAS Project ID: `137a8bd5-39c8-4de3-8949-194420b876a7`
+Privacy Policy: https://ganglinwu.github.io/quiz-game/privacy-policy.html
 
 ## Known Issues
 - `app.json` includes `NSPhotoLibraryUsageDescription` to satisfy App Store — Expo dependency pulls it in, app doesn't actually use photos

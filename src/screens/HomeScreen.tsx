@@ -4,7 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { Category } from '../types';
 import { useAudio, useBGM } from '../audio';
-import { ALL_GENS, POKEMON_BY_GEN } from '../data/pokemon-data';
+import { ALL_GENS, getPokemonCountByGen } from '../data/pokemon-db';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -16,7 +16,7 @@ export default function HomeScreen({ navigation }: Props) {
 
   const totalPokemon = useMemo(() => {
     return Array.from(selectedGens).reduce(
-      (sum, g) => sum + (POKEMON_BY_GEN[g]?.length ?? 0),
+      (sum, g) => sum + getPokemonCountByGen(g),
       0
     );
   }, [selectedGens]);
@@ -70,7 +70,7 @@ export default function HomeScreen({ navigation }: Props) {
         <View style={styles.genPicker}>
           {ALL_GENS.map((gen) => {
             const active = selectedGens.has(gen);
-            const count = POKEMON_BY_GEN[gen]?.length ?? 0;
+            const count = getPokemonCountByGen(gen);
             return (
               <TouchableOpacity
                 key={gen}

@@ -8,7 +8,7 @@ import { useAudio, useBGMDynamic, useAudioSpeechBridge, HINT_SUCCESS_SFX } from 
 import type { TrackId } from '../audio';
 import { findDuplicate, fuzzyMatchWithGenDetection, fuzzyMatch } from '../utils/fuzzyMatch';
 import { getPlayerColor } from '../utils/colors';
-import { getPokemonForGens, getAllPokemon, getGenForPokemon } from '../data/pokemon-data';
+import { getPokemonForGens, getAllPokemon, getGenForPokemon } from '../data/pokemon-db';
 import MicButton from '../components/MicButton';
 import TextInputField from '../components/TextInputField';
 import ConfirmationOverlay from '../components/ConfirmationOverlay';
@@ -18,7 +18,8 @@ import Toast from '../components/Toast';
 import SuccessBanner from '../components/SuccessBanner';
 import GenerationVoteOverlay from '../components/GenerationVoteOverlay';
 import GenerationSettingsModal from '../components/GenerationSettingsModal';
-import fruitsData from '../data/fruits.json';
+import { getAllFruits } from '../data/pokemon-db';
+import { logVoiceResult } from '../utils/voiceLogger';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
 
@@ -51,7 +52,7 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
     if (isPokemon) {
       return getPokemonForGens(state.activeGenerations).map((p) => p.name);
     }
-    return fruitsData.map((f) => f.name);
+    return getAllFruits().map((f) => f.name);
   }, [isPokemon, state.activeGenerations]);
 
   const allPokemonNames = useMemo(() => {
@@ -61,12 +62,17 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
 
   const playerColor = getPlayerColor(state.currentPlayer, state.players);
 
+  const lastVoiceInputRef = useRef<string | null>(null);
+
   const processInput = useCallback(
     (text: string, isVoice: boolean) => {
       setDuplicateItem(null);
+      const source = isVoice ? 'voice' : 'text' as const;
+      const cat = isPokemon ? 'pokemon' : 'fruits';
 
       const dupMatch = findDuplicate(text, state.usedItems);
       if (dupMatch) {
+        logVoiceResult({ raw: text, matched: dupMatch, confidence: 'exact', distance: 0, source, category: cat });
         if (isVoice) {
           Alert.alert(
             'Already said!',
@@ -93,6 +99,11 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
         const result = fuzzyMatchWithGenDetection(
           text, itemNames, allPokemonNames, state.usedItems, getGenForPokemon
         );
+        logVoiceResult({ raw: text, matched: result.match, confidence: result.confidence, distance: result.distance, source, category: cat });
+
+        if (result.confidence !== 'none') {
+          lastVoiceInputRef.current = text;
+        }
 
         if (result.confidence === 'none') {
           if (isVoice) {
@@ -112,6 +123,12 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
         }
       } else {
         const result = fuzzyMatch(text, itemNames, state.usedItems);
+        logVoiceResult({ raw: text, matched: result.match, confidence: result.confidence, distance: result.distance, source, category: cat });
+
+        if (result.confidence !== 'none') {
+          lastVoiceInputRef.current = text;
+        }
+
         if (result.confidence === 'none') {
           if (isVoice) {
             setToastMessage(`Heard "${text}" — no match found`);
@@ -129,6 +146,18 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
   const handleConfirm = () => {
     const gotHintRight = pendingHintRef.current !== null &&
       state.confirmationItem === pendingHintRef.current;
+    if (lastVoiceInputRef.current && state.confirmationItem) {
+      logVoiceResult({
+        raw: lastVoiceInputRef.current,
+        matched: state.confirmationItem,
+        confidence: 'exact',
+        distance: 0,
+        source: 'voice',
+        category: isPokemon ? 'pokemon' : 'fruits',
+        confirmed: state.confirmationItem,
+      });
+    }
+    lastVoiceInputRef.current = null;
     setDuplicateItem(null);
     dispatch({ type: 'CONFIRM_ITEM' });
     pendingHintRef.current = null;
@@ -139,6 +168,7 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
   };
 
   const handleRetry = () => {
+    lastVoiceInputRef.current = null;
     setDuplicateItem(null);
     dispatch({ type: 'REJECT_ITEM' });
   };

@@ -1,0 +1,4816 @@
+{
+  "1": {
+    "name": "Bulbasaur",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "height": 7,
+    "weight": 69,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 1,
+    "evolves_from_id": null
+  },
+  "2": {
+    "name": "Ivysaur",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "height": 10,
+    "weight": 130,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 1,
+    "evolves_from_id": 1
+  },
+  "3": {
+    "name": "Venusaur",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "height": 20,
+    "weight": 1000,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 1,
+    "evolves_from_id": 2
+  },
+  "4": {
+    "name": "Charmander",
+    "types": [
+      "fire"
+    ],
+    "height": 6,
+    "weight": 85,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 2,
+    "evolves_from_id": null
+  },
+  "5": {
+    "name": "Charmeleon",
+    "types": [
+      "fire"
+    ],
+    "height": 11,
+    "weight": 190,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 2,
+    "evolves_from_id": 4
+  },
+  "6": {
+    "name": "Charizard",
+    "types": [
+      "fire",
+      "flying"
+    ],
+    "height": 17,
+    "weight": 905,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 2,
+    "evolves_from_id": 5
+  },
+  "7": {
+    "name": "Squirtle",
+    "types": [
+      "water"
+    ],
+    "height": 5,
+    "weight": 90,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 3,
+    "evolves_from_id": null
+  },
+  "8": {
+    "name": "Wartortle",
+    "types": [
+      "water"
+    ],
+    "height": 10,
+    "weight": 225,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 3,
+    "evolves_from_id": 7
+  },
+  "9": {
+    "name": "Blastoise",
+    "types": [
+      "water"
+    ],
+    "height": 16,
+    "weight": 855,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 3,
+    "evolves_from_id": 8
+  },
+  "10": {
+    "name": "Caterpie",
+    "types": [
+      "bug"
+    ],
+    "height": 3,
+    "weight": 29,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 4,
+    "evolves_from_id": null
+  },
+  "11": {
+    "name": "Metapod",
+    "types": [
+      "bug"
+    ],
+    "height": 7,
+    "weight": 99,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 4,
+    "evolves_from_id": 10
+  },
+  "12": {
+    "name": "Butterfree",
+    "types": [
+      "bug",
+      "flying"
+    ],
+    "height": 11,
+    "weight": 320,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 4,
+    "evolves_from_id": 11
+  },
+  "13": {
+    "name": "Weedle",
+    "types": [
+      "bug",
+      "poison"
+    ],
+    "height": 3,
+    "weight": 32,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 5,
+    "evolves_from_id": null
+  },
+  "14": {
+    "name": "Kakuna",
+    "types": [
+      "bug",
+      "poison"
+    ],
+    "height": 6,
+    "weight": 100,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 5,
+    "evolves_from_id": 13
+  },
+  "15": {
+    "name": "Beedrill",
+    "types": [
+      "bug",
+      "poison"
+    ],
+    "height": 10,
+    "weight": 295,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 5,
+    "evolves_from_id": 14
+  },
+  "16": {
+    "name": "Pidgey",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "height": 3,
+    "weight": 18,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 6,
+    "evolves_from_id": null
+  },
+  "17": {
+    "name": "Pidgeotto",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "height": 11,
+    "weight": 300,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 6,
+    "evolves_from_id": 16
+  },
+  "18": {
+    "name": "Pidgeot",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "height": 15,
+    "weight": 395,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 6,
+    "evolves_from_id": 17
+  },
+  "19": {
+    "name": "Rattata",
+    "types": [
+      "normal"
+    ],
+    "height": 3,
+    "weight": 35,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 7,
+    "evolves_from_id": null
+  },
+  "20": {
+    "name": "Raticate",
+    "types": [
+      "normal"
+    ],
+    "height": 7,
+    "weight": 185,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 7,
+    "evolves_from_id": 19
+  },
+  "21": {
+    "name": "Spearow",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "height": 3,
+    "weight": 20,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 8,
+    "evolves_from_id": null
+  },
+  "22": {
+    "name": "Fearow",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "height": 12,
+    "weight": 380,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 8,
+    "evolves_from_id": 21
+  },
+  "23": {
+    "name": "Ekans",
+    "types": [
+      "poison"
+    ],
+    "height": 20,
+    "weight": 69,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 9,
+    "evolves_from_id": null
+  },
+  "24": {
+    "name": "Arbok",
+    "types": [
+      "poison"
+    ],
+    "height": 35,
+    "weight": 650,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 9,
+    "evolves_from_id": 23
+  },
+  "25": {
+    "name": "Pikachu",
+    "types": [
+      "electric"
+    ],
+    "height": 4,
+    "weight": 60,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 10,
+    "evolves_from_id": 172
+  },
+  "26": {
+    "name": "Raichu",
+    "types": [
+      "electric"
+    ],
+    "height": 8,
+    "weight": 300,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 10,
+    "evolves_from_id": 25
+  },
+  "27": {
+    "name": "Sandshrew",
+    "types": [
+      "ground"
+    ],
+    "height": 6,
+    "weight": 120,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 11,
+    "evolves_from_id": null
+  },
+  "28": {
+    "name": "Sandslash",
+    "types": [
+      "ground"
+    ],
+    "height": 10,
+    "weight": 295,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 11,
+    "evolves_from_id": 27
+  },
+  "29": {
+    "name": "Nidoran Female",
+    "types": [
+      "poison"
+    ],
+    "height": 4,
+    "weight": 70,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 12,
+    "evolves_from_id": null
+  },
+  "30": {
+    "name": "Nidorina",
+    "types": [
+      "poison"
+    ],
+    "height": 8,
+    "weight": 200,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 12,
+    "evolves_from_id": 29
+  },
+  "31": {
+    "name": "Nidoqueen",
+    "types": [
+      "poison",
+      "ground"
+    ],
+    "height": 13,
+    "weight": 600,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 12,
+    "evolves_from_id": 30
+  },
+  "32": {
+    "name": "Nidoran Male",
+    "types": [
+      "poison"
+    ],
+    "height": 5,
+    "weight": 90,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 13,
+    "evolves_from_id": null
+  },
+  "33": {
+    "name": "Nidorino",
+    "types": [
+      "poison"
+    ],
+    "height": 9,
+    "weight": 195,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 13,
+    "evolves_from_id": 32
+  },
+  "34": {
+    "name": "Nidoking",
+    "types": [
+      "poison",
+      "ground"
+    ],
+    "height": 14,
+    "weight": 620,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 13,
+    "evolves_from_id": 33
+  },
+  "35": {
+    "name": "Clefairy",
+    "types": [
+      "fairy"
+    ],
+    "height": 6,
+    "weight": 75,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 14,
+    "evolves_from_id": 173
+  },
+  "36": {
+    "name": "Clefable",
+    "types": [
+      "fairy"
+    ],
+    "height": 13,
+    "weight": 400,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 14,
+    "evolves_from_id": 35
+  },
+  "37": {
+    "name": "Vulpix",
+    "types": [
+      "fire"
+    ],
+    "height": 6,
+    "weight": 99,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 15,
+    "evolves_from_id": null
+  },
+  "38": {
+    "name": "Ninetales",
+    "types": [
+      "fire"
+    ],
+    "height": 11,
+    "weight": 199,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 15,
+    "evolves_from_id": 37
+  },
+  "39": {
+    "name": "Jigglypuff",
+    "types": [
+      "normal",
+      "fairy"
+    ],
+    "height": 5,
+    "weight": 55,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 16,
+    "evolves_from_id": 174
+  },
+  "40": {
+    "name": "Wigglytuff",
+    "types": [
+      "normal",
+      "fairy"
+    ],
+    "height": 10,
+    "weight": 120,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 16,
+    "evolves_from_id": 39
+  },
+  "41": {
+    "name": "Zubat",
+    "types": [
+      "poison",
+      "flying"
+    ],
+    "height": 8,
+    "weight": 75,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 17,
+    "evolves_from_id": null
+  },
+  "42": {
+    "name": "Golbat",
+    "types": [
+      "poison",
+      "flying"
+    ],
+    "height": 16,
+    "weight": 550,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 17,
+    "evolves_from_id": 41
+  },
+  "43": {
+    "name": "Oddish",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "height": 5,
+    "weight": 54,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 18,
+    "evolves_from_id": null
+  },
+  "44": {
+    "name": "Gloom",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "height": 8,
+    "weight": 86,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 18,
+    "evolves_from_id": 43
+  },
+  "45": {
+    "name": "Vileplume",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "height": 12,
+    "weight": 186,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 18,
+    "evolves_from_id": 44
+  },
+  "46": {
+    "name": "Paras",
+    "types": [
+      "bug",
+      "grass"
+    ],
+    "height": 3,
+    "weight": 54,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 19,
+    "evolves_from_id": null
+  },
+  "47": {
+    "name": "Parasect",
+    "types": [
+      "bug",
+      "grass"
+    ],
+    "height": 10,
+    "weight": 295,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 19,
+    "evolves_from_id": 46
+  },
+  "48": {
+    "name": "Venonat",
+    "types": [
+      "bug",
+      "poison"
+    ],
+    "height": 10,
+    "weight": 300,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 20,
+    "evolves_from_id": null
+  },
+  "49": {
+    "name": "Venomoth",
+    "types": [
+      "bug",
+      "poison"
+    ],
+    "height": 15,
+    "weight": 125,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 20,
+    "evolves_from_id": 48
+  },
+  "50": {
+    "name": "Diglett",
+    "types": [
+      "ground"
+    ],
+    "height": 2,
+    "weight": 8,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 21,
+    "evolves_from_id": null
+  },
+  "51": {
+    "name": "Dugtrio",
+    "types": [
+      "ground"
+    ],
+    "height": 7,
+    "weight": 333,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 21,
+    "evolves_from_id": 50
+  },
+  "52": {
+    "name": "Meowth",
+    "types": [
+      "normal"
+    ],
+    "height": 4,
+    "weight": 42,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 22,
+    "evolves_from_id": null
+  },
+  "53": {
+    "name": "Persian",
+    "types": [
+      "normal"
+    ],
+    "height": 10,
+    "weight": 320,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 22,
+    "evolves_from_id": 52
+  },
+  "54": {
+    "name": "Psyduck",
+    "types": [
+      "water"
+    ],
+    "height": 8,
+    "weight": 196,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 23,
+    "evolves_from_id": null
+  },
+  "55": {
+    "name": "Golduck",
+    "types": [
+      "water"
+    ],
+    "height": 17,
+    "weight": 766,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 23,
+    "evolves_from_id": 54
+  },
+  "56": {
+    "name": "Mankey",
+    "types": [
+      "fighting"
+    ],
+    "height": 5,
+    "weight": 280,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 24,
+    "evolves_from_id": null
+  },
+  "57": {
+    "name": "Primeape",
+    "types": [
+      "fighting"
+    ],
+    "height": 10,
+    "weight": 320,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 24,
+    "evolves_from_id": 56
+  },
+  "58": {
+    "name": "Growlithe",
+    "types": [
+      "fire"
+    ],
+    "height": 7,
+    "weight": 190,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 25,
+    "evolves_from_id": null
+  },
+  "59": {
+    "name": "Arcanine",
+    "types": [
+      "fire"
+    ],
+    "height": 19,
+    "weight": 1550,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 25,
+    "evolves_from_id": 58
+  },
+  "60": {
+    "name": "Poliwag",
+    "types": [
+      "water"
+    ],
+    "height": 6,
+    "weight": 124,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 26,
+    "evolves_from_id": null
+  },
+  "61": {
+    "name": "Poliwhirl",
+    "types": [
+      "water"
+    ],
+    "height": 10,
+    "weight": 200,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 26,
+    "evolves_from_id": 60
+  },
+  "62": {
+    "name": "Poliwrath",
+    "types": [
+      "water",
+      "fighting"
+    ],
+    "height": 13,
+    "weight": 540,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 26,
+    "evolves_from_id": 61
+  },
+  "63": {
+    "name": "Abra",
+    "types": [
+      "psychic"
+    ],
+    "height": 9,
+    "weight": 195,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 27,
+    "evolves_from_id": null
+  },
+  "64": {
+    "name": "Kadabra",
+    "types": [
+      "psychic"
+    ],
+    "height": 13,
+    "weight": 565,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 27,
+    "evolves_from_id": 63
+  },
+  "65": {
+    "name": "Alakazam",
+    "types": [
+      "psychic"
+    ],
+    "height": 15,
+    "weight": 480,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 27,
+    "evolves_from_id": 64
+  },
+  "66": {
+    "name": "Machop",
+    "types": [
+      "fighting"
+    ],
+    "height": 8,
+    "weight": 195,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 28,
+    "evolves_from_id": null
+  },
+  "67": {
+    "name": "Machoke",
+    "types": [
+      "fighting"
+    ],
+    "height": 15,
+    "weight": 705,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 28,
+    "evolves_from_id": 66
+  },
+  "68": {
+    "name": "Machamp",
+    "types": [
+      "fighting"
+    ],
+    "height": 16,
+    "weight": 1300,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 28,
+    "evolves_from_id": 67
+  },
+  "69": {
+    "name": "Bellsprout",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "height": 7,
+    "weight": 40,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 29,
+    "evolves_from_id": null
+  },
+  "70": {
+    "name": "Weepinbell",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "height": 10,
+    "weight": 64,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 29,
+    "evolves_from_id": 69
+  },
+  "71": {
+    "name": "Victreebel",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "height": 17,
+    "weight": 155,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 29,
+    "evolves_from_id": 70
+  },
+  "72": {
+    "name": "Tentacool",
+    "types": [
+      "water",
+      "poison"
+    ],
+    "height": 9,
+    "weight": 455,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 30,
+    "evolves_from_id": null
+  },
+  "73": {
+    "name": "Tentacruel",
+    "types": [
+      "water",
+      "poison"
+    ],
+    "height": 16,
+    "weight": 550,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 30,
+    "evolves_from_id": 72
+  },
+  "74": {
+    "name": "Geodude",
+    "types": [
+      "rock",
+      "ground"
+    ],
+    "height": 4,
+    "weight": 200,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 31,
+    "evolves_from_id": null
+  },
+  "75": {
+    "name": "Graveler",
+    "types": [
+      "rock",
+      "ground"
+    ],
+    "height": 10,
+    "weight": 1050,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 31,
+    "evolves_from_id": 74
+  },
+  "76": {
+    "name": "Golem",
+    "types": [
+      "rock",
+      "ground"
+    ],
+    "height": 14,
+    "weight": 3000,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 31,
+    "evolves_from_id": 75
+  },
+  "77": {
+    "name": "Ponyta",
+    "types": [
+      "fire"
+    ],
+    "height": 10,
+    "weight": 300,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 32,
+    "evolves_from_id": null
+  },
+  "78": {
+    "name": "Rapidash",
+    "types": [
+      "fire"
+    ],
+    "height": 17,
+    "weight": 950,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 32,
+    "evolves_from_id": 77
+  },
+  "79": {
+    "name": "Slowpoke",
+    "types": [
+      "water",
+      "psychic"
+    ],
+    "height": 12,
+    "weight": 360,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 33,
+    "evolves_from_id": null
+  },
+  "80": {
+    "name": "Slowbro",
+    "types": [
+      "water",
+      "psychic"
+    ],
+    "height": 16,
+    "weight": 785,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 33,
+    "evolves_from_id": 79
+  },
+  "81": {
+    "name": "Magnemite",
+    "types": [
+      "electric",
+      "steel"
+    ],
+    "height": 3,
+    "weight": 60,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 34,
+    "evolves_from_id": null
+  },
+  "82": {
+    "name": "Magneton",
+    "types": [
+      "electric",
+      "steel"
+    ],
+    "height": 10,
+    "weight": 600,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 34,
+    "evolves_from_id": 81
+  },
+  "83": {
+    "name": "Farfetch'd",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "height": 8,
+    "weight": 150,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 35,
+    "evolves_from_id": null
+  },
+  "84": {
+    "name": "Doduo",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "height": 14,
+    "weight": 392,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 36,
+    "evolves_from_id": null
+  },
+  "85": {
+    "name": "Dodrio",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "height": 18,
+    "weight": 852,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 36,
+    "evolves_from_id": 84
+  },
+  "86": {
+    "name": "Seel",
+    "types": [
+      "water"
+    ],
+    "height": 11,
+    "weight": 900,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 37,
+    "evolves_from_id": null
+  },
+  "87": {
+    "name": "Dewgong",
+    "types": [
+      "water",
+      "ice"
+    ],
+    "height": 17,
+    "weight": 1200,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 37,
+    "evolves_from_id": 86
+  },
+  "88": {
+    "name": "Grimer",
+    "types": [
+      "poison"
+    ],
+    "height": 9,
+    "weight": 300,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 38,
+    "evolves_from_id": null
+  },
+  "89": {
+    "name": "Muk",
+    "types": [
+      "poison"
+    ],
+    "height": 12,
+    "weight": 300,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 38,
+    "evolves_from_id": 88
+  },
+  "90": {
+    "name": "Shellder",
+    "types": [
+      "water"
+    ],
+    "height": 3,
+    "weight": 40,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 39,
+    "evolves_from_id": null
+  },
+  "91": {
+    "name": "Cloyster",
+    "types": [
+      "water",
+      "ice"
+    ],
+    "height": 15,
+    "weight": 1325,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 39,
+    "evolves_from_id": 90
+  },
+  "92": {
+    "name": "Gastly",
+    "types": [
+      "ghost",
+      "poison"
+    ],
+    "height": 13,
+    "weight": 1,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 40,
+    "evolves_from_id": null
+  },
+  "93": {
+    "name": "Haunter",
+    "types": [
+      "ghost",
+      "poison"
+    ],
+    "height": 16,
+    "weight": 1,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 40,
+    "evolves_from_id": 92
+  },
+  "94": {
+    "name": "Gengar",
+    "types": [
+      "ghost",
+      "poison"
+    ],
+    "height": 15,
+    "weight": 405,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 40,
+    "evolves_from_id": 93
+  },
+  "95": {
+    "name": "Onix",
+    "types": [
+      "rock",
+      "ground"
+    ],
+    "height": 88,
+    "weight": 2100,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 41,
+    "evolves_from_id": null
+  },
+  "96": {
+    "name": "Drowzee",
+    "types": [
+      "psychic"
+    ],
+    "height": 10,
+    "weight": 324,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 42,
+    "evolves_from_id": null
+  },
+  "97": {
+    "name": "Hypno",
+    "types": [
+      "psychic"
+    ],
+    "height": 16,
+    "weight": 756,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 42,
+    "evolves_from_id": 96
+  },
+  "98": {
+    "name": "Krabby",
+    "types": [
+      "water"
+    ],
+    "height": 4,
+    "weight": 65,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 43,
+    "evolves_from_id": null
+  },
+  "99": {
+    "name": "Kingler",
+    "types": [
+      "water"
+    ],
+    "height": 13,
+    "weight": 600,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 43,
+    "evolves_from_id": 98
+  },
+  "100": {
+    "name": "Voltorb",
+    "types": [
+      "electric"
+    ],
+    "height": 5,
+    "weight": 104,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 44,
+    "evolves_from_id": null
+  },
+  "101": {
+    "name": "Electrode",
+    "types": [
+      "electric"
+    ],
+    "height": 12,
+    "weight": 666,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 44,
+    "evolves_from_id": 100
+  },
+  "102": {
+    "name": "Exeggcute",
+    "types": [
+      "grass",
+      "psychic"
+    ],
+    "height": 4,
+    "weight": 25,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 45,
+    "evolves_from_id": null
+  },
+  "103": {
+    "name": "Exeggutor",
+    "types": [
+      "grass",
+      "psychic"
+    ],
+    "height": 20,
+    "weight": 1200,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 45,
+    "evolves_from_id": 102
+  },
+  "104": {
+    "name": "Cubone",
+    "types": [
+      "ground"
+    ],
+    "height": 4,
+    "weight": 65,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 46,
+    "evolves_from_id": null
+  },
+  "105": {
+    "name": "Marowak",
+    "types": [
+      "ground"
+    ],
+    "height": 10,
+    "weight": 450,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 46,
+    "evolves_from_id": 104
+  },
+  "106": {
+    "name": "Hitmonlee",
+    "types": [
+      "fighting"
+    ],
+    "height": 15,
+    "weight": 498,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 47,
+    "evolves_from_id": 236
+  },
+  "107": {
+    "name": "Hitmonchan",
+    "types": [
+      "fighting"
+    ],
+    "height": 14,
+    "weight": 502,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 47,
+    "evolves_from_id": 236
+  },
+  "108": {
+    "name": "Lickitung",
+    "types": [
+      "normal"
+    ],
+    "height": 12,
+    "weight": 655,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 48,
+    "evolves_from_id": null
+  },
+  "109": {
+    "name": "Koffing",
+    "types": [
+      "poison"
+    ],
+    "height": 6,
+    "weight": 10,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 49,
+    "evolves_from_id": null
+  },
+  "110": {
+    "name": "Weezing",
+    "types": [
+      "poison"
+    ],
+    "height": 12,
+    "weight": 95,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 49,
+    "evolves_from_id": 109
+  },
+  "111": {
+    "name": "Rhyhorn",
+    "types": [
+      "ground",
+      "rock"
+    ],
+    "height": 10,
+    "weight": 1150,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 50,
+    "evolves_from_id": null
+  },
+  "112": {
+    "name": "Rhydon",
+    "types": [
+      "ground",
+      "rock"
+    ],
+    "height": 19,
+    "weight": 1200,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 50,
+    "evolves_from_id": 111
+  },
+  "113": {
+    "name": "Chansey",
+    "types": [
+      "normal"
+    ],
+    "height": 11,
+    "weight": 346,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 51,
+    "evolves_from_id": 440
+  },
+  "114": {
+    "name": "Tangela",
+    "types": [
+      "grass"
+    ],
+    "height": 10,
+    "weight": 350,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 52,
+    "evolves_from_id": null
+  },
+  "115": {
+    "name": "Kangaskhan",
+    "types": [
+      "normal"
+    ],
+    "height": 22,
+    "weight": 800,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 53,
+    "evolves_from_id": null
+  },
+  "116": {
+    "name": "Horsea",
+    "types": [
+      "water"
+    ],
+    "height": 4,
+    "weight": 80,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 54,
+    "evolves_from_id": null
+  },
+  "117": {
+    "name": "Seadra",
+    "types": [
+      "water"
+    ],
+    "height": 12,
+    "weight": 250,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 54,
+    "evolves_from_id": 116
+  },
+  "118": {
+    "name": "Goldeen",
+    "types": [
+      "water"
+    ],
+    "height": 6,
+    "weight": 150,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 55,
+    "evolves_from_id": null
+  },
+  "119": {
+    "name": "Seaking",
+    "types": [
+      "water"
+    ],
+    "height": 13,
+    "weight": 390,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 55,
+    "evolves_from_id": 118
+  },
+  "120": {
+    "name": "Staryu",
+    "types": [
+      "water"
+    ],
+    "height": 8,
+    "weight": 345,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 56,
+    "evolves_from_id": null
+  },
+  "121": {
+    "name": "Starmie",
+    "types": [
+      "water",
+      "psychic"
+    ],
+    "height": 11,
+    "weight": 800,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 56,
+    "evolves_from_id": 120
+  },
+  "122": {
+    "name": "Mr. Mime",
+    "types": [
+      "psychic",
+      "fairy"
+    ],
+    "height": 13,
+    "weight": 545,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 57,
+    "evolves_from_id": 439
+  },
+  "123": {
+    "name": "Scyther",
+    "types": [
+      "bug",
+      "flying"
+    ],
+    "height": 15,
+    "weight": 560,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 58,
+    "evolves_from_id": null
+  },
+  "124": {
+    "name": "Jynx",
+    "types": [
+      "ice",
+      "psychic"
+    ],
+    "height": 14,
+    "weight": 406,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 59,
+    "evolves_from_id": 238
+  },
+  "125": {
+    "name": "Electabuzz",
+    "types": [
+      "electric"
+    ],
+    "height": 11,
+    "weight": 300,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 60,
+    "evolves_from_id": 239
+  },
+  "126": {
+    "name": "Magmar",
+    "types": [
+      "fire"
+    ],
+    "height": 13,
+    "weight": 445,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 61,
+    "evolves_from_id": 240
+  },
+  "127": {
+    "name": "Pinsir",
+    "types": [
+      "bug"
+    ],
+    "height": 15,
+    "weight": 550,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 62,
+    "evolves_from_id": null
+  },
+  "128": {
+    "name": "Tauros",
+    "types": [
+      "normal"
+    ],
+    "height": 14,
+    "weight": 884,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 63,
+    "evolves_from_id": null
+  },
+  "129": {
+    "name": "Magikarp",
+    "types": [
+      "water"
+    ],
+    "height": 9,
+    "weight": 100,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 64,
+    "evolves_from_id": null
+  },
+  "130": {
+    "name": "Gyarados",
+    "types": [
+      "water",
+      "flying"
+    ],
+    "height": 65,
+    "weight": 2350,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 64,
+    "evolves_from_id": 129
+  },
+  "131": {
+    "name": "Lapras",
+    "types": [
+      "water",
+      "ice"
+    ],
+    "height": 25,
+    "weight": 2200,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 65,
+    "evolves_from_id": null
+  },
+  "132": {
+    "name": "Ditto",
+    "types": [
+      "normal"
+    ],
+    "height": 3,
+    "weight": 40,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 66,
+    "evolves_from_id": null
+  },
+  "133": {
+    "name": "Eevee",
+    "types": [
+      "normal"
+    ],
+    "height": 3,
+    "weight": 65,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 67,
+    "evolves_from_id": null
+  },
+  "134": {
+    "name": "Vaporeon",
+    "types": [
+      "water"
+    ],
+    "height": 10,
+    "weight": 290,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 67,
+    "evolves_from_id": 133
+  },
+  "135": {
+    "name": "Jolteon",
+    "types": [
+      "electric"
+    ],
+    "height": 8,
+    "weight": 245,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 67,
+    "evolves_from_id": 133
+  },
+  "136": {
+    "name": "Flareon",
+    "types": [
+      "fire"
+    ],
+    "height": 9,
+    "weight": 250,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 67,
+    "evolves_from_id": 133
+  },
+  "137": {
+    "name": "Porygon",
+    "types": [
+      "normal"
+    ],
+    "height": 8,
+    "weight": 365,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 68,
+    "evolves_from_id": null
+  },
+  "138": {
+    "name": "Omanyte",
+    "types": [
+      "rock",
+      "water"
+    ],
+    "height": 4,
+    "weight": 75,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 69,
+    "evolves_from_id": null
+  },
+  "139": {
+    "name": "Omastar",
+    "types": [
+      "rock",
+      "water"
+    ],
+    "height": 10,
+    "weight": 350,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 69,
+    "evolves_from_id": 138
+  },
+  "140": {
+    "name": "Kabuto",
+    "types": [
+      "rock",
+      "water"
+    ],
+    "height": 5,
+    "weight": 115,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 70,
+    "evolves_from_id": null
+  },
+  "141": {
+    "name": "Kabutops",
+    "types": [
+      "rock",
+      "water"
+    ],
+    "height": 13,
+    "weight": 405,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 70,
+    "evolves_from_id": 140
+  },
+  "142": {
+    "name": "Aerodactyl",
+    "types": [
+      "rock",
+      "flying"
+    ],
+    "height": 18,
+    "weight": 590,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 71,
+    "evolves_from_id": null
+  },
+  "143": {
+    "name": "Snorlax",
+    "types": [
+      "normal"
+    ],
+    "height": 21,
+    "weight": 4600,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 72,
+    "evolves_from_id": 446
+  },
+  "144": {
+    "name": "Articuno",
+    "types": [
+      "ice",
+      "flying"
+    ],
+    "height": 17,
+    "weight": 554,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 73,
+    "evolves_from_id": null
+  },
+  "145": {
+    "name": "Zapdos",
+    "types": [
+      "electric",
+      "flying"
+    ],
+    "height": 16,
+    "weight": 526,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 74,
+    "evolves_from_id": null
+  },
+  "146": {
+    "name": "Moltres",
+    "types": [
+      "fire",
+      "flying"
+    ],
+    "height": 20,
+    "weight": 600,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 75,
+    "evolves_from_id": null
+  },
+  "147": {
+    "name": "Dratini",
+    "types": [
+      "dragon"
+    ],
+    "height": 18,
+    "weight": 33,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 76,
+    "evolves_from_id": null
+  },
+  "148": {
+    "name": "Dragonair",
+    "types": [
+      "dragon"
+    ],
+    "height": 40,
+    "weight": 165,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 76,
+    "evolves_from_id": 147
+  },
+  "149": {
+    "name": "Dragonite",
+    "types": [
+      "dragon",
+      "flying"
+    ],
+    "height": 22,
+    "weight": 2100,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 76,
+    "evolves_from_id": 148
+  },
+  "150": {
+    "name": "Mewtwo",
+    "types": [
+      "psychic"
+    ],
+    "height": 20,
+    "weight": 1220,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 77,
+    "evolves_from_id": null
+  },
+  "151": {
+    "name": "Mew",
+    "types": [
+      "psychic"
+    ],
+    "height": 4,
+    "weight": 40,
+    "is_legendary": false,
+    "is_mythical": true,
+    "evolution_chain_id": 78,
+    "evolves_from_id": null
+  },
+  "152": {
+    "name": "Chikorita",
+    "types": [
+      "grass"
+    ],
+    "height": 9,
+    "weight": 64,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 79,
+    "evolves_from_id": null
+  },
+  "153": {
+    "name": "Bayleef",
+    "types": [
+      "grass"
+    ],
+    "height": 12,
+    "weight": 158,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 79,
+    "evolves_from_id": 152
+  },
+  "154": {
+    "name": "Meganium",
+    "types": [
+      "grass"
+    ],
+    "height": 18,
+    "weight": 1005,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 79,
+    "evolves_from_id": 153
+  },
+  "155": {
+    "name": "Cyndaquil",
+    "types": [
+      "fire"
+    ],
+    "height": 5,
+    "weight": 79,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 80,
+    "evolves_from_id": null
+  },
+  "156": {
+    "name": "Quilava",
+    "types": [
+      "fire"
+    ],
+    "height": 9,
+    "weight": 190,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 80,
+    "evolves_from_id": 155
+  },
+  "157": {
+    "name": "Typhlosion",
+    "types": [
+      "fire"
+    ],
+    "height": 17,
+    "weight": 795,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 80,
+    "evolves_from_id": 156
+  },
+  "158": {
+    "name": "Totodile",
+    "types": [
+      "water"
+    ],
+    "height": 6,
+    "weight": 95,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 81,
+    "evolves_from_id": null
+  },
+  "159": {
+    "name": "Croconaw",
+    "types": [
+      "water"
+    ],
+    "height": 11,
+    "weight": 250,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 81,
+    "evolves_from_id": 158
+  },
+  "160": {
+    "name": "Feraligatr",
+    "types": [
+      "water"
+    ],
+    "height": 23,
+    "weight": 888,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 81,
+    "evolves_from_id": 159
+  },
+  "161": {
+    "name": "Sentret",
+    "types": [
+      "normal"
+    ],
+    "height": 8,
+    "weight": 60,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 82,
+    "evolves_from_id": null
+  },
+  "162": {
+    "name": "Furret",
+    "types": [
+      "normal"
+    ],
+    "height": 18,
+    "weight": 325,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 82,
+    "evolves_from_id": 161
+  },
+  "163": {
+    "name": "Hoothoot",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "height": 7,
+    "weight": 212,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 83,
+    "evolves_from_id": null
+  },
+  "164": {
+    "name": "Noctowl",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "height": 16,
+    "weight": 408,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 83,
+    "evolves_from_id": 163
+  },
+  "165": {
+    "name": "Ledyba",
+    "types": [
+      "bug",
+      "flying"
+    ],
+    "height": 10,
+    "weight": 108,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 84,
+    "evolves_from_id": null
+  },
+  "166": {
+    "name": "Ledian",
+    "types": [
+      "bug",
+      "flying"
+    ],
+    "height": 14,
+    "weight": 356,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 84,
+    "evolves_from_id": 165
+  },
+  "167": {
+    "name": "Spinarak",
+    "types": [
+      "bug",
+      "poison"
+    ],
+    "height": 5,
+    "weight": 85,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 85,
+    "evolves_from_id": null
+  },
+  "168": {
+    "name": "Ariados",
+    "types": [
+      "bug",
+      "poison"
+    ],
+    "height": 11,
+    "weight": 335,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 85,
+    "evolves_from_id": 167
+  },
+  "169": {
+    "name": "Crobat",
+    "types": [
+      "poison",
+      "flying"
+    ],
+    "height": 18,
+    "weight": 750,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 17,
+    "evolves_from_id": 42
+  },
+  "170": {
+    "name": "Chinchou",
+    "types": [
+      "water",
+      "electric"
+    ],
+    "height": 5,
+    "weight": 120,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 86,
+    "evolves_from_id": null
+  },
+  "171": {
+    "name": "Lanturn",
+    "types": [
+      "water",
+      "electric"
+    ],
+    "height": 12,
+    "weight": 225,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 86,
+    "evolves_from_id": 170
+  },
+  "172": {
+    "name": "Pichu",
+    "types": [
+      "electric"
+    ],
+    "height": 3,
+    "weight": 20,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 10,
+    "evolves_from_id": null
+  },
+  "173": {
+    "name": "Cleffa",
+    "types": [
+      "fairy"
+    ],
+    "height": 3,
+    "weight": 30,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 14,
+    "evolves_from_id": null
+  },
+  "174": {
+    "name": "Igglybuff",
+    "types": [
+      "normal",
+      "fairy"
+    ],
+    "height": 3,
+    "weight": 10,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 16,
+    "evolves_from_id": null
+  },
+  "175": {
+    "name": "Togepi",
+    "types": [
+      "fairy"
+    ],
+    "height": 3,
+    "weight": 15,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 87,
+    "evolves_from_id": null
+  },
+  "176": {
+    "name": "Togetic",
+    "types": [
+      "fairy",
+      "flying"
+    ],
+    "height": 6,
+    "weight": 32,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 87,
+    "evolves_from_id": 175
+  },
+  "177": {
+    "name": "Natu",
+    "types": [
+      "psychic",
+      "flying"
+    ],
+    "height": 2,
+    "weight": 20,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 88,
+    "evolves_from_id": null
+  },
+  "178": {
+    "name": "Xatu",
+    "types": [
+      "psychic",
+      "flying"
+    ],
+    "height": 15,
+    "weight": 150,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 88,
+    "evolves_from_id": 177
+  },
+  "179": {
+    "name": "Mareep",
+    "types": [
+      "electric"
+    ],
+    "height": 6,
+    "weight": 78,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 89,
+    "evolves_from_id": null
+  },
+  "180": {
+    "name": "Flaaffy",
+    "types": [
+      "electric"
+    ],
+    "height": 8,
+    "weight": 133,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 89,
+    "evolves_from_id": 179
+  },
+  "181": {
+    "name": "Ampharos",
+    "types": [
+      "electric"
+    ],
+    "height": 14,
+    "weight": 615,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 89,
+    "evolves_from_id": 180
+  },
+  "182": {
+    "name": "Bellossom",
+    "types": [
+      "grass"
+    ],
+    "height": 4,
+    "weight": 58,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 18,
+    "evolves_from_id": 44
+  },
+  "183": {
+    "name": "Marill",
+    "types": [
+      "water",
+      "fairy"
+    ],
+    "height": 4,
+    "weight": 85,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 90,
+    "evolves_from_id": 298
+  },
+  "184": {
+    "name": "Azumarill",
+    "types": [
+      "water",
+      "fairy"
+    ],
+    "height": 8,
+    "weight": 285,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 90,
+    "evolves_from_id": 183
+  },
+  "185": {
+    "name": "Sudowoodo",
+    "types": [
+      "rock"
+    ],
+    "height": 12,
+    "weight": 380,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 91,
+    "evolves_from_id": 438
+  },
+  "186": {
+    "name": "Politoed",
+    "types": [
+      "water"
+    ],
+    "height": 11,
+    "weight": 339,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 26,
+    "evolves_from_id": 61
+  },
+  "187": {
+    "name": "Hoppip",
+    "types": [
+      "grass",
+      "flying"
+    ],
+    "height": 4,
+    "weight": 5,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 92,
+    "evolves_from_id": null
+  },
+  "188": {
+    "name": "Skiploom",
+    "types": [
+      "grass",
+      "flying"
+    ],
+    "height": 6,
+    "weight": 10,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 92,
+    "evolves_from_id": 187
+  },
+  "189": {
+    "name": "Jumpluff",
+    "types": [
+      "grass",
+      "flying"
+    ],
+    "height": 8,
+    "weight": 30,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 92,
+    "evolves_from_id": 188
+  },
+  "190": {
+    "name": "Aipom",
+    "types": [
+      "normal"
+    ],
+    "height": 8,
+    "weight": 115,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 93,
+    "evolves_from_id": null
+  },
+  "191": {
+    "name": "Sunkern",
+    "types": [
+      "grass"
+    ],
+    "height": 3,
+    "weight": 18,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 94,
+    "evolves_from_id": null
+  },
+  "192": {
+    "name": "Sunflora",
+    "types": [
+      "grass"
+    ],
+    "height": 8,
+    "weight": 85,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 94,
+    "evolves_from_id": 191
+  },
+  "193": {
+    "name": "Yanma",
+    "types": [
+      "bug",
+      "flying"
+    ],
+    "height": 12,
+    "weight": 380,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 95,
+    "evolves_from_id": null
+  },
+  "194": {
+    "name": "Wooper",
+    "types": [
+      "water",
+      "ground"
+    ],
+    "height": 4,
+    "weight": 85,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 96,
+    "evolves_from_id": null
+  },
+  "195": {
+    "name": "Quagsire",
+    "types": [
+      "water",
+      "ground"
+    ],
+    "height": 14,
+    "weight": 750,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 96,
+    "evolves_from_id": 194
+  },
+  "196": {
+    "name": "Espeon",
+    "types": [
+      "psychic"
+    ],
+    "height": 9,
+    "weight": 265,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 67,
+    "evolves_from_id": 133
+  },
+  "197": {
+    "name": "Umbreon",
+    "types": [
+      "dark"
+    ],
+    "height": 10,
+    "weight": 270,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 67,
+    "evolves_from_id": 133
+  },
+  "198": {
+    "name": "Murkrow",
+    "types": [
+      "dark",
+      "flying"
+    ],
+    "height": 5,
+    "weight": 21,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 97,
+    "evolves_from_id": null
+  },
+  "199": {
+    "name": "Slowking",
+    "types": [
+      "water",
+      "psychic"
+    ],
+    "height": 20,
+    "weight": 795,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 33,
+    "evolves_from_id": 79
+  },
+  "200": {
+    "name": "Misdreavus",
+    "types": [
+      "ghost"
+    ],
+    "height": 7,
+    "weight": 10,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 98,
+    "evolves_from_id": null
+  },
+  "201": {
+    "name": "Unown",
+    "types": [
+      "psychic"
+    ],
+    "height": 5,
+    "weight": 50,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 99,
+    "evolves_from_id": null
+  },
+  "202": {
+    "name": "Wobbuffet",
+    "types": [
+      "psychic"
+    ],
+    "height": 13,
+    "weight": 285,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 100,
+    "evolves_from_id": 360
+  },
+  "203": {
+    "name": "Girafarig",
+    "types": [
+      "normal",
+      "psychic"
+    ],
+    "height": 15,
+    "weight": 415,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 101,
+    "evolves_from_id": null
+  },
+  "204": {
+    "name": "Pineco",
+    "types": [
+      "bug"
+    ],
+    "height": 6,
+    "weight": 72,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 102,
+    "evolves_from_id": null
+  },
+  "205": {
+    "name": "Forretress",
+    "types": [
+      "bug",
+      "steel"
+    ],
+    "height": 12,
+    "weight": 1258,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 102,
+    "evolves_from_id": 204
+  },
+  "206": {
+    "name": "Dunsparce",
+    "types": [
+      "normal"
+    ],
+    "height": 15,
+    "weight": 140,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 103,
+    "evolves_from_id": null
+  },
+  "207": {
+    "name": "Gligar",
+    "types": [
+      "ground",
+      "flying"
+    ],
+    "height": 11,
+    "weight": 648,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 104,
+    "evolves_from_id": null
+  },
+  "208": {
+    "name": "Steelix",
+    "types": [
+      "steel",
+      "ground"
+    ],
+    "height": 92,
+    "weight": 4000,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 41,
+    "evolves_from_id": 95
+  },
+  "209": {
+    "name": "Snubbull",
+    "types": [
+      "fairy"
+    ],
+    "height": 6,
+    "weight": 78,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 105,
+    "evolves_from_id": null
+  },
+  "210": {
+    "name": "Granbull",
+    "types": [
+      "fairy"
+    ],
+    "height": 14,
+    "weight": 487,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 105,
+    "evolves_from_id": 209
+  },
+  "211": {
+    "name": "Qwilfish",
+    "types": [
+      "water",
+      "poison"
+    ],
+    "height": 5,
+    "weight": 39,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 106,
+    "evolves_from_id": null
+  },
+  "212": {
+    "name": "Scizor",
+    "types": [
+      "bug",
+      "steel"
+    ],
+    "height": 18,
+    "weight": 1180,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 58,
+    "evolves_from_id": 123
+  },
+  "213": {
+    "name": "Shuckle",
+    "types": [
+      "bug",
+      "rock"
+    ],
+    "height": 6,
+    "weight": 205,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 107,
+    "evolves_from_id": null
+  },
+  "214": {
+    "name": "Heracross",
+    "types": [
+      "bug",
+      "fighting"
+    ],
+    "height": 15,
+    "weight": 540,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 108,
+    "evolves_from_id": null
+  },
+  "215": {
+    "name": "Sneasel",
+    "types": [
+      "dark",
+      "ice"
+    ],
+    "height": 9,
+    "weight": 280,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 109,
+    "evolves_from_id": null
+  },
+  "216": {
+    "name": "Teddiursa",
+    "types": [
+      "normal"
+    ],
+    "height": 6,
+    "weight": 88,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 110,
+    "evolves_from_id": null
+  },
+  "217": {
+    "name": "Ursaring",
+    "types": [
+      "normal"
+    ],
+    "height": 18,
+    "weight": 1258,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 110,
+    "evolves_from_id": 216
+  },
+  "218": {
+    "name": "Slugma",
+    "types": [
+      "fire"
+    ],
+    "height": 7,
+    "weight": 350,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 111,
+    "evolves_from_id": null
+  },
+  "219": {
+    "name": "Magcargo",
+    "types": [
+      "fire",
+      "rock"
+    ],
+    "height": 8,
+    "weight": 550,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 111,
+    "evolves_from_id": 218
+  },
+  "220": {
+    "name": "Swinub",
+    "types": [
+      "ice",
+      "ground"
+    ],
+    "height": 4,
+    "weight": 65,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 112,
+    "evolves_from_id": null
+  },
+  "221": {
+    "name": "Piloswine",
+    "types": [
+      "ice",
+      "ground"
+    ],
+    "height": 11,
+    "weight": 558,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 112,
+    "evolves_from_id": 220
+  },
+  "222": {
+    "name": "Corsola",
+    "types": [
+      "water",
+      "rock"
+    ],
+    "height": 6,
+    "weight": 50,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 113,
+    "evolves_from_id": null
+  },
+  "223": {
+    "name": "Remoraid",
+    "types": [
+      "water"
+    ],
+    "height": 6,
+    "weight": 120,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 114,
+    "evolves_from_id": null
+  },
+  "224": {
+    "name": "Octillery",
+    "types": [
+      "water"
+    ],
+    "height": 9,
+    "weight": 285,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 114,
+    "evolves_from_id": 223
+  },
+  "225": {
+    "name": "Delibird",
+    "types": [
+      "ice",
+      "flying"
+    ],
+    "height": 9,
+    "weight": 160,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 115,
+    "evolves_from_id": null
+  },
+  "226": {
+    "name": "Mantine",
+    "types": [
+      "water",
+      "flying"
+    ],
+    "height": 21,
+    "weight": 2200,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 116,
+    "evolves_from_id": 458
+  },
+  "227": {
+    "name": "Skarmory",
+    "types": [
+      "steel",
+      "flying"
+    ],
+    "height": 17,
+    "weight": 505,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 117,
+    "evolves_from_id": null
+  },
+  "228": {
+    "name": "Houndour",
+    "types": [
+      "dark",
+      "fire"
+    ],
+    "height": 6,
+    "weight": 108,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 118,
+    "evolves_from_id": null
+  },
+  "229": {
+    "name": "Houndoom",
+    "types": [
+      "dark",
+      "fire"
+    ],
+    "height": 14,
+    "weight": 350,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 118,
+    "evolves_from_id": 228
+  },
+  "230": {
+    "name": "Kingdra",
+    "types": [
+      "water",
+      "dragon"
+    ],
+    "height": 18,
+    "weight": 1520,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 54,
+    "evolves_from_id": 117
+  },
+  "231": {
+    "name": "Phanpy",
+    "types": [
+      "ground"
+    ],
+    "height": 5,
+    "weight": 335,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 119,
+    "evolves_from_id": null
+  },
+  "232": {
+    "name": "Donphan",
+    "types": [
+      "ground"
+    ],
+    "height": 11,
+    "weight": 1200,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 119,
+    "evolves_from_id": 231
+  },
+  "233": {
+    "name": "Porygon2",
+    "types": [
+      "normal"
+    ],
+    "height": 6,
+    "weight": 325,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 68,
+    "evolves_from_id": 137
+  },
+  "234": {
+    "name": "Stantler",
+    "types": [
+      "normal"
+    ],
+    "height": 14,
+    "weight": 712,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 120,
+    "evolves_from_id": null
+  },
+  "235": {
+    "name": "Smeargle",
+    "types": [
+      "normal"
+    ],
+    "height": 12,
+    "weight": 580,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 121,
+    "evolves_from_id": null
+  },
+  "236": {
+    "name": "Tyrogue",
+    "types": [
+      "fighting"
+    ],
+    "height": 7,
+    "weight": 210,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 47,
+    "evolves_from_id": null
+  },
+  "237": {
+    "name": "Hitmontop",
+    "types": [
+      "fighting"
+    ],
+    "height": 14,
+    "weight": 480,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 47,
+    "evolves_from_id": 236
+  },
+  "238": {
+    "name": "Smoochum",
+    "types": [
+      "ice",
+      "psychic"
+    ],
+    "height": 4,
+    "weight": 60,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 59,
+    "evolves_from_id": null
+  },
+  "239": {
+    "name": "Elekid",
+    "types": [
+      "electric"
+    ],
+    "height": 6,
+    "weight": 235,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 60,
+    "evolves_from_id": null
+  },
+  "240": {
+    "name": "Magby",
+    "types": [
+      "fire"
+    ],
+    "height": 7,
+    "weight": 214,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 61,
+    "evolves_from_id": null
+  },
+  "241": {
+    "name": "Miltank",
+    "types": [
+      "normal"
+    ],
+    "height": 12,
+    "weight": 755,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 122,
+    "evolves_from_id": null
+  },
+  "242": {
+    "name": "Blissey",
+    "types": [
+      "normal"
+    ],
+    "height": 15,
+    "weight": 468,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 51,
+    "evolves_from_id": 113
+  },
+  "243": {
+    "name": "Raikou",
+    "types": [
+      "electric"
+    ],
+    "height": 19,
+    "weight": 1780,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 123,
+    "evolves_from_id": null
+  },
+  "244": {
+    "name": "Entei",
+    "types": [
+      "fire"
+    ],
+    "height": 21,
+    "weight": 1980,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 124,
+    "evolves_from_id": null
+  },
+  "245": {
+    "name": "Suicune",
+    "types": [
+      "water"
+    ],
+    "height": 20,
+    "weight": 1870,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 125,
+    "evolves_from_id": null
+  },
+  "246": {
+    "name": "Larvitar",
+    "types": [
+      "rock",
+      "ground"
+    ],
+    "height": 6,
+    "weight": 720,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 126,
+    "evolves_from_id": null
+  },
+  "247": {
+    "name": "Pupitar",
+    "types": [
+      "rock",
+      "ground"
+    ],
+    "height": 12,
+    "weight": 1520,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 126,
+    "evolves_from_id": 246
+  },
+  "248": {
+    "name": "Tyranitar",
+    "types": [
+      "rock",
+      "dark"
+    ],
+    "height": 20,
+    "weight": 2020,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 126,
+    "evolves_from_id": 247
+  },
+  "249": {
+    "name": "Lugia",
+    "types": [
+      "psychic",
+      "flying"
+    ],
+    "height": 52,
+    "weight": 2160,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 127,
+    "evolves_from_id": null
+  },
+  "250": {
+    "name": "Ho-Oh",
+    "types": [
+      "fire",
+      "flying"
+    ],
+    "height": 38,
+    "weight": 1990,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 128,
+    "evolves_from_id": null
+  },
+  "251": {
+    "name": "Celebi",
+    "types": [
+      "psychic",
+      "grass"
+    ],
+    "height": 6,
+    "weight": 50,
+    "is_legendary": false,
+    "is_mythical": true,
+    "evolution_chain_id": 129,
+    "evolves_from_id": null
+  },
+  "252": {
+    "name": "Treecko",
+    "types": [
+      "grass"
+    ],
+    "height": 5,
+    "weight": 50,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 130,
+    "evolves_from_id": null
+  },
+  "253": {
+    "name": "Grovyle",
+    "types": [
+      "grass"
+    ],
+    "height": 9,
+    "weight": 216,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 130,
+    "evolves_from_id": 252
+  },
+  "254": {
+    "name": "Sceptile",
+    "types": [
+      "grass"
+    ],
+    "height": 17,
+    "weight": 522,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 130,
+    "evolves_from_id": 253
+  },
+  "255": {
+    "name": "Torchic",
+    "types": [
+      "fire"
+    ],
+    "height": 4,
+    "weight": 25,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 131,
+    "evolves_from_id": null
+  },
+  "256": {
+    "name": "Combusken",
+    "types": [
+      "fire",
+      "fighting"
+    ],
+    "height": 9,
+    "weight": 195,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 131,
+    "evolves_from_id": 255
+  },
+  "257": {
+    "name": "Blaziken",
+    "types": [
+      "fire",
+      "fighting"
+    ],
+    "height": 19,
+    "weight": 520,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 131,
+    "evolves_from_id": 256
+  },
+  "258": {
+    "name": "Mudkip",
+    "types": [
+      "water"
+    ],
+    "height": 4,
+    "weight": 76,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 132,
+    "evolves_from_id": null
+  },
+  "259": {
+    "name": "Marshtomp",
+    "types": [
+      "water",
+      "ground"
+    ],
+    "height": 7,
+    "weight": 280,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 132,
+    "evolves_from_id": 258
+  },
+  "260": {
+    "name": "Swampert",
+    "types": [
+      "water",
+      "ground"
+    ],
+    "height": 15,
+    "weight": 819,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 132,
+    "evolves_from_id": 259
+  },
+  "261": {
+    "name": "Poochyena",
+    "types": [
+      "dark"
+    ],
+    "height": 5,
+    "weight": 136,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 133,
+    "evolves_from_id": null
+  },
+  "262": {
+    "name": "Mightyena",
+    "types": [
+      "dark"
+    ],
+    "height": 10,
+    "weight": 370,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 133,
+    "evolves_from_id": 261
+  },
+  "263": {
+    "name": "Zigzagoon",
+    "types": [
+      "normal"
+    ],
+    "height": 4,
+    "weight": 175,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 134,
+    "evolves_from_id": null
+  },
+  "264": {
+    "name": "Linoone",
+    "types": [
+      "normal"
+    ],
+    "height": 5,
+    "weight": 325,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 134,
+    "evolves_from_id": 263
+  },
+  "265": {
+    "name": "Wurmple",
+    "types": [
+      "bug"
+    ],
+    "height": 3,
+    "weight": 36,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 135,
+    "evolves_from_id": null
+  },
+  "266": {
+    "name": "Silcoon",
+    "types": [
+      "bug"
+    ],
+    "height": 6,
+    "weight": 100,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 135,
+    "evolves_from_id": 265
+  },
+  "267": {
+    "name": "Beautifly",
+    "types": [
+      "bug",
+      "flying"
+    ],
+    "height": 10,
+    "weight": 284,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 135,
+    "evolves_from_id": 266
+  },
+  "268": {
+    "name": "Cascoon",
+    "types": [
+      "bug"
+    ],
+    "height": 7,
+    "weight": 115,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 135,
+    "evolves_from_id": 265
+  },
+  "269": {
+    "name": "Dustox",
+    "types": [
+      "bug",
+      "poison"
+    ],
+    "height": 12,
+    "weight": 316,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 135,
+    "evolves_from_id": 268
+  },
+  "270": {
+    "name": "Lotad",
+    "types": [
+      "water",
+      "grass"
+    ],
+    "height": 5,
+    "weight": 26,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 136,
+    "evolves_from_id": null
+  },
+  "271": {
+    "name": "Lombre",
+    "types": [
+      "water",
+      "grass"
+    ],
+    "height": 12,
+    "weight": 325,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 136,
+    "evolves_from_id": 270
+  },
+  "272": {
+    "name": "Ludicolo",
+    "types": [
+      "water",
+      "grass"
+    ],
+    "height": 15,
+    "weight": 550,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 136,
+    "evolves_from_id": 271
+  },
+  "273": {
+    "name": "Seedot",
+    "types": [
+      "grass"
+    ],
+    "height": 5,
+    "weight": 40,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 137,
+    "evolves_from_id": null
+  },
+  "274": {
+    "name": "Nuzleaf",
+    "types": [
+      "grass",
+      "dark"
+    ],
+    "height": 10,
+    "weight": 280,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 137,
+    "evolves_from_id": 273
+  },
+  "275": {
+    "name": "Shiftry",
+    "types": [
+      "grass",
+      "dark"
+    ],
+    "height": 13,
+    "weight": 596,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 137,
+    "evolves_from_id": 274
+  },
+  "276": {
+    "name": "Taillow",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "height": 3,
+    "weight": 23,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 138,
+    "evolves_from_id": null
+  },
+  "277": {
+    "name": "Swellow",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "height": 7,
+    "weight": 198,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 138,
+    "evolves_from_id": 276
+  },
+  "278": {
+    "name": "Wingull",
+    "types": [
+      "water",
+      "flying"
+    ],
+    "height": 6,
+    "weight": 95,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 139,
+    "evolves_from_id": null
+  },
+  "279": {
+    "name": "Pelipper",
+    "types": [
+      "water",
+      "flying"
+    ],
+    "height": 12,
+    "weight": 280,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 139,
+    "evolves_from_id": 278
+  },
+  "280": {
+    "name": "Ralts",
+    "types": [
+      "psychic",
+      "fairy"
+    ],
+    "height": 4,
+    "weight": 66,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 140,
+    "evolves_from_id": null
+  },
+  "281": {
+    "name": "Kirlia",
+    "types": [
+      "psychic",
+      "fairy"
+    ],
+    "height": 8,
+    "weight": 202,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 140,
+    "evolves_from_id": 280
+  },
+  "282": {
+    "name": "Gardevoir",
+    "types": [
+      "psychic",
+      "fairy"
+    ],
+    "height": 16,
+    "weight": 484,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 140,
+    "evolves_from_id": 281
+  },
+  "283": {
+    "name": "Surskit",
+    "types": [
+      "bug",
+      "water"
+    ],
+    "height": 5,
+    "weight": 17,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 141,
+    "evolves_from_id": null
+  },
+  "284": {
+    "name": "Masquerain",
+    "types": [
+      "bug",
+      "flying"
+    ],
+    "height": 8,
+    "weight": 36,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 141,
+    "evolves_from_id": 283
+  },
+  "285": {
+    "name": "Shroomish",
+    "types": [
+      "grass"
+    ],
+    "height": 4,
+    "weight": 45,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 142,
+    "evolves_from_id": null
+  },
+  "286": {
+    "name": "Breloom",
+    "types": [
+      "grass",
+      "fighting"
+    ],
+    "height": 12,
+    "weight": 392,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 142,
+    "evolves_from_id": 285
+  },
+  "287": {
+    "name": "Slakoth",
+    "types": [
+      "normal"
+    ],
+    "height": 8,
+    "weight": 240,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 143,
+    "evolves_from_id": null
+  },
+  "288": {
+    "name": "Vigoroth",
+    "types": [
+      "normal"
+    ],
+    "height": 14,
+    "weight": 465,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 143,
+    "evolves_from_id": 287
+  },
+  "289": {
+    "name": "Slaking",
+    "types": [
+      "normal"
+    ],
+    "height": 20,
+    "weight": 1305,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 143,
+    "evolves_from_id": 288
+  },
+  "290": {
+    "name": "Nincada",
+    "types": [
+      "bug",
+      "ground"
+    ],
+    "height": 5,
+    "weight": 55,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 144,
+    "evolves_from_id": null
+  },
+  "291": {
+    "name": "Ninjask",
+    "types": [
+      "bug",
+      "flying"
+    ],
+    "height": 8,
+    "weight": 120,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 144,
+    "evolves_from_id": 290
+  },
+  "292": {
+    "name": "Shedinja",
+    "types": [
+      "bug",
+      "ghost"
+    ],
+    "height": 8,
+    "weight": 12,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 144,
+    "evolves_from_id": 290
+  },
+  "293": {
+    "name": "Whismur",
+    "types": [
+      "normal"
+    ],
+    "height": 6,
+    "weight": 163,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 145,
+    "evolves_from_id": null
+  },
+  "294": {
+    "name": "Loudred",
+    "types": [
+      "normal"
+    ],
+    "height": 10,
+    "weight": 405,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 145,
+    "evolves_from_id": 293
+  },
+  "295": {
+    "name": "Exploud",
+    "types": [
+      "normal"
+    ],
+    "height": 15,
+    "weight": 840,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 145,
+    "evolves_from_id": 294
+  },
+  "296": {
+    "name": "Makuhita",
+    "types": [
+      "fighting"
+    ],
+    "height": 10,
+    "weight": 864,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 146,
+    "evolves_from_id": null
+  },
+  "297": {
+    "name": "Hariyama",
+    "types": [
+      "fighting"
+    ],
+    "height": 23,
+    "weight": 2538,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 146,
+    "evolves_from_id": 296
+  },
+  "298": {
+    "name": "Azurill",
+    "types": [
+      "normal",
+      "fairy"
+    ],
+    "height": 2,
+    "weight": 20,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 90,
+    "evolves_from_id": null
+  },
+  "299": {
+    "name": "Nosepass",
+    "types": [
+      "rock"
+    ],
+    "height": 10,
+    "weight": 970,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 147,
+    "evolves_from_id": null
+  },
+  "300": {
+    "name": "Skitty",
+    "types": [
+      "normal"
+    ],
+    "height": 6,
+    "weight": 110,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 148,
+    "evolves_from_id": null
+  },
+  "301": {
+    "name": "Delcatty",
+    "types": [
+      "normal"
+    ],
+    "height": 11,
+    "weight": 326,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 148,
+    "evolves_from_id": 300
+  },
+  "302": {
+    "name": "Sableye",
+    "types": [
+      "dark",
+      "ghost"
+    ],
+    "height": 5,
+    "weight": 110,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 149,
+    "evolves_from_id": null
+  },
+  "303": {
+    "name": "Mawile",
+    "types": [
+      "steel",
+      "fairy"
+    ],
+    "height": 6,
+    "weight": 115,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 150,
+    "evolves_from_id": null
+  },
+  "304": {
+    "name": "Aron",
+    "types": [
+      "steel",
+      "rock"
+    ],
+    "height": 4,
+    "weight": 600,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 151,
+    "evolves_from_id": null
+  },
+  "305": {
+    "name": "Lairon",
+    "types": [
+      "steel",
+      "rock"
+    ],
+    "height": 9,
+    "weight": 1200,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 151,
+    "evolves_from_id": 304
+  },
+  "306": {
+    "name": "Aggron",
+    "types": [
+      "steel",
+      "rock"
+    ],
+    "height": 21,
+    "weight": 3600,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 151,
+    "evolves_from_id": 305
+  },
+  "307": {
+    "name": "Meditite",
+    "types": [
+      "fighting",
+      "psychic"
+    ],
+    "height": 6,
+    "weight": 112,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 152,
+    "evolves_from_id": null
+  },
+  "308": {
+    "name": "Medicham",
+    "types": [
+      "fighting",
+      "psychic"
+    ],
+    "height": 13,
+    "weight": 315,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 152,
+    "evolves_from_id": 307
+  },
+  "309": {
+    "name": "Electrike",
+    "types": [
+      "electric"
+    ],
+    "height": 6,
+    "weight": 152,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 153,
+    "evolves_from_id": null
+  },
+  "310": {
+    "name": "Manectric",
+    "types": [
+      "electric"
+    ],
+    "height": 15,
+    "weight": 402,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 153,
+    "evolves_from_id": 309
+  },
+  "311": {
+    "name": "Plusle",
+    "types": [
+      "electric"
+    ],
+    "height": 4,
+    "weight": 42,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 154,
+    "evolves_from_id": null
+  },
+  "312": {
+    "name": "Minun",
+    "types": [
+      "electric"
+    ],
+    "height": 4,
+    "weight": 42,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 155,
+    "evolves_from_id": null
+  },
+  "313": {
+    "name": "Volbeat",
+    "types": [
+      "bug"
+    ],
+    "height": 7,
+    "weight": 177,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 156,
+    "evolves_from_id": null
+  },
+  "314": {
+    "name": "Illumise",
+    "types": [
+      "bug"
+    ],
+    "height": 6,
+    "weight": 177,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 157,
+    "evolves_from_id": null
+  },
+  "315": {
+    "name": "Roselia",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "height": 3,
+    "weight": 20,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 158,
+    "evolves_from_id": 406
+  },
+  "316": {
+    "name": "Gulpin",
+    "types": [
+      "poison"
+    ],
+    "height": 4,
+    "weight": 103,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 159,
+    "evolves_from_id": null
+  },
+  "317": {
+    "name": "Swalot",
+    "types": [
+      "poison"
+    ],
+    "height": 17,
+    "weight": 800,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 159,
+    "evolves_from_id": 316
+  },
+  "318": {
+    "name": "Carvanha",
+    "types": [
+      "water",
+      "dark"
+    ],
+    "height": 8,
+    "weight": 208,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 160,
+    "evolves_from_id": null
+  },
+  "319": {
+    "name": "Sharpedo",
+    "types": [
+      "water",
+      "dark"
+    ],
+    "height": 18,
+    "weight": 888,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 160,
+    "evolves_from_id": 318
+  },
+  "320": {
+    "name": "Wailmer",
+    "types": [
+      "water"
+    ],
+    "height": 20,
+    "weight": 1300,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 161,
+    "evolves_from_id": null
+  },
+  "321": {
+    "name": "Wailord",
+    "types": [
+      "water"
+    ],
+    "height": 145,
+    "weight": 3980,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 161,
+    "evolves_from_id": 320
+  },
+  "322": {
+    "name": "Numel",
+    "types": [
+      "fire",
+      "ground"
+    ],
+    "height": 7,
+    "weight": 240,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 162,
+    "evolves_from_id": null
+  },
+  "323": {
+    "name": "Camerupt",
+    "types": [
+      "fire",
+      "ground"
+    ],
+    "height": 19,
+    "weight": 2200,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 162,
+    "evolves_from_id": 322
+  },
+  "324": {
+    "name": "Torkoal",
+    "types": [
+      "fire"
+    ],
+    "height": 5,
+    "weight": 804,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 163,
+    "evolves_from_id": null
+  },
+  "325": {
+    "name": "Spoink",
+    "types": [
+      "psychic"
+    ],
+    "height": 7,
+    "weight": 306,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 164,
+    "evolves_from_id": null
+  },
+  "326": {
+    "name": "Grumpig",
+    "types": [
+      "psychic"
+    ],
+    "height": 9,
+    "weight": 715,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 164,
+    "evolves_from_id": 325
+  },
+  "327": {
+    "name": "Spinda",
+    "types": [
+      "normal"
+    ],
+    "height": 11,
+    "weight": 50,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 165,
+    "evolves_from_id": null
+  },
+  "328": {
+    "name": "Trapinch",
+    "types": [
+      "ground"
+    ],
+    "height": 7,
+    "weight": 150,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 166,
+    "evolves_from_id": null
+  },
+  "329": {
+    "name": "Vibrava",
+    "types": [
+      "ground",
+      "dragon"
+    ],
+    "height": 11,
+    "weight": 153,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 166,
+    "evolves_from_id": 328
+  },
+  "330": {
+    "name": "Flygon",
+    "types": [
+      "ground",
+      "dragon"
+    ],
+    "height": 20,
+    "weight": 820,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 166,
+    "evolves_from_id": 329
+  },
+  "331": {
+    "name": "Cacnea",
+    "types": [
+      "grass"
+    ],
+    "height": 4,
+    "weight": 513,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 167,
+    "evolves_from_id": null
+  },
+  "332": {
+    "name": "Cacturne",
+    "types": [
+      "grass",
+      "dark"
+    ],
+    "height": 13,
+    "weight": 774,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 167,
+    "evolves_from_id": 331
+  },
+  "333": {
+    "name": "Swablu",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "height": 4,
+    "weight": 12,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 168,
+    "evolves_from_id": null
+  },
+  "334": {
+    "name": "Altaria",
+    "types": [
+      "dragon",
+      "flying"
+    ],
+    "height": 11,
+    "weight": 206,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 168,
+    "evolves_from_id": 333
+  },
+  "335": {
+    "name": "Zangoose",
+    "types": [
+      "normal"
+    ],
+    "height": 13,
+    "weight": 403,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 169,
+    "evolves_from_id": null
+  },
+  "336": {
+    "name": "Seviper",
+    "types": [
+      "poison"
+    ],
+    "height": 27,
+    "weight": 525,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 170,
+    "evolves_from_id": null
+  },
+  "337": {
+    "name": "Lunatone",
+    "types": [
+      "rock",
+      "psychic"
+    ],
+    "height": 10,
+    "weight": 1680,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 171,
+    "evolves_from_id": null
+  },
+  "338": {
+    "name": "Solrock",
+    "types": [
+      "rock",
+      "psychic"
+    ],
+    "height": 12,
+    "weight": 1540,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 172,
+    "evolves_from_id": null
+  },
+  "339": {
+    "name": "Barboach",
+    "types": [
+      "water",
+      "ground"
+    ],
+    "height": 4,
+    "weight": 19,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 173,
+    "evolves_from_id": null
+  },
+  "340": {
+    "name": "Whiscash",
+    "types": [
+      "water",
+      "ground"
+    ],
+    "height": 9,
+    "weight": 236,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 173,
+    "evolves_from_id": 339
+  },
+  "341": {
+    "name": "Corphish",
+    "types": [
+      "water"
+    ],
+    "height": 6,
+    "weight": 115,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 174,
+    "evolves_from_id": null
+  },
+  "342": {
+    "name": "Crawdaunt",
+    "types": [
+      "water",
+      "dark"
+    ],
+    "height": 11,
+    "weight": 328,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 174,
+    "evolves_from_id": 341
+  },
+  "343": {
+    "name": "Baltoy",
+    "types": [
+      "ground",
+      "psychic"
+    ],
+    "height": 5,
+    "weight": 215,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 175,
+    "evolves_from_id": null
+  },
+  "344": {
+    "name": "Claydol",
+    "types": [
+      "ground",
+      "psychic"
+    ],
+    "height": 15,
+    "weight": 1080,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 175,
+    "evolves_from_id": 343
+  },
+  "345": {
+    "name": "Lileep",
+    "types": [
+      "rock",
+      "grass"
+    ],
+    "height": 10,
+    "weight": 238,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 176,
+    "evolves_from_id": null
+  },
+  "346": {
+    "name": "Cradily",
+    "types": [
+      "rock",
+      "grass"
+    ],
+    "height": 15,
+    "weight": 604,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 176,
+    "evolves_from_id": 345
+  },
+  "347": {
+    "name": "Anorith",
+    "types": [
+      "rock",
+      "bug"
+    ],
+    "height": 7,
+    "weight": 125,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 177,
+    "evolves_from_id": null
+  },
+  "348": {
+    "name": "Armaldo",
+    "types": [
+      "rock",
+      "bug"
+    ],
+    "height": 15,
+    "weight": 682,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 177,
+    "evolves_from_id": 347
+  },
+  "349": {
+    "name": "Feebas",
+    "types": [
+      "water"
+    ],
+    "height": 6,
+    "weight": 74,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 178,
+    "evolves_from_id": null
+  },
+  "350": {
+    "name": "Milotic",
+    "types": [
+      "water"
+    ],
+    "height": 62,
+    "weight": 1620,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 178,
+    "evolves_from_id": 349
+  },
+  "351": {
+    "name": "Castform",
+    "types": [
+      "normal"
+    ],
+    "height": 3,
+    "weight": 8,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 179,
+    "evolves_from_id": null
+  },
+  "352": {
+    "name": "Kecleon",
+    "types": [
+      "normal"
+    ],
+    "height": 10,
+    "weight": 220,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 180,
+    "evolves_from_id": null
+  },
+  "353": {
+    "name": "Shuppet",
+    "types": [
+      "ghost"
+    ],
+    "height": 6,
+    "weight": 23,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 181,
+    "evolves_from_id": null
+  },
+  "354": {
+    "name": "Banette",
+    "types": [
+      "ghost"
+    ],
+    "height": 11,
+    "weight": 125,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 181,
+    "evolves_from_id": 353
+  },
+  "355": {
+    "name": "Duskull",
+    "types": [
+      "ghost"
+    ],
+    "height": 8,
+    "weight": 150,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 182,
+    "evolves_from_id": null
+  },
+  "356": {
+    "name": "Dusclops",
+    "types": [
+      "ghost"
+    ],
+    "height": 16,
+    "weight": 306,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 182,
+    "evolves_from_id": 355
+  },
+  "357": {
+    "name": "Tropius",
+    "types": [
+      "grass",
+      "flying"
+    ],
+    "height": 20,
+    "weight": 1000,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 183,
+    "evolves_from_id": null
+  },
+  "358": {
+    "name": "Chimecho",
+    "types": [
+      "psychic"
+    ],
+    "height": 6,
+    "weight": 10,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 184,
+    "evolves_from_id": 433
+  },
+  "359": {
+    "name": "Absol",
+    "types": [
+      "dark"
+    ],
+    "height": 12,
+    "weight": 470,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 185,
+    "evolves_from_id": null
+  },
+  "360": {
+    "name": "Wynaut",
+    "types": [
+      "psychic"
+    ],
+    "height": 6,
+    "weight": 140,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 100,
+    "evolves_from_id": null
+  },
+  "361": {
+    "name": "Snorunt",
+    "types": [
+      "ice"
+    ],
+    "height": 7,
+    "weight": 168,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 186,
+    "evolves_from_id": null
+  },
+  "362": {
+    "name": "Glalie",
+    "types": [
+      "ice"
+    ],
+    "height": 15,
+    "weight": 2565,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 186,
+    "evolves_from_id": 361
+  },
+  "363": {
+    "name": "Spheal",
+    "types": [
+      "ice",
+      "water"
+    ],
+    "height": 8,
+    "weight": 395,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 187,
+    "evolves_from_id": null
+  },
+  "364": {
+    "name": "Sealeo",
+    "types": [
+      "ice",
+      "water"
+    ],
+    "height": 11,
+    "weight": 876,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 187,
+    "evolves_from_id": 363
+  },
+  "365": {
+    "name": "Walrein",
+    "types": [
+      "ice",
+      "water"
+    ],
+    "height": 14,
+    "weight": 1506,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 187,
+    "evolves_from_id": 364
+  },
+  "366": {
+    "name": "Clamperl",
+    "types": [
+      "water"
+    ],
+    "height": 4,
+    "weight": 525,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 188,
+    "evolves_from_id": null
+  },
+  "367": {
+    "name": "Huntail",
+    "types": [
+      "water"
+    ],
+    "height": 17,
+    "weight": 270,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 188,
+    "evolves_from_id": 366
+  },
+  "368": {
+    "name": "Gorebyss",
+    "types": [
+      "water"
+    ],
+    "height": 18,
+    "weight": 226,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 188,
+    "evolves_from_id": 366
+  },
+  "369": {
+    "name": "Relicanth",
+    "types": [
+      "water",
+      "rock"
+    ],
+    "height": 10,
+    "weight": 234,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 189,
+    "evolves_from_id": null
+  },
+  "370": {
+    "name": "Luvdisc",
+    "types": [
+      "water"
+    ],
+    "height": 6,
+    "weight": 87,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 190,
+    "evolves_from_id": null
+  },
+  "371": {
+    "name": "Bagon",
+    "types": [
+      "dragon"
+    ],
+    "height": 6,
+    "weight": 421,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 191,
+    "evolves_from_id": null
+  },
+  "372": {
+    "name": "Shelgon",
+    "types": [
+      "dragon"
+    ],
+    "height": 11,
+    "weight": 1105,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 191,
+    "evolves_from_id": 371
+  },
+  "373": {
+    "name": "Salamence",
+    "types": [
+      "dragon",
+      "flying"
+    ],
+    "height": 15,
+    "weight": 1026,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 191,
+    "evolves_from_id": 372
+  },
+  "374": {
+    "name": "Beldum",
+    "types": [
+      "steel",
+      "psychic"
+    ],
+    "height": 6,
+    "weight": 952,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 192,
+    "evolves_from_id": null
+  },
+  "375": {
+    "name": "Metang",
+    "types": [
+      "steel",
+      "psychic"
+    ],
+    "height": 12,
+    "weight": 2025,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 192,
+    "evolves_from_id": 374
+  },
+  "376": {
+    "name": "Metagross",
+    "types": [
+      "steel",
+      "psychic"
+    ],
+    "height": 16,
+    "weight": 5500,
+    "is_legendary": false,
+    "is_mythical": false,
+    "evolution_chain_id": 192,
+    "evolves_from_id": 375
+  },
+  "377": {
+    "name": "Regirock",
+    "types": [
+      "rock"
+    ],
+    "height": 17,
+    "weight": 2300,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 193,
+    "evolves_from_id": null
+  },
+  "378": {
+    "name": "Regice",
+    "types": [
+      "ice"
+    ],
+    "height": 18,
+    "weight": 1750,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 194,
+    "evolves_from_id": null
+  },
+  "379": {
+    "name": "Registeel",
+    "types": [
+      "steel"
+    ],
+    "height": 19,
+    "weight": 2050,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 195,
+    "evolves_from_id": null
+  },
+  "380": {
+    "name": "Latias",
+    "types": [
+      "dragon",
+      "psychic"
+    ],
+    "height": 14,
+    "weight": 400,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 196,
+    "evolves_from_id": null
+  },
+  "381": {
+    "name": "Latios",
+    "types": [
+      "dragon",
+      "psychic"
+    ],
+    "height": 20,
+    "weight": 600,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 197,
+    "evolves_from_id": null
+  },
+  "382": {
+    "name": "Kyogre",
+    "types": [
+      "water"
+    ],
+    "height": 45,
+    "weight": 3520,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 198,
+    "evolves_from_id": null
+  },
+  "383": {
+    "name": "Groudon",
+    "types": [
+      "ground"
+    ],
+    "height": 35,
+    "weight": 9500,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 199,
+    "evolves_from_id": null
+  },
+  "384": {
+    "name": "Rayquaza",
+    "types": [
+      "dragon",
+      "flying"
+    ],
+    "height": 70,
+    "weight": 2065,
+    "is_legendary": true,
+    "is_mythical": false,
+    "evolution_chain_id": 200,
+    "evolves_from_id": null
+  },
+  "385": {
+    "name": "Jirachi",
+    "types": [
+      "steel",
+      "psychic"
+    ],
+    "height": 3,
+    "weight": 11,
+    "is_legendary": false,
+    "is_mythical": true,
+    "evolution_chain_id": 201,
+    "evolves_from_id": null
+  },
+  "386": {
+    "name": "Deoxys",
+    "types": [
+      "psychic"
+    ],
+    "height": 17,
+    "weight": 608,
+    "is_legendary": false,
+    "is_mythical": true,
+    "evolution_chain_id": 202,
+    "evolves_from_id": null
+  }
+}

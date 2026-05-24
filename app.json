@@ -44,7 +44,8 @@
           "speechRecognitionPermission": "Allow $(PRODUCT_NAME) to use speech recognition."
         }
       ],
-      "expo-audio"
+      "expo-audio",
+      "expo-sqlite"
     ],
     "extra": {
       "eas": {

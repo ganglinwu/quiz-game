@@ -11,7 +11,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useBGM } from '../audio';
-import { ALL_GENS, POKEMON_BY_GEN, getAllPokemon } from '../data/pokemon-data';
+import { ALL_GENS, getPokemonForGens, getAllPokemon } from '../data/pokemon-db';
 import { getArtworkUrl } from '../utils/pokeApi';
 import { PokemonItem } from '../types';
 import NetworkImage from '../components/NetworkImage';
@@ -34,7 +34,7 @@ export default function PokedexScreen({ navigation }: Props) {
   const [selectedPokemon, setSelectedPokemon] = useState<PokemonItem | null>(null);
 
   const pokemon = useMemo(() => {
-    let list = selectedGen ? POKEMON_BY_GEN[selectedGen] ?? [] : getAllPokemon();
+    let list = selectedGen ? getPokemonForGens([selectedGen]) : getAllPokemon();
     if (search.trim()) {
       const query = search.trim().toLowerCase();
       list = list.filter((p) => p.name.toLowerCase().includes(query));

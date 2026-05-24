@@ -1,5 +1,11 @@
 import { levenshtein } from './levenshtein';
-import { aliases } from '../data/aliases';
+import { getAllAliases } from '../data/pokemon-db';
+
+let _aliases: Record<string, string> | null = null;
+function getAliases(): Record<string, string> {
+  if (!_aliases) _aliases = getAllAliases();
+  return _aliases;
+}
 
 export interface MatchResult {
   match: string | null;
@@ -21,7 +27,8 @@ function getThreshold(input: string): number {
 
 export function findDuplicate(input: string, usedItems: string[]): string | null {
   const normalized = normalize(input);
-  const resolved = aliases[input.toLowerCase().trim()] || aliases[normalized] || null;
+  const a = getAliases();
+  const resolved = a[input.toLowerCase().trim()] || a[normalized] || null;
 
   const exactMatch = usedItems.find((item) => normalize(item) === normalized);
   if (exactMatch) {
@@ -52,6 +59,7 @@ export function fuzzyMatch(
   }
 
   const lowerInput = input.toLowerCase().trim();
+  const aliases = getAliases();
   const aliasMatch = aliases[lowerInput] || aliases[normalized];
   if (aliasMatch) {
     const usedSet = new Set(usedItems.map(normalize));

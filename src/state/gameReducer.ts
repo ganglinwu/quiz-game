@@ -1,5 +1,5 @@
 import { GameAction, GameState, Category, HintLimit } from '../types';
-import { getPokemonForGens } from '../data/pokemon-data';
+import { getPokemonForGens } from '../data/pokemon-db';
 
 function getNextActivePlayer(
   currentPlayer: string,
