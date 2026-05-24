@@ -70,7 +70,9 @@ export default function PlayerSetupScreen({ navigation, route }: Props) {
       <Text style={styles.title}>Players</Text>
       <Text style={styles.subtitle}>
         {category.type === 'pokemon'
-          ? `Pokemon Gen ${category.generations.sort().join(', ')}`
+          ? category.quizConfig
+            ? `Quiz Mode (${category.quizConfig.difficulty.charAt(0).toUpperCase() + category.quizConfig.difficulty.slice(1)}) · Gen ${category.generations.sort().join(', ')}`
+            : `Pokemon Gen ${category.generations.sort().join(', ')}`
           : 'Fruits'}
       </Text>
 

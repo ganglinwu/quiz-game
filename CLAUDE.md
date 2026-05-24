@@ -7,7 +7,7 @@ A turn-based naming game for iOS built with Expo (React Native + TypeScript). Pl
 ## Current State
 
 ### Features Implemented
-- **2 game modes**: Pokemon (Gen 1-3, ~400 Pokemon) and Fruits (~90)
+- **2 game modes**: Pokemon (Gen 1-3, ~400 Pokemon) and Fruits (~90), with optional Quiz Mode for Pokemon
 - **2-8 players** with custom names and assigned colors
 - **Voice input** (push-to-hold mic button) via `expo-speech-recognition`
 - **Text input** always visible as fallback
@@ -33,10 +33,18 @@ A turn-based naming game for iOS built with Expo (React Native + TypeScript). Pl
   - Screens use declarative hooks: `useBGM('title')`, `useBGMDynamic(trackId)`, `useAudioSpeechBridge(isListening)`
 - **Haptic feedback** on mic button press/release
 - **Toast notifications** for voice errors and no-match results (centered on screen)
+- **Quiz Mode** (Pokemon only) — opt-in modifier that presents constrained prompts each turn:
+  - Per-turn questions like "Name a Gen 2 Fire type Pokemon" or "Name a fully evolved Dragon type Pokemon"
+  - 3 difficulty tiers: Easy (1 constraint), Medium (2), Hard (3) — auto-degrades if no valid question exists at current difficulty
+  - Question generator validates every question has at least 1 valid un-used answer before presenting
+  - 5 constraint dimensions: generation, type (18 types), legendary/mythical, evolution stage (base/middle/final), mono/dual type
+  - Pre-game filters restrict the question pool (e.g., "only Fire/Water questions", "exclude legendaries", "fully evolved only")
+  - Answer validation: fuzzy match runs against all Pokemon, then constraint check rejects valid Pokemon that don't match the question with a specific error message
+  - Hints in quiz mode pick from valid answers for the current question
+  - Generation voting disabled in quiz mode (gens are fixed by question constraints)
+  - QuizFilterModal with type multi-select chips, legendary/mythical toggles, evolution stage chips, type pairing selector
 
 ### Not Yet Implemented
-- Answer validation (checking if an answer is actually a valid Pokemon/fruit vs just matching the list)
-- Multi-dimensional game modes (e.g., "name a Gen 2 electric Pokemon") — data is in SQLite, game mode UI not built yet
 - Additional categories beyond Pokemon and Fruits
 - Android support
 - Online multiplayer
@@ -62,6 +70,7 @@ src/
 │   ├── HistoryModal.tsx          # Scrollable game history with highlights
 │   ├── MicButton.tsx             # Push-to-hold voice capture
 │   ├── PokemonCardModal.tsx      # Trading card-style detail modal (PokeAPI)
+│   ├── QuizFilterModal.tsx       # Pre-game quiz filter config (types, legendary, evo stage, dual type)
 │   ├── StatsPanel.tsx            # Per-player stats display
 │   ├── SuccessBanner.tsx         # "You got it right!" hint success banner
 │   ├── TextInputField.tsx        # Text input with submit
@@ -95,6 +104,7 @@ src/
     ├── fuzzyMatch.ts             # Levenshtein matching + alias lookup + gen detection
     ├── levenshtein.ts            # Edit distance algorithm
     ├── pokeApi.ts                # PokeAPI artwork URL helper
+    ├── quizQuestionGenerator.ts  # Quiz mode question generation + answer validation
     └── statsCalculator.ts        # End-of-game stats computation
 ```
 
@@ -106,6 +116,9 @@ src/
 - **Hint tracking**: revealed hints saved to game state (max 5). On game end, hinted-but-unnamed Pokemon become silhouette quizzes; remaining slots filled with random unnamed Pokemon as suggestions.
 - **Generation auto-detection**: if a player names a Pokemon from an inactive generation, a vote is triggered rather than rejecting the answer. Majority approval expands the pool mid-game.
 - **Audio manager as command queue**: `AudioManager` is a plain TypeScript class (not React) that serializes all BGM operations through an async queue. One persistent `AudioPlayer` swaps tracks via `replace()`. Superseded play commands are skipped. SFX bypasses the queue entirely. Screens declare intent via hooks (`useBGM`, `useBGMDynamic`) rather than calling play/stop directly. After speech recognition ends, `setAudioModeAsync()` is called to reclaim the iOS audio session before resuming playback.
+- **Quiz mode as two-layer system**: pre-game *filters* (QuizFilter) restrict the question pool, per-turn *constraints* (QuizConstraint[]) narrow further. Both feed into `queryPokemon()` with AND logic. The constraint pool itself respects filters — if filters say "only Fire/Water", only those type constraints appear. Question generator tries up to 50 random constraint combos, validates each against the DB, and auto-degrades difficulty (hard→medium→easy→null) if needed.
+- **Quiz answer validation after fuzzy match**: fuzzy matching runs against ALL Pokemon in active gens (not just valid answers) to prevent gaming via process of elimination. After a match is found, a separate `validateAnswerAgainstQuestion()` check rejects Pokemon that don't satisfy the question's constraints, with a specific error message.
+- **Evolution stage derived from existing data**: base = `evolves_from_id IS NULL` (195), middle = has parent AND is someone's parent (44), final = has parent but nobody evolves from it (147). No schema changes needed.
 - **SQLite data layer**: Pokemon data (386 Pokemon with types, generation, legendary/mythical status, evolution chains, height, weight), ~500 voice aliases, and ~90 fruits stored in a pre-populated `assets/quiz.db`. Generated at build time by `scripts/generate-db.ts` which fetches from PokeAPI and caches in `scripts/pokeapi-cache.json`. `src/data/pokemon-db.ts` provides sync query functions via `expo-sqlite`'s `openDatabaseSync`. Includes `queryPokemon()` for multi-dimensional queries (by type, generation, legendary status, etc.).
 
 ## Build & Deploy

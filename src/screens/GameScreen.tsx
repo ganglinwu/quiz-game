@@ -2,7 +2,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
-import { Category, HintLimit } from '../types';
+import { Category, HintLimit, QuizConfig } from '../types';
+import {
+  generateQuestion,
+  validateAnswerAgainstQuestion,
+  constraintsToQuery,
+  buildBaselineQuery,
+} from '../utils/quizQuestionGenerator';
+import { queryPokemon } from '../data/pokemon-db';
 import { GameProvider, useGame } from '../state/GameContext';
 import { useAudio, useBGMDynamic, useAudioSpeechBridge, HINT_SUCCESS_SFX } from '../audio';
 import type { TrackId } from '../audio';
@@ -47,6 +54,21 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
   }, [state.hintPhase, state.hintPokemonName]);
 
   const isPokemon = category.type === 'pokemon';
+  const isQuizMode = isPokemon && !!category.quizConfig;
+
+  useEffect(() => {
+    if (!isQuizMode || state.currentQuestion || state.isGameOver) return;
+    const question = generateQuestion(
+      category.quizConfig!,
+      state.activeGenerations,
+      state.usedItems,
+    );
+    if (question) {
+      dispatch({ type: 'SET_QUESTION', question });
+    } else {
+      dispatch({ type: 'QUESTION_POOL_EXHAUSTED' });
+    }
+  }, [isQuizMode, state.currentQuestion, state.usedItems, state.isGameOver]);
 
   const itemNames = useMemo(() => {
     if (isPokemon) {
@@ -112,12 +134,31 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
             dispatch({ type: 'SET_ERROR', message: `No match for "${text}", try again` });
           }
         } else if (result.generation && !state.activeGenerations.includes(result.generation)) {
-          dispatch({
-            type: 'PROPOSE_GEN_CHANGE',
-            generation: result.generation,
-            triggerPokemon: result.match!,
-            source: 'auto-detect',
-          });
+          if (isQuizMode) {
+            if (isVoice) {
+              setToastMessage(`Heard "${text}" — no match found`);
+            } else {
+              dispatch({ type: 'SET_ERROR', message: `No match for "${text}", try again` });
+            }
+          } else {
+            dispatch({
+              type: 'PROPOSE_GEN_CHANGE',
+              generation: result.generation,
+              triggerPokemon: result.match!,
+              source: 'auto-detect',
+            });
+          }
+        } else if (isQuizMode && state.currentQuestion && result.match) {
+          if (!validateAnswerAgainstQuestion(result.match, state.currentQuestion, state.activeGenerations)) {
+            const msg = `${result.match} doesn't match: "${state.currentQuestion.promptText}"`;
+            if (isVoice) {
+              setToastMessage(msg);
+            } else {
+              dispatch({ type: 'SET_ERROR', message: msg });
+            }
+          } else {
+            dispatch({ type: 'PROPOSE_ITEM', item: result.match });
+          }
         } else {
           dispatch({ type: 'PROPOSE_ITEM', item: result.match! });
         }
@@ -198,11 +239,22 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
   }, [isPokemon, state.activeGenerations]);
 
   const handleHint = useCallback(() => {
-    const unused = pokemonItems.filter((p) => !state.usedItems.includes(p.name));
-    if (unused.length === 0) return;
-    const pick = unused[Math.floor(Math.random() * unused.length)];
-    dispatch({ type: 'SHOW_HINT', pokemonName: pick.name, pokemonId: pick.pokedexNumber });
-  }, [pokemonItems, state.usedItems, dispatch]);
+    if (isQuizMode && state.currentQuestion && category.type === 'pokemon') {
+      const query = constraintsToQuery(
+        buildBaselineQuery(category.quizConfig!.filter, state.activeGenerations, state.usedItems),
+        state.currentQuestion.constraints,
+      );
+      const validPokemon = queryPokemon(query);
+      if (validPokemon.length === 0) return;
+      const pick = validPokemon[Math.floor(Math.random() * validPokemon.length)];
+      dispatch({ type: 'SHOW_HINT', pokemonName: pick.name, pokemonId: pick.pokedexNumber });
+    } else {
+      const unused = pokemonItems.filter((p) => !state.usedItems.includes(p.name));
+      if (unused.length === 0) return;
+      const pick = unused[Math.floor(Math.random() * unused.length)];
+      dispatch({ type: 'SHOW_HINT', pokemonName: pick.name, pokemonId: pick.pokedexNumber });
+    }
+  }, [isQuizMode, state.currentQuestion, category, pokemonItems, state.usedItems, state.activeGenerations, dispatch]);
 
   const handleGiveUp = () => {
     Alert.alert('Give Up?', 'Are you sure you want to give up?', [
@@ -260,7 +312,7 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
           {isMuted && <View style={styles.muteStrike} />}
         </TouchableOpacity>
         <Text style={[styles.turnLabel, { color: playerColor }]}>{state.currentPlayer}'s Turn</Text>
-        {isPokemon && (
+        {isPokemon && !isQuizMode && (
           <TouchableOpacity
             style={styles.settingsBtn}
             onPress={() => setSettingsVisible(true)}
@@ -269,10 +321,19 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
           </TouchableOpacity>
         )}
       </View>
-      <Text style={styles.categoryLabel}>
+      <Text style={[styles.categoryLabel, isQuizMode && styles.categoryLabelQuiz]}>
         {categoryLabel}
         {activeCount < state.players.length && ` · ${activeCount} players left`}
       </Text>
+
+      {isQuizMode && state.currentQuestion && (
+        <View style={styles.questionBanner}>
+          <Text style={styles.questionText}>{state.currentQuestion.promptText}</Text>
+          <Text style={styles.questionMeta}>
+            {state.currentQuestion.validAnswerCount} possible
+          </Text>
+        </View>
+      )}
 
       <View style={styles.textInputWrapper}>
         <TextInputField onSubmit={(text) => processInput(text, false)} disabled={inputDisabled} clearKey={state.turnRecords.length} />
@@ -398,8 +459,9 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
 
 export default function GameScreen({ navigation, route }: Props) {
   const { category, players, hintLimit } = route.params;
+  const quizConfig = category.type === 'pokemon' ? category.quizConfig : undefined;
   return (
-    <GameProvider category={category} players={players} hintLimit={hintLimit}>
+    <GameProvider category={category} players={players} hintLimit={hintLimit} quizConfig={quizConfig}>
       <GameContent navigation={navigation} category={category} />
     </GameProvider>
   );
@@ -459,6 +521,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 4,
     marginBottom: 40,
+  },
+  categoryLabelQuiz: {
+    marginBottom: 12,
+  },
+  questionBanner: {
+    backgroundColor: '#2a4a6e',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  questionText: {
+    color: '#ffd700',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  questionMeta: {
+    color: '#a0a0b0',
+    fontSize: 12,
+    marginTop: 4,
   },
   textInputWrapper: {
     width: '100%',

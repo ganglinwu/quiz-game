@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer } from 'react';
-import { Category, GameAction, GameState, HintLimit } from '../types';
+import { Category, GameAction, GameState, HintLimit, QuizConfig } from '../types';
 import { createInitialState, gameReducer } from './gameReducer';
 
 interface GameContextValue {
@@ -13,14 +13,16 @@ export function GameProvider({
   category,
   players,
   hintLimit,
+  quizConfig,
   children,
 }: {
   category: Category;
   players: string[];
   hintLimit?: HintLimit;
+  quizConfig?: QuizConfig;
   children: React.ReactNode;
 }) {
-  const [state, dispatch] = useReducer(gameReducer, { category, players, hintLimit }, createInitialState);
+  const [state, dispatch] = useReducer(gameReducer, { category, players, hintLimit, quizConfig }, createInitialState);
 
   return (
     <GameContext.Provider value={{ state, dispatch }}>

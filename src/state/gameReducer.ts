@@ -1,4 +1,4 @@
-import { GameAction, GameState, Category, HintLimit } from '../types';
+import { GameAction, GameState, Category, HintLimit, QuizConfig } from '../types';
 import { getPokemonForGens } from '../data/pokemon-db';
 
 function getNextActivePlayer(
@@ -19,6 +19,7 @@ export function createInitialState(args: {
   category: Category;
   players: string[];
   hintLimit?: HintLimit;
+  quizConfig?: QuizConfig;
 }): GameState {
   const activeGenerations = args.category.type === 'pokemon' ? args.category.generations : [];
   const hintsUsed: Record<string, number> = {};
@@ -49,6 +50,8 @@ export function createInitialState(args: {
     hintPokemonName: null,
     hintPokemonId: null,
     revealedHints: [],
+    quizConfig: args.quizConfig ?? null,
+    currentQuestion: null,
   };
 }
 
@@ -96,6 +99,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         hintPhase: 'none',
         hintPokemonName: null,
         hintPokemonId: null,
+        currentQuestion: null,
       };
     }
 
@@ -118,6 +122,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           hintPhase: 'none',
           hintPokemonName: null,
           hintPokemonId: null,
+          currentQuestion: null,
         };
       }
 
@@ -129,6 +134,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         hintPhase: 'none',
         hintPokemonName: null,
         hintPokemonId: null,
+        currentQuestion: null,
       };
     }
 
@@ -142,6 +148,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       });
 
     case 'PROPOSE_GEN_CHANGE': {
+      if (state.quizConfig) return state;
       if (state.pendingGenVote) return state;
       const initialVotes: Record<string, boolean> = {};
       if (action.source === 'auto-detect') {
@@ -255,6 +262,20 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         pendingGenVote: null,
       };
     }
+
+    case 'SET_QUESTION':
+      return {
+        ...state,
+        currentQuestion: action.question,
+      };
+
+    case 'QUESTION_POOL_EXHAUSTED':
+      return {
+        ...state,
+        isGameOver: true,
+        isDraw: true,
+        currentQuestion: null,
+      };
 
     default:
       return state;

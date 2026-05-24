@@ -84,6 +84,8 @@ export interface PokemonQuery {
   isMythical?: boolean;
   evolvesFromId?: number;
   excludeNames?: string[];
+  evolutionStage?: 'base' | 'middle' | 'final';
+  isDualType?: boolean;
 }
 
 export interface PokemonDetailItem extends PokemonItem {
@@ -130,6 +132,22 @@ export function queryPokemon(query: PokemonQuery): PokemonDetailItem[] {
   if (query.excludeNames?.length) {
     conditions.push(`name NOT IN (${query.excludeNames.map(() => '?').join(',')})`);
     params.push(...query.excludeNames);
+  }
+
+  if (query.evolutionStage === 'base') {
+    conditions.push('evolves_from_id IS NULL');
+  } else if (query.evolutionStage === 'middle') {
+    conditions.push('evolves_from_id IS NOT NULL');
+    conditions.push('id IN (SELECT DISTINCT evolves_from_id FROM pokemon WHERE evolves_from_id IS NOT NULL)');
+  } else if (query.evolutionStage === 'final') {
+    conditions.push('evolves_from_id IS NOT NULL');
+    conditions.push('id NOT IN (SELECT DISTINCT evolves_from_id FROM pokemon WHERE evolves_from_id IS NOT NULL)');
+  }
+
+  if (query.isDualType === true) {
+    conditions.push('type2 IS NOT NULL');
+  } else if (query.isDualType === false) {
+    conditions.push('type2 IS NULL');
   }
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';

@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Switch } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
-import { Category } from '../types';
+import { Category, QuizDifficulty, QuizFilter } from '../types';
 import { useAudio, useBGM } from '../audio';
 import { ALL_GENS, getPokemonCountByGen } from '../data/pokemon-db';
+import QuizFilterModal from '../components/QuizFilterModal';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -13,6 +14,13 @@ export default function HomeScreen({ navigation }: Props) {
   useBGM('title');
   const [selectedGens, setSelectedGens] = useState<Set<number>>(new Set([1]));
   const [expanded, setExpanded] = useState(false);
+  const [quizMode, setQuizMode] = useState(false);
+  const [quizDifficulty, setQuizDifficulty] = useState<QuizDifficulty>('medium');
+  const [quizFilter, setQuizFilter] = useState<QuizFilter>({
+    includeLegendary: true,
+    includeMythical: true,
+  });
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
 
   const totalPokemon = useMemo(() => {
     return Array.from(selectedGens).reduce(
@@ -37,6 +45,12 @@ export default function HomeScreen({ navigation }: Props) {
     const category: Category = {
       type: 'pokemon',
       generations: Array.from(selectedGens).sort(),
+      ...(quizMode && {
+        quizConfig: {
+          difficulty: quizDifficulty,
+          filter: quizFilter,
+        },
+      }),
     };
     navigation.navigate('PlayerSetup', { category });
   };
@@ -83,6 +97,37 @@ export default function HomeScreen({ navigation }: Props) {
               </TouchableOpacity>
             );
           })}
+
+          <View style={styles.quizToggleRow}>
+            <Text style={styles.quizToggleLabel}>Quiz Mode</Text>
+            <Switch
+              value={quizMode}
+              onValueChange={setQuizMode}
+              trackColor={{ false: '#2a2a3e', true: '#4361ee' }}
+            />
+          </View>
+
+          {quizMode && (
+            <>
+              <View style={styles.difficultyRow}>
+                {(['easy', 'medium', 'hard'] as const).map((d) => (
+                  <TouchableOpacity
+                    key={d}
+                    style={[styles.difficultyChip, quizDifficulty === d && styles.difficultyChipActive]}
+                    onPress={() => setQuizDifficulty(d)}
+                  >
+                    <Text style={[styles.difficultyText, quizDifficulty === d && styles.difficultyTextActive]}>
+                      {d.charAt(0).toUpperCase() + d.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <TouchableOpacity style={styles.filterBtn} onPress={() => setFilterModalVisible(true)}>
+                <Text style={styles.filterBtnText}>Filters</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
           <TouchableOpacity style={styles.playBtn} onPress={startPokemon}>
             <Text style={styles.playBtnText}>Play</Text>
           </TouchableOpacity>
@@ -103,6 +148,13 @@ export default function HomeScreen({ navigation }: Props) {
       >
         <Text style={styles.pokedexBtnText}>Browse Pokédex</Text>
       </TouchableOpacity>
+
+      <QuizFilterModal
+        visible={filterModalVisible}
+        onClose={() => setFilterModalVisible(false)}
+        filter={quizFilter}
+        onFilterChange={setQuizFilter}
+      />
     </View>
   );
 }
@@ -197,6 +249,57 @@ const styles = StyleSheet.create({
   },
   genChipTextActive: {
     color: '#ffffff',
+  },
+  quizToggleRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+  },
+  quizToggleLabel: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  difficultyRow: {
+    width: '100%',
+    flexDirection: 'row',
+    gap: 10,
+  },
+  difficultyChip: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#2a2a3e',
+    backgroundColor: '#2a2a3e',
+    alignItems: 'center',
+  },
+  difficultyChipActive: {
+    borderColor: '#4361ee',
+    backgroundColor: '#2a3a5e',
+  },
+  difficultyText: {
+    color: '#a0a0b0',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  difficultyTextActive: {
+    color: '#ffffff',
+  },
+  filterBtn: {
+    width: '100%',
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#4361ee',
+    alignItems: 'center',
+  },
+  filterBtnText: {
+    color: '#4361ee',
+    fontSize: 14,
+    fontWeight: '600',
   },
   playBtn: {
     backgroundColor: '#e63946',

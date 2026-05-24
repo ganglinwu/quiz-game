@@ -1,5 +1,35 @@
+export type QuizDifficulty = 'easy' | 'medium' | 'hard';
+
+export type QuizConstraint =
+  | { kind: 'generation'; generation: number }
+  | { kind: 'type'; pokemonType: string }
+  | { kind: 'legendary'; value: boolean }
+  | { kind: 'mythical'; value: boolean }
+  | { kind: 'evolutionStage'; stage: 'base' | 'middle' | 'final' }
+  | { kind: 'dualType'; value: boolean };
+
+export interface QuizQuestion {
+  constraints: QuizConstraint[];
+  promptText: string;
+  validAnswerCount: number;
+  difficulty: QuizDifficulty;
+}
+
+export interface QuizFilter {
+  types?: string[];
+  includeLegendary: boolean;
+  includeMythical: boolean;
+  evolutionStages?: ('base' | 'middle' | 'final')[];
+  allowDualType?: boolean;
+}
+
+export interface QuizConfig {
+  difficulty: QuizDifficulty;
+  filter: QuizFilter;
+}
+
 export type Category =
-  | { type: 'pokemon'; generations: number[] }
+  | { type: 'pokemon'; generations: number[]; quizConfig?: QuizConfig }
   | { type: 'fruits' };
 
 export interface PokemonItem {
@@ -61,6 +91,8 @@ export interface GameState {
   hintPokemonName: string | null;
   hintPokemonId: number | null;
   revealedHints: HintRecord[];
+  quizConfig: QuizConfig | null;
+  currentQuestion: QuizQuestion | null;
 }
 
 export interface PlayerStat {
@@ -90,4 +122,6 @@ export type GameAction =
   | { type: 'CAST_GEN_VOTE'; player: string; approve: boolean }
   | { type: 'SHOW_HINT'; pokemonName: string; pokemonId: number }
   | { type: 'REVEAL_HINT' }
-  | { type: 'DISMISS_HINT' };
+  | { type: 'DISMISS_HINT' }
+  | { type: 'SET_QUESTION'; question: QuizQuestion }
+  | { type: 'QUESTION_POOL_EXHAUSTED' };
