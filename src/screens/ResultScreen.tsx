@@ -61,9 +61,10 @@ function SilhouetteCard({
       <View style={styles.imageContainer}>
         <NetworkImage
           uri={getArtworkUrl(hint.pokemonId)}
-          style={[styles.hintImage, !revealed && styles.silhouette]}
+          style={styles.hintImage}
           loaderSize={20}
         />
+        {!revealed && <View style={styles.silhouetteOverlay} />}
       </View>
       {revealed ? (
         <Text style={styles.hintName}>{hint.pokemonName}</Text>
@@ -307,8 +308,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
   },
-  silhouette: {
-    tintColor: '#000000',
+  silhouetteOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#000000',
+    borderRadius: 10,
   },
   hintName: {
     color: '#ffffff',
