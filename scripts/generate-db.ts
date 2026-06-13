@@ -8,16 +8,19 @@ const DB_PATH = path.join(PROJECT_ROOT, 'assets', 'quiz.db');
 const ALIASES_PATH = path.join(PROJECT_ROOT, 'src', 'data', 'aliases.ts');
 const FRUITS_PATH = path.join(PROJECT_ROOT, 'src', 'data', 'fruits.json');
 
-const TOTAL_POKEMON = 386;
+const TOTAL_POKEMON = 721;
 const FETCH_DELAY_MS = 100;
 
 const GEN_RANGES: [number, number, number][] = [
   [1, 1, 151],
   [2, 152, 251],
   [3, 252, 386],
+  [4, 387, 493],
+  [5, 494, 649],
+  [6, 650, 721],
 ];
 
-interface CachedPokemon {
+export interface CachedPokemon {
   name: string;
   types: string[];
   height: number;
@@ -26,6 +29,14 @@ interface CachedPokemon {
   is_mythical: boolean;
   evolution_chain_id: number | null;
   evolves_from_id: number | null;
+  stats?: {
+    hp: number;
+    attack: number;
+    defense: number;
+    sp_atk: number;
+    sp_def: number;
+    speed: number;
+  };
 }
 
 type Cache = Record<string, CachedPokemon>;
@@ -61,6 +72,11 @@ async function fetchPokemonData(id: number): Promise<CachedPokemon> {
     ? parseInt(species.evolves_from_species.url.match(/\/pokemon-species\/(\d+)\//)?.[1] ?? '', 10) || null
     : null;
 
+  const statMap: Record<string, number> = {};
+  for (const s of pokemon.stats) {
+    statMap[s.stat.name] = s.base_stat;
+  }
+
   return {
     name: formatName(pokemon.name, id),
     types: pokemon.types
@@ -72,6 +88,14 @@ async function fetchPokemonData(id: number): Promise<CachedPokemon> {
     is_mythical: species.is_mythical,
     evolution_chain_id: evolutionChainId,
     evolves_from_id: evolvesFromId,
+    stats: {
+      hp: statMap['hp'] ?? 0,
+      attack: statMap['attack'] ?? 0,
+      defense: statMap['defense'] ?? 0,
+      sp_atk: statMap['special-attack'] ?? 0,
+      sp_def: statMap['special-defense'] ?? 0,
+      speed: statMap['speed'] ?? 0,
+    },
   };
 }
 
@@ -83,6 +107,25 @@ function formatName(apiName: string, id: number): string {
     122: 'Mr. Mime',
     250: 'Ho-Oh',
     386: 'Deoxys',
+    413: 'Wormadam',
+    421: 'Cherrim',
+    422: 'Shellos',
+    423: 'Gastrodon',
+    439: 'Mime Jr.',
+    474: 'Porygon-Z',
+    487: 'Giratina',
+    492: 'Shaymin',
+    550: 'Basculin',
+    555: 'Darmanitan',
+    641: 'Tornadus',
+    642: 'Thundurus',
+    645: 'Landorus',
+    647: 'Keldeo',
+    648: 'Meloetta',
+    681: 'Aegislash',
+    710: 'Pumpkaboo',
+    711: 'Gourgeist',
+    718: 'Zygarde',
   };
   if (overrides[id]) return overrides[id];
 
@@ -92,7 +135,7 @@ function formatName(apiName: string, id: number): string {
     .join('');
 }
 
-async function fetchAllPokemon(): Promise<Cache> {
+export async function fetchAllPokemon(): Promise<Cache> {
   let cache: Cache = {};
   if (fs.existsSync(CACHE_PATH)) {
     cache = JSON.parse(fs.readFileSync(CACHE_PATH, 'utf-8'));
@@ -101,7 +144,7 @@ async function fetchAllPokemon(): Promise<Cache> {
 
   const missing: number[] = [];
   for (let id = 1; id <= TOTAL_POKEMON; id++) {
-    if (!cache[String(id)]) missing.push(id);
+    if (!cache[String(id)] || !cache[String(id)].stats) missing.push(id);
   }
 
   if (missing.length === 0) {
@@ -129,7 +172,7 @@ async function fetchAllPokemon(): Promise<Cache> {
   return cache;
 }
 
-function parseAliases(): Record<string, string> {
+export function parseAliases(): Record<string, string> {
   const content = fs.readFileSync(ALIASES_PATH, 'utf-8');
   const aliases: Record<string, string> = {};
 
@@ -142,12 +185,12 @@ function parseAliases(): Record<string, string> {
   return aliases;
 }
 
-function parseFruits(): string[] {
+export function parseFruits(): string[] {
   const data = JSON.parse(fs.readFileSync(FRUITS_PATH, 'utf-8'));
   return data.map((f: { name: string }) => f.name);
 }
 
-function generateDatabase(cache: Cache, aliases: Record<string, string>, fruits: string[]): void {
+export function generateDatabase(cache: Cache, aliases: Record<string, string>, fruits: string[]): void {
   if (fs.existsSync(DB_PATH)) fs.unlinkSync(DB_PATH);
 
   const db = new Database(DB_PATH);
@@ -167,7 +210,13 @@ function generateDatabase(cache: Cache, aliases: Record<string, string>, fruits:
       is_legendary    INTEGER NOT NULL DEFAULT 0,
       is_mythical     INTEGER NOT NULL DEFAULT 0,
       evolution_chain_id INTEGER,
-      evolves_from_id INTEGER REFERENCES pokemon(id)
+      evolves_from_id INTEGER REFERENCES pokemon(id),
+      hp              INTEGER NOT NULL DEFAULT 0,
+      attack          INTEGER NOT NULL DEFAULT 0,
+      defense         INTEGER NOT NULL DEFAULT 0,
+      sp_attack       INTEGER NOT NULL DEFAULT 0,
+      sp_defense      INTEGER NOT NULL DEFAULT 0,
+      speed           INTEGER NOT NULL DEFAULT 0
     );
 
     CREATE INDEX idx_pokemon_generation ON pokemon(generation);
@@ -192,8 +241,8 @@ function generateDatabase(cache: Cache, aliases: Record<string, string>, fruits:
   `);
 
   const insertPokemon = db.prepare(`
-    INSERT INTO pokemon (id, name, generation, type1, type2, height, weight, is_legendary, is_mythical, evolution_chain_id, evolves_from_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO pokemon (id, name, generation, type1, type2, height, weight, is_legendary, is_mythical, evolution_chain_id, evolves_from_id, hp, attack, defense, sp_attack, sp_defense, speed)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const insertAlias = db.prepare('INSERT OR IGNORE INTO aliases (alias, pokemon_name) VALUES (?, ?)');
@@ -216,7 +265,13 @@ function generateDatabase(cache: Cache, aliases: Record<string, string>, fruits:
         p.is_legendary ? 1 : 0,
         p.is_mythical ? 1 : 0,
         p.evolution_chain_id,
-        p.evolves_from_id
+        p.evolves_from_id,
+        p.stats?.hp ?? 0,
+        p.stats?.attack ?? 0,
+        p.stats?.defense ?? 0,
+        p.stats?.sp_atk ?? 0,
+        p.stats?.sp_def ?? 0,
+        p.stats?.speed ?? 0
       );
     }
 

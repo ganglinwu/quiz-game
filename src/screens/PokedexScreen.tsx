@@ -5,6 +5,7 @@ import {
   TextInput,
   FlatList,
   TouchableOpacity,
+  ScrollView,
   StyleSheet,
   useWindowDimensions,
 } from 'react-native';
@@ -87,7 +88,12 @@ export default function PokedexScreen({ navigation }: Props) {
         />
       </View>
 
-      <View style={styles.filterRow}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.filterRow}
+        style={styles.filterScroll}
+      >
         <TouchableOpacity
           style={[styles.filterChip, selectedGen === null && styles.filterChipActive]}
           onPress={() => setSelectedGen(null)}
@@ -107,7 +113,7 @@ export default function PokedexScreen({ navigation }: Props) {
             </Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </ScrollView>
 
       <FlatList
         data={pokemon}
@@ -178,11 +184,14 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 15,
   },
+  filterScroll: {
+    marginBottom: 12,
+    flexGrow: 0,
+  },
   filterRow: {
     flexDirection: 'row',
     gap: 8,
     paddingHorizontal: HORIZONTAL_PADDING,
-    marginBottom: 12,
   },
   filterChip: {
     backgroundColor: '#2a2a3e',

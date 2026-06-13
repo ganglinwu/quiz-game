@@ -15,7 +15,7 @@ export default function App() {
     <Suspense fallback={null}>
       <SQLiteProvider
         databaseName="quiz.db"
-        assetSource={{ assetId: require('./assets/quiz.db') }}
+        assetSource={{ assetId: require('./assets/quiz.db'), forceOverwrite: true }}
         onInit={onInit}
         useSuspense
       >

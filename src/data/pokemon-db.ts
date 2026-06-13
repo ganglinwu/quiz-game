@@ -10,7 +10,7 @@ function getDb(): SQLite.SQLiteDatabase {
   return db;
 }
 
-export const ALL_GENS = [1, 2, 3];
+export const ALL_GENS = [1, 2, 3, 4, 5, 6];
 
 export function getPokemonForGens(gens: number[]): PokemonItem[] {
   if (gens.length === 0) return [];
@@ -86,6 +86,8 @@ export interface PokemonQuery {
   excludeNames?: string[];
   evolutionStage?: 'base' | 'middle' | 'final';
   isDualType?: boolean;
+  hasAnyOfTypes?: string[];
+  statRank?: { stat: string; topN: number };
 }
 
 export interface PokemonDetailItem extends PokemonItem {
@@ -96,6 +98,12 @@ export interface PokemonDetailItem extends PokemonItem {
   isMythical: number;
   height: number;
   weight: number;
+  hp: number;
+  attack: number;
+  defense: number;
+  spAttack: number;
+  spDefense: number;
+  speed: number;
 }
 
 export function queryPokemon(query: PokemonQuery): PokemonDetailItem[] {
@@ -150,11 +158,33 @@ export function queryPokemon(query: PokemonQuery): PokemonDetailItem[] {
     conditions.push('type2 IS NULL');
   }
 
+  if (query.hasAnyOfTypes?.length) {
+    const placeholders = query.hasAnyOfTypes.map(() => '?').join(',');
+    conditions.push(`(LOWER(type1) IN (${placeholders}) OR LOWER(type2) IN (${placeholders}))`);
+    params.push(...query.hasAnyOfTypes.map(t => t.toLowerCase()));
+    params.push(...query.hasAnyOfTypes.map(t => t.toLowerCase()));
+  }
+
+  if (query.statRank) {
+    const validStats = ['hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed'];
+    const { stat, topN } = query.statRank;
+    if (!validStats.includes(stat)) throw new Error(`Invalid stat: ${stat}`);
+    const genFilter = query.generations?.length
+      ? `WHERE generation IN (${query.generations.map(() => '?').join(',')})`
+      : '';
+    conditions.push(`id IN (SELECT id FROM pokemon ${genFilter} ORDER BY ${stat} DESC LIMIT ?)`);
+    if (query.generations?.length) params.push(...query.generations);
+    params.push(topN);
+  }
+
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
   return getDb().getAllSync<PokemonDetailItem>(
     `SELECT id as pokedexNumber, name, type1, type2, generation,
      is_legendary as isLegendary, is_mythical as isMythical,
-     height, weight FROM pokemon ${where} ORDER BY id`,
+     height, weight,
+     hp, attack, defense,
+     sp_attack as spAttack, sp_defense as spDefense, speed
+     FROM pokemon ${where} ORDER BY id`,
     params
   );
 }
