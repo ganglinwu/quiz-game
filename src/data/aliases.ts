@@ -12,6 +12,12 @@ export const aliases: Record<string, string> = {
   'p g': 'Pidgey',
   'pg': 'Pidgey',
 
+  // Pidgeotto
+  'pig geo to': 'Pidgeotto',
+  'pete joto': 'Pidgeotto',
+  'pet joto': 'Pidgeotto',
+  'pig joto': 'Pidgeotto',
+
   // Pidgeot
   'patriot': 'Pidgeot',
   'hiott': 'Pidgeot',
@@ -28,6 +34,10 @@ export const aliases: Record<string, string> = {
   'a book': 'Arbok',
   'our book': 'Arbok',
   'abo': 'Arbok',
+
+  // Bellsprout
+  'bell sprout': 'Bellsprout',
+  'bell sprouts': 'Bellsprout',
 
   // Sandshrew
   'send true': 'Sandshrew',
@@ -51,6 +61,17 @@ export const aliases: Record<string, string> = {
   'caterpillar': 'Caterpie',
   'cater pee': 'Caterpie',
 
+  // Butterfree
+  'butter free': 'Butterfree',
+
+  // Metapod
+  'metaport': 'Metapod',
+  'metal pot': 'Metapod',
+  'mehta pot': 'Metapod',
+
+  // Beedrill
+  'be drill': 'Beedrill',
+
   // Ekans
   'he can': 'Ekans',
   'he cans': 'Ekans',
@@ -59,18 +80,56 @@ export const aliases: Record<string, string> = {
   'ee kans': 'Ekans',
   'econs': 'Ekans',
 
+  // Jynx
+  'jinx': 'Jynx',
+  'drinks': 'Jynx',
+  'jeans': 'Jynx',
+
   // Blastoise
   'blast toys': 'Blastoise',
 
   // Wartortle
   'water turtle': 'Wartortle',
+  'water bottle': 'Wartortle',
   'war total': 'Wartortle',
   'call total': 'Wartortle',
   'wall total': 'Wartortle',
+  'what total': 'Wartortle',
 
   // Meowth
   'meow': 'Meowth',
   'meows': 'Meowth',
+
+  // Mankey
+  'monkey': 'Mankey',
+  'yankee': 'Mankey',
+
+  // Haunter
+  'hunter': 'Haunter',
+
+  // Mr. Mime
+  'mr. mine': 'Mr. Mime',
+
+  // Machop
+  'macho': 'Machop',
+  'ma chowk': 'Machop',
+  'my chop': 'Machop',
+  'match up': 'Machop',
+  'ma chan': 'Machop',
+
+  // Machoke
+  'my truck': 'Machoke',
+  'match hook': 'Machoke',
+
+  // Machamp
+  'march champ': 'Machamp',
+  'march ham': 'Machamp',
+
+  // Graveler
+  'gravel': 'Graveler',
+
+  // Staryu
+  'star you': 'Staryu',
 
   // Common speech recognition mangles
   'mewtwo': 'Mewtwo',
@@ -84,6 +143,7 @@ export const aliases: Record<string, string> = {
   'ivy sore': 'Ivysaur',
   'venus or': 'Venusaur',
   'venusore': 'Venusaur',
+  'veena song': 'Venusaur',
   'squirtle': 'Squirtle',
   'char mander': 'Charmander',
   'charmelion': 'Charmeleon',
@@ -100,6 +160,10 @@ export const aliases: Record<string, string> = {
   'nidoran girl': 'Nidoran Female',
   'need run': 'Nidoran Male',
   'need a run': 'Nidoran Male',
+  'needle and mail': 'Nidoran Male',
+  'needle run': 'Nidoran Male',
+  'needle and female': 'Nidoran Female',
+  'need a female': 'Nidoran Female',
 
   // Nidorina
   'e arena': 'Nidorina',
@@ -108,6 +172,8 @@ export const aliases: Record<string, string> = {
   // Nidoqueen
   'need a queen': 'Nidoqueen',
   'needle queen': 'Nidoqueen',
+  'nile queen': 'Nidoqueen',
+  'nero queen': 'Nidoqueen',
 
   // Nidorino
   'ido reno': 'Nidorino',
@@ -120,6 +186,8 @@ export const aliases: Record<string, string> = {
   // Clefairy
   'fairy': 'Clefairy',
   'safari': 'Clefairy',
+  'club fairy': 'Clefairy',
+  'the fairy': 'Clefairy',
 
   // Clefable
   'fable': 'Clefable',
@@ -135,6 +203,9 @@ export const aliases: Record<string, string> = {
 
   // Ninetales
   'nine tails': 'Ninetales',
+  'nine tales': 'Ninetales',
+  'night tails': 'Ninetales',
+  'night tales': 'Ninetales',
 
   // Jigglypuff
   'jiggly': 'Jigglypuff',
@@ -145,6 +216,7 @@ export const aliases: Record<string, string> = {
   'wiggly pop': 'Wigglytuff',
   'wiggle puff': 'Wigglytuff',
   'wiggly top': 'Wigglytuff',
+  'wiggly tough': 'Wigglytuff',
 
   // Zubat
   'zoo bat': 'Zubat',
@@ -166,11 +238,16 @@ export const aliases: Record<string, string> = {
   'five plum': 'Vileplume',
   'fire plum': 'Vileplume',
 
+  // Paras
+  'paris': 'Paras',
+
   // Parasect
   'power set': 'Parasect',
+  'parasite': 'Parasect',
 
   // Venonat
   'vino net': 'Venonat',
+  'vino na': 'Venonat',
   'know net': 'Venonat',
   'no net': 'Venonat',
   'we know net': 'Venonat',
@@ -191,6 +268,7 @@ export const aliases: Record<string, string> = {
   'dug trail': 'Dugtrio',
   'doc trail': 'Dugtrio',
   'dark trail': 'Dugtrio',
+  'dark trio': 'Dugtrio',
 
   // Psyduck
   'sidak': 'Psyduck',
@@ -214,12 +292,21 @@ export const aliases: Record<string, string> = {
 
   // Tentacool
   'tentacle': 'Tentacool',
+  '10 cool': 'Tentacool',
+  'ten cool': 'Tentacool',
+  'then cool': 'Tentacool',
+  'tend to cool': 'Tentacool',
 
   // Tentacruel
   'tend to cruel': 'Tentacruel',
+  '10 two': 'Tentacruel',
+  'ten two': 'Tentacruel',
+  'anti cruel': 'Tentacruel',
+  'santa crew': 'Tentacruel',
 
   // Weepinbell
   'pink bell': 'Weepinbell',
+  'weeping bell': 'Weepinbell',
 
   // Growlithe
   'grow list': 'Growlithe',
@@ -230,6 +317,18 @@ export const aliases: Record<string, string> = {
   'our canine': 'Arcanine',
   'arcane nine': 'Arcanine',
   'arc nine': 'Arcanine',
+
+  // Tangela
+  'thala': 'Tangela',
+  'bengala': 'Tangela',
+  'tangala': 'Tangela',
+  'angela': 'Tangela',
+  'pangola': 'Tangela',
+  'theegala': 'Tangela',
+
+  // Golem
+  'cola': 'Golem',
+  'golam': 'Golem',
 
   // Geodude
   'geo dude': 'Geodude',
@@ -253,6 +352,7 @@ export const aliases: Record<string, string> = {
   'right you': 'Raichu',
   'rye choo': 'Raichu',
   'rye shoe': 'Raichu',
+  'write you': 'Raichu',
 
   // Rattata
   'rat at a': 'Rattata',
@@ -282,6 +382,18 @@ export const aliases: Record<string, string> = {
   'dugong': 'Dewgong',
   'dew gong': 'Dewgong',
   'do gong': 'Dewgong',
+  'you gone': 'Dewgong',
+  'do you gone': 'Dewgong',
+  'you go': 'Dewgong',
+  'duong': 'Dewgong',
+  'do you go': 'Dewgong',
+
+  // Gastly
+  'ghastly': 'Gastly',
+  'gas lee': 'Gastly',
+  'guess lee': 'Gastly',
+  'gas li': 'Gastly',
+  'guest lee': 'Gastly',
 
   // Gengar
   'gang are': 'Gengar',
@@ -291,6 +403,9 @@ export const aliases: Record<string, string> = {
   'gang car': 'Gengar',
   'gang ga': 'Gengar',
 
+  // Slowpoke
+  'slow pop': 'Slowpoke',
+
   // Drowzee
   'drowsy': 'Drowzee',
   'drow z': 'Drowzee',
@@ -298,6 +413,8 @@ export const aliases: Record<string, string> = {
   // Cloyster
   'cloister': 'Cloyster',
   'cloy stir': 'Cloyster',
+  'oyster': 'Cloyster',
+  'coaster': 'Cloyster',
 
   // Koffing
   'coughing': 'Koffing',
@@ -309,11 +426,14 @@ export const aliases: Record<string, string> = {
   // Rhyhorn
   'rye horn': 'Rhyhorn',
   'rhino horn': 'Rhyhorn',
+  'ryhan': 'Rhyhorn',
+  'rayhorn': 'Rhyhorn',
 
   // Rhydon
   'ride on': 'Rhydon',
   'right on': 'Rhydon',
   'rye don': 'Rhydon',
+  'ryden': 'Rhydon',
 
   // Cubone
   'q bone': 'Cubone',
@@ -334,11 +454,15 @@ export const aliases: Record<string, string> = {
   'la press': 'Lapras',
   'lapis': 'Lapras',
   'lap rest': 'Lapras',
+  'lara': 'Lapras',
+  'la pras': 'Lapras',
+  'la ross': 'Lapras',
 
   // Scyther
   'sider': 'Scyther',
   'cider': 'Scyther',
   'sigh there': 'Scyther',
+  'skyler': 'Scyther',
 
   // Pinsir
   'pincer': 'Pinsir',
@@ -373,23 +497,39 @@ export const aliases: Record<string, string> = {
   'article no': 'Articuno',
   'artic uno': 'Articuno',
   'arctic uno': 'Articuno',
+  'aarti kono': 'Articuno',
 
   // Zapdos
   'zap dose': 'Zapdos',
   'zap dos': 'Zapdos',
+  'zap das': 'Zapdos',
+  'zap do': 'Zapdos',
+  'that door': 'Zapdos',
 
   // Moltres
   'mole trace': 'Moltres',
   'molt race': 'Moltres',
   'mole tress': 'Moltres',
+  'motors': 'Moltres',
+  'motos': 'Moltres',
+  'mo trucks': 'Moltres',
+  'more trust': 'Moltres',
+  'mo trust': 'Moltres',
+  'no trust': 'Moltres',
+  'motu': 'Moltres',
+  'moress': 'Moltres',
 
   // Dratini
   'dra teeny': 'Dratini',
   'dry teeny': 'Dratini',
+  'brittini': 'Dratini',
+  'rotini': 'Dratini',
+  'traini': 'Dratini',
 
   // Omanyte
   'ammonite': 'Omanyte',
   'oh man i': 'Omanyte',
+  'oh my night': 'Omanyte',
 
   // Omastar
   'oh my star': 'Omastar',
@@ -405,11 +545,28 @@ export const aliases: Record<string, string> = {
   'gyarados': 'Gyarados',
   'garados': 'Gyarados',
   'gyrados': 'Gyarados',
+  'gerardo': 'Gyarados',
+  'yara das': 'Gyarados',
+  'garage': 'Gyarados',
+  'gerardos': 'Gyarados',
+  // Raticate
+  'eradicate': 'Raticate',
+
+  // Primeape
+  'prime app': 'Primeape',
+
+  // Kabutops
+  'cabo tops': 'Kabutops',
+
   'aero dactyl': 'Aerodactyl',
+  'pterodactyl': 'Aerodactyl',
   'electabuzz': 'Electabuzz',
   'electa buzz': 'Electabuzz',
   'hitmon lee': 'Hitmonlee',
+  'hitman lee': 'Hitmonlee',
   'hitmon chan': 'Hitmonchan',
+  'hitman chan': 'Hitmonchan',
+  'eman chan': 'Hitmonchan',
   'lickitung': 'Lickitung',
   'licky tongue': 'Lickitung',
   'kangaskhan': 'Kangaskhan',
@@ -420,7 +577,10 @@ export const aliases: Record<string, string> = {
   'eggsecute': 'Exeggcute',
   'polly wag': 'Poliwag',
   'holly wag': 'Poliwag',
+  'polly work': 'Poliwag',
+  'polly whack': 'Poliwag',
   'polly whirl': 'Poliwhirl',
+  'polly wall': 'Poliwhirl',
   'pollywood': 'Poliwhirl',
   'hollywood world': 'Poliwhirl',
   'holy world': 'Poliwhirl',
@@ -428,6 +588,7 @@ export const aliases: Record<string, string> = {
   'hollywood': 'Poliwhirl',
   'polly world': 'Poliwhirl',
   'polly wrath': 'Poliwrath',
+  'polly rath': 'Poliwrath',
   'polygraph': 'Poliwrath',
   'poly wrath': 'Poliwrath',
   'holy wrath': 'Poliwrath',
@@ -437,12 +598,19 @@ export const aliases: Record<string, string> = {
   'magnetite': 'Magnemite',
   'dynamite': 'Magnemite',
   'abracadabra': 'Abra',
+  'la bra': 'Abra',
+  'cadabra': 'Kadabra',
   'alakazam': 'Alakazam',
   'alla kazam': 'Alakazam',
+  'allah cousin': 'Alakazam',
+  'i like cousin': 'Alakazam',
   'victorybell': 'Victreebel',
   'victory bell': 'Victreebel',
   'vapour eon': 'Vaporeon',
   'jolty on': 'Jolteon',
+  'jyoti on': 'Jolteon',
+  'jyoti': 'Jolteon',
+  'joe dion': 'Jolteon',
   'flair eon': 'Flareon',
   'snorlax': 'Snorlax',
   'snore lacks': 'Snorlax',
@@ -596,6 +764,9 @@ export const aliases: Record<string, string> = {
   // Gardevoir
   'guard a four': 'Gardevoir',
   'guard of war': 'Gardevoir',
+
+  // Lairon
+  'lauren': 'Lairon',
 
   // Aggron
   'a gron': 'Aggron',
