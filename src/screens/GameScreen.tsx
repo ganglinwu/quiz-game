@@ -321,7 +321,12 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
     ]);
   };
 
-  if (state.isGameOver && (state.winner || state.isDraw)) {
+  const navigatedRef = useRef(false);
+  useEffect(() => {
+    if (!state.isGameOver || (!state.winner && !state.isDraw)) return;
+    if (navigatedRef.current) return;
+    navigatedRef.current = true;
+
     const hints = state.revealedHints.filter(
       (h) => !state.usedItems.includes(h.pokemonName)
     );
@@ -345,7 +350,7 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
       gameStartTime: state.gameStartTime,
       revealedHints: hints,
     });
-  }
+  }, [state.isGameOver, state.winner, state.isDraw]);
 
   const hasConfirmation = state.confirmationItem !== null;
   const hasVotePending = state.pendingGenVote !== null;
