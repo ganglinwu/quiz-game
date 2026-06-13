@@ -6,7 +6,11 @@ export type QuizConstraint =
   | { kind: 'legendary'; value: boolean }
   | { kind: 'mythical'; value: boolean }
   | { kind: 'evolutionStage'; stage: 'base' | 'middle' | 'final' }
-  | { kind: 'dualType'; value: boolean };
+  | { kind: 'dualType'; value: boolean }
+  | { kind: 'superEffective'; targetType: string }
+  | { kind: 'statRank'; stat: StatName; topN: number };
+
+export type StatName = 'hp' | 'attack' | 'defense' | 'sp_attack' | 'sp_defense' | 'speed';
 
 export interface QuizQuestion {
   constraints: QuizConstraint[];

@@ -5,6 +5,7 @@ import {
   QuizDifficulty,
   QuizFilter,
   QuizQuestion,
+  StatName,
 } from '../types';
 
 const ALL_POKEMON_TYPES = [
@@ -12,6 +13,37 @@ const ALL_POKEMON_TYPES = [
   'ghost', 'grass', 'ground', 'ice', 'normal', 'poison', 'psychic', 'rock',
   'steel', 'water',
 ];
+
+const TYPE_EFFECTIVENESS: Record<string, string[]> = {
+  normal: [],
+  fire: ['grass', 'ice', 'bug', 'steel'],
+  water: ['fire', 'ground', 'rock'],
+  electric: ['water', 'flying'],
+  grass: ['water', 'ground', 'rock'],
+  ice: ['grass', 'ground', 'flying', 'dragon'],
+  fighting: ['normal', 'ice', 'rock', 'dark', 'steel'],
+  poison: ['grass', 'fairy'],
+  ground: ['fire', 'electric', 'poison', 'rock', 'steel'],
+  flying: ['grass', 'fighting', 'bug'],
+  psychic: ['fighting', 'poison'],
+  bug: ['grass', 'psychic', 'dark'],
+  rock: ['fire', 'ice', 'flying', 'bug'],
+  ghost: ['psychic', 'ghost'],
+  dragon: ['dragon'],
+  dark: ['psychic', 'ghost'],
+  steel: ['ice', 'rock', 'fairy'],
+  fairy: ['fighting', 'dragon', 'dark'],
+};
+
+export function getTypesStrongAgainst(targetType: string): string[] {
+  const result: string[] = [];
+  for (const [attackingType, targets] of Object.entries(TYPE_EFFECTIVENESS)) {
+    if (targets.includes(targetType.toLowerCase())) {
+      result.push(attackingType);
+    }
+  }
+  return result;
+}
 
 function constraintCount(difficulty: QuizDifficulty): number {
   switch (difficulty) {
@@ -75,6 +107,18 @@ function buildConstraintPool(
     pool.push({ kind: 'dualType', value: false });
   }
 
+  for (const t of ALL_POKEMON_TYPES) {
+    if (getTypesStrongAgainst(t).length > 0) {
+      pool.push({ kind: 'superEffective', targetType: t });
+    }
+  }
+
+  const STAT_RANK_N = 20;
+  const stats: StatName[] = ['hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed'];
+  for (const stat of stats) {
+    pool.push({ kind: 'statRank', stat, topN: STAT_RANK_N });
+  }
+
   return pool;
 }
 
@@ -92,6 +136,9 @@ function areCompatible(constraints: QuizConstraint[]): boolean {
       .map((c) => c.pokemonType);
     if (types[0] === types[1]) return false;
   }
+
+  if (kinds.includes('superEffective') && typeCount > 0) return false;
+  if (kinds.includes('superEffective') && kinds.includes('statRank')) return false;
 
   return true;
 }
@@ -121,6 +168,12 @@ export function constraintsToQuery(
       case 'dualType':
         query.isDualType = c.value;
         break;
+      case 'superEffective':
+        query.hasAnyOfTypes = getTypesStrongAgainst(c.targetType);
+        break;
+      case 'statRank':
+        query.statRank = { stat: c.stat, topN: c.topN };
+        break;
     }
   }
   return query;
@@ -146,6 +199,15 @@ export function constraintToLabel(constraint: QuizConstraint): string {
     }
     case 'dualType':
       return constraint.value ? 'Dual-type' : 'Mono-type';
+    case 'superEffective':
+      return `Strong against ${capitalize(constraint.targetType)}`;
+    case 'statRank': {
+      const statLabels: Record<StatName, string> = {
+        hp: 'HP', attack: 'Attack', defense: 'Defense',
+        sp_attack: 'Sp. Atk', sp_defense: 'Sp. Def', speed: 'Speed',
+      };
+      return `Top ${constraint.topN} ${statLabels[constraint.stat]}`;
+    }
   }
 }
 
@@ -185,6 +247,22 @@ export function buildPromptText(constraints: QuizConstraint[]): string {
   );
   if (types.length > 0) {
     parts.push(types.map((t) => capitalize(t.pokemonType)).join('/') + ' type');
+  }
+
+  const se = constraints.find(
+    (c): c is Extract<QuizConstraint, { kind: 'superEffective' }> => c.kind === 'superEffective',
+  );
+  if (se) parts.push(`strong against ${capitalize(se.targetType)}`);
+
+  const sr = constraints.find(
+    (c): c is Extract<QuizConstraint, { kind: 'statRank' }> => c.kind === 'statRank',
+  );
+  if (sr) {
+    const statLabels: Record<StatName, string> = {
+      hp: 'HP', attack: 'Attack', defense: 'Defense',
+      sp_attack: 'Sp. Atk', sp_defense: 'Sp. Def', speed: 'Speed',
+    };
+    parts.push(`top ${sr.topN} in ${statLabels[sr.stat]}`);
   }
 
   return `Name a ${parts.join(' ')} Pokemon`;
