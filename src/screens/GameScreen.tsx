@@ -456,6 +456,7 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
           isListening={state.isListening}
           setIsListening={(v) => dispatch({ type: 'SET_LISTENING', isListening: v })}
           color={playerColor}
+          audioManager={manager}
         />
       </View>
 
