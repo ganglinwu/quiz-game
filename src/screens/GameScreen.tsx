@@ -356,34 +356,17 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
   const hasVotePending = state.pendingGenVote !== null;
   const inputDisabled = hasConfirmation || hasVotePending;
   const activeCount = state.activePlayers.length;
+  const hintActive = state.hintPhase !== 'none' && state.hintPokemonId !== null;
 
   const categoryLabel = isPokemon
     ? `Pokemon Gen ${state.activeGenerations.sort((a, b) => a - b).join(', ')}`
     : 'Fruits';
 
+  const quizHintActive = isQuizMode && hintActive;
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.muteBtn} onPress={toggleMute}>
-          <Text style={[styles.muteIcon, isMuted && styles.mutedIcon]}>♪</Text>
-          {isMuted && <View style={styles.muteStrike} />}
-        </TouchableOpacity>
-        <Text style={[styles.turnLabel, { color: playerColor }]}>{state.currentPlayer}'s Turn</Text>
-        {isPokemon && !isQuizMode && (
-          <TouchableOpacity
-            style={styles.settingsBtn}
-            onPress={() => setSettingsVisible(true)}
-          >
-            <Text style={styles.settingsIcon}>⚙</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-      <Text style={[styles.categoryLabel, isQuizMode && styles.categoryLabelQuiz]}>
-        {categoryLabel}
-        {activeCount < state.players.length && ` · ${activeCount} players left`}
-      </Text>
-
-      {isQuizMode && state.currentQuestion && (
+      {quizHintActive && state.currentQuestion && (
         <QuizQuestionBanner
           question={state.currentQuestion}
           activeGens={state.activeGenerations}
@@ -393,26 +376,55 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
         />
       )}
 
-      <View style={styles.textInputWrapper}>
-        <TextInputField onSubmit={(text) => processInput(text, false)} disabled={inputDisabled} clearKey={state.turnRecords.length} />
-      </View>
-
-      {state.errorMessage && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.error}>{state.errorMessage}</Text>
-          {duplicateItem && (
-            <TouchableOpacity onPress={handleShowWhen}>
-              <Text style={styles.showWhenLink}>Show me when</Text>
+      <View style={quizHintActive ? styles.headerHintWrapper : undefined}>
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.muteBtn} onPress={toggleMute}>
+            <Text style={[styles.muteIcon, isMuted && styles.mutedIcon]}>♪</Text>
+            {isMuted && <View style={styles.muteStrike} />}
+          </TouchableOpacity>
+          <Text style={[styles.turnLabel, { color: playerColor }]}>{state.currentPlayer}'s Turn</Text>
+          {isPokemon && !isQuizMode && (
+            <TouchableOpacity
+              style={styles.settingsBtn}
+              onPress={() => setSettingsVisible(true)}
+            >
+              <Text style={styles.settingsIcon}>⚙</Text>
             </TouchableOpacity>
           )}
         </View>
+        <Text style={[styles.categoryLabel, isQuizMode && styles.categoryLabelQuiz]}>
+          {categoryLabel}
+          {activeCount < state.players.length && ` · ${activeCount} players left`}
+        </Text>
+
+        {quizHintActive && (
+          <View style={styles.hintFloating}>
+            <HintOverlay
+              phase={state.hintPhase}
+              pokemonId={state.hintPokemonId!}
+              canReveal={canReveal}
+              onReveal={() => dispatch({ type: 'REVEAL_HINT' })}
+              onDismiss={() => dispatch({ type: 'DISMISS_HINT' })}
+            />
+          </View>
+        )}
+      </View>
+
+      {isQuizMode && state.currentQuestion && !hintActive && (
+        <QuizQuestionBanner
+          question={state.currentQuestion}
+          activeGens={state.activeGenerations}
+          feedback={constraintFeedback}
+          feedbackName={feedbackName}
+          hardcore={isHardcore}
+        />
       )}
 
-      {state.hintPhase !== 'none' && state.hintPokemonId !== null && (
+      {!isQuizMode && hintActive && (
         <View style={styles.hintArea}>
           <HintOverlay
             phase={state.hintPhase}
-            pokemonId={state.hintPokemonId}
+            pokemonId={state.hintPokemonId!}
             canReveal={canReveal}
             onReveal={() => dispatch({ type: 'REVEAL_HINT' })}
             onDismiss={() => dispatch({ type: 'DISMISS_HINT' })}
@@ -421,6 +433,20 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
       )}
 
       <View style={styles.bottomArea}>
+        <View style={styles.textInputWrapper}>
+          <TextInputField onSubmit={(text) => processInput(text, false)} disabled={inputDisabled} clearKey={state.turnRecords.length} />
+        </View>
+
+        {state.errorMessage && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.error}>{state.errorMessage}</Text>
+            {duplicateItem && (
+              <TouchableOpacity onPress={handleShowWhen}>
+                <Text style={styles.showWhenLink}>Show me when</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
         <View style={styles.actions}>
           <TouchableOpacity
             style={styles.historyBtn}
@@ -584,6 +610,17 @@ const styles = StyleSheet.create({
   categoryLabelQuiz: {
     marginBottom: 12,
   },
+  headerHintWrapper: {
+    position: 'relative',
+    zIndex: 10,
+  },
+  hintFloating: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
   textInputWrapper: {
     width: '100%',
   },
@@ -611,7 +648,7 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
     alignItems: 'center',
     paddingBottom: 40,
-    gap: 24,
+    gap: 16,
   },
   actions: {
     flexDirection: 'row',
