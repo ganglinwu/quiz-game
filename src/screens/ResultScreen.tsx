@@ -58,13 +58,13 @@ function SilhouetteCard({
 
   return (
     <TouchableOpacity style={styles.hintCard} onPress={handleTap} activeOpacity={0.7}>
-      <View style={styles.imageContainer}>
+      <View style={[styles.imageContainer, !revealed && styles.imageContainerHidden]}>
         <NetworkImage
+          key={revealed ? 'revealed' : 'hidden'}
           uri={getArtworkUrl(hint.pokemonId)}
-          style={styles.hintImage}
+          style={[styles.hintImage, !revealed && { tintColor: '#000000' }]}
           loaderSize={20}
         />
-        {!revealed && <View style={styles.silhouetteOverlay} />}
       </View>
       {revealed ? (
         <Text style={styles.hintName}>{hint.pokemonName}</Text>
@@ -299,19 +299,16 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: 64,
     height: 64,
-    backgroundColor: '#2a4a6e',
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  imageContainerHidden: {
+    backgroundColor: '#2a4a6e',
+  },
   hintImage: {
     width: 56,
     height: 56,
-  },
-  silhouetteOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#000000',
-    borderRadius: 10,
   },
   hintName: {
     color: '#ffffff',
