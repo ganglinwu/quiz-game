@@ -13,4 +13,3 @@ export const TRACK_REGISTRY = new Map<TrackId, TrackDefinition>(
 );
 
 export const HINT_SUCCESS_SFX = require('../../assets/music/wild-pokemon-caught.mp3');
-export const MIC_READY_SFX = require('../../assets/music/notification-smooth-modern-stereo-332449.mp3');

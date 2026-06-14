@@ -6,7 +6,6 @@ import {
   useSpeechRecognitionEvent,
 } from 'expo-speech-recognition';
 import type { AudioManager } from '../audio/AudioManager';
-import { MIC_READY_SFX } from '../audio/tracks';
 
 type MicPhase = 'idle' | 'preparing' | 'ready';
 
@@ -36,14 +35,21 @@ export default function MicButton({
   const rotationLoop = useRef<Animated.CompositeAnimation | null>(null);
   const pulseLoop = useRef<Animated.CompositeAnimation | null>(null);
 
+  const playReadyHaptic = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await new Promise((r) => setTimeout(r, 80));
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await new Promise((r) => setTimeout(r, 80));
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+  };
+
   const transitionToReady = () => {
     if (safetyTimeout.current) {
       clearTimeout(safetyTimeout.current);
       safetyTimeout.current = null;
     }
     setMicPhase('ready');
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    audioManager.playSfx(MIC_READY_SFX);
+    playReadyHaptic();
   };
 
   useEffect(() => {
@@ -136,8 +142,7 @@ export default function MicButton({
     safetyTimeout.current = setTimeout(() => {
       setMicPhase((current) => {
         if (current === 'preparing') {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          audioManager.playSfx(MIC_READY_SFX);
+          playReadyHaptic();
           return 'ready';
         }
         return current;
