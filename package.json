@@ -7,7 +7,12 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "generate-db": "npx tsx scripts/generate-db.ts"
+    "generate-db": "npx tsx scripts/generate-db.ts",
+    "test:unit": "vitest run",
+    "test:smoke": "jest",
+    "test": "vitest run && jest",
+    "typecheck": "npx tsc --noEmit",
+    "prebuild-check": "npx tsc --noEmit && vitest run && jest"
   },
   "dependencies": {
     "@react-navigation/native": "^7.2.4",
@@ -25,10 +30,18 @@
     "react-native-screens": "~4.16.0"
   },
   "devDependencies": {
+    "@testing-library/react-native": "^14.0.0",
     "@types/better-sqlite3": "^7.6.13",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^25.9.3",
     "@types/react": "~19.1.0",
+    "@types/react-test-renderer": "^19.1.0",
     "better-sqlite3": "^12.10.0",
-    "typescript": "~5.9.2"
+    "jest": "^29.7.0",
+    "jest-expo": "~54.0.17",
+    "react-test-renderer": "^19.1.0",
+    "typescript": "~5.9.2",
+    "vitest": "^4.1.8"
   },
   "private": true
 }
