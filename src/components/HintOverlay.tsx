@@ -20,6 +20,9 @@ export default function HintOverlay({ phase, pokemonId, canReveal, onReveal, onD
 
   return (
     <View style={styles.card}>
+      <TouchableOpacity style={styles.closeX} onPress={onDismiss}>
+        <Text style={styles.closeXText}>✕</Text>
+      </TouchableOpacity>
       <Text style={styles.title}>
         {isSilhouette ? "Who's that Pokemon?" : 'Hint revealed!'}
       </Text>
@@ -67,6 +70,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'center',
     width: '100%',
+  },
+  closeX: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#2a3a5a',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+  closeXText: {
+    color: '#a0a0b0',
+    fontSize: 14,
+    fontWeight: '600',
   },
   title: {
     fontSize: 18,
