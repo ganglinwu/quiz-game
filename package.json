@@ -12,7 +12,8 @@
     "test:smoke": "jest",
     "test": "vitest run && jest",
     "typecheck": "npx tsc --noEmit",
-    "prebuild-check": "npx tsc --noEmit && vitest run && jest"
+    "prebuild-check": "npx tsc --noEmit && vitest run && jest",
+    "eas-build-post-install": "npx tsc --noEmit && vitest run && jest"
   },
   "dependencies": {
     "@react-navigation/native": "^7.2.4",
