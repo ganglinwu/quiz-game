@@ -354,8 +354,15 @@ export function validateAnswerPerConstraint(
     });
   }
 
+  const genConstraint = question.constraints.find(
+    (c): c is Extract<QuizConstraint, { kind: 'generation' }> => c.kind === 'generation',
+  );
+  const effectiveGens = genConstraint ? [genConstraint.generation] : activeGens;
+
   for (const constraint of question.constraints) {
-    const query = constraintsToQuery({}, [constraint]);
+    const baseline: PokemonQuery =
+      constraint.kind === 'statRank' ? { generations: effectiveGens } : {};
+    const query = constraintsToQuery(baseline, [constraint]);
     const matches = queryPokemon(query);
     results.push({
       label: constraintToLabel(constraint),
