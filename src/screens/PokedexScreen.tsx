@@ -76,16 +76,22 @@ export default function PokedexScreen({ navigation }: Props) {
       </View>
 
       <View style={styles.searchRow}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search…"
-          placeholderTextColor="#666"
-          value={search}
-          onChangeText={setSearch}
-          autoCorrect={false}
-          autoCapitalize="none"
-          clearButtonMode="while-editing"
-        />
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search…"
+            placeholderTextColor="#666"
+            value={search}
+            onChangeText={setSearch}
+            autoCorrect={false}
+            autoCapitalize="none"
+          />
+          {search.length > 0 && (
+            <TouchableOpacity style={styles.clearBtn} onPress={() => setSearch('')}>
+              <Text style={styles.clearBtnText}>✕</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <ScrollView
@@ -176,22 +182,37 @@ const styles = StyleSheet.create({
     paddingHorizontal: HORIZONTAL_PADDING,
     marginBottom: 10,
   },
-  searchInput: {
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#2a2a3e',
     borderRadius: 10,
+  },
+  searchInput: {
+    flex: 1,
     paddingHorizontal: 14,
     paddingVertical: 10,
     color: '#ffffff',
     fontSize: 15,
   },
+  clearBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  clearBtnText: {
+    color: '#a0a0b0',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   filterScroll: {
+    flexShrink: 0,
     marginBottom: 12,
-    flexGrow: 0,
   },
   filterRow: {
     flexDirection: 'row',
     gap: 8,
     paddingHorizontal: HORIZONTAL_PADDING,
+    paddingVertical: 4,
   },
   filterChip: {
     backgroundColor: '#2a2a3e',
