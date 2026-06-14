@@ -25,6 +25,7 @@ export interface QuizFilter {
   includeMythical: boolean;
   evolutionStages?: ('base' | 'middle' | 'final')[];
   allowDualType?: boolean;
+  stats?: StatName[];
 }
 
 export interface QuizConfig {

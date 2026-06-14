@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView, Switch } from 'react-native';
-import { QuizFilter } from '../types';
+import { QuizFilter, StatName } from '../types';
 
 const ALL_POKEMON_TYPES = [
   'bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'flying',
@@ -20,6 +20,15 @@ const EVOLUTION_STAGES = [
   { key: 'base' as const, label: 'Base' },
   { key: 'middle' as const, label: 'Middle' },
   { key: 'final' as const, label: 'Final' },
+];
+
+const STAT_OPTIONS: { key: StatName; label: string }[] = [
+  { key: 'hp', label: 'HP' },
+  { key: 'attack', label: 'Attack' },
+  { key: 'defense', label: 'Defense' },
+  { key: 'sp_attack', label: 'Sp. Atk' },
+  { key: 'sp_defense', label: 'Sp. Def' },
+  { key: 'speed', label: 'Speed' },
 ];
 
 interface Props {
@@ -75,6 +84,29 @@ export default function QuizFilterModal({ visible, onClose, filter, onFilterChan
       }
     }
     onFilterChange({ ...filter, evolutionStages: [...next] });
+  };
+
+  const selectedStats = new Set(filter.stats ?? []);
+  const allStatsSelected = selectedStats.size === 0;
+
+  const toggleStat = (stat: StatName) => {
+    const next = new Set(selectedStats);
+    if (allStatsSelected) {
+      STAT_OPTIONS.forEach((s) => { if (s.key !== stat) next.add(s.key); });
+    } else if (next.has(stat)) {
+      next.delete(stat);
+      if (next.size === 0) {
+        onFilterChange({ ...filter, stats: undefined });
+        return;
+      }
+    } else {
+      next.add(stat);
+      if (next.size === STAT_OPTIONS.length) {
+        onFilterChange({ ...filter, stats: undefined });
+        return;
+      }
+    }
+    onFilterChange({ ...filter, stats: [...next] });
   };
 
   const dualTypeValue = filter.allowDualType;
@@ -176,6 +208,23 @@ export default function QuizFilterModal({ visible, onClose, filter, onFilterChan
                   >
                     <Text style={[styles.stageChipText, active && styles.stageChipTextActive]}>
                       {opt.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <Text style={styles.sectionTitle}>Stat Rankings (Top 20)</Text>
+            <View style={styles.chipGrid}>
+              {STAT_OPTIONS.map((s) => {
+                const active = allStatsSelected || selectedStats.has(s.key);
+                return (
+                  <TouchableOpacity
+                    key={s.key}
+                    style={[styles.statChip, active && styles.statChipActive]}
+                    onPress={() => toggleStat(s.key)}
+                  >
+                    <Text style={[styles.stageChipText, active && styles.stageChipTextActive]}>
+                      {s.label}
                     </Text>
                   </TouchableOpacity>
                 );
@@ -284,6 +333,18 @@ const styles = StyleSheet.create({
   },
   stageChipTextActive: {
     color: '#ffffff',
+  },
+  statChip: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#2a2a3e',
+    backgroundColor: '#2a2a3e',
+  },
+  statChipActive: {
+    borderColor: '#4361ee',
+    backgroundColor: '#2a3a5e',
   },
   doneBtn: {
     marginTop: 20,
