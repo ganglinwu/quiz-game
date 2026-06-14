@@ -178,13 +178,14 @@ export function queryPokemon(query: PokemonQuery): PokemonDetailItem[] {
   }
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const orderBy = query.statRank ? `${query.statRank.stat} DESC` : 'id';
   return getDb().getAllSync<PokemonDetailItem>(
     `SELECT id as pokedexNumber, name, type1, type2, generation,
      is_legendary as isLegendary, is_mythical as isMythical,
      height, weight,
      hp, attack, defense,
      sp_attack as spAttack, sp_defense as spDefense, speed
-     FROM pokemon ${where} ORDER BY id`,
+     FROM pokemon ${where} ORDER BY ${orderBy}`,
     params
   );
 }
