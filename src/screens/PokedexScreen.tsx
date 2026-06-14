@@ -12,9 +12,9 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useBGM } from '../audio';
-import { ALL_GENS, getPokemonForGens, getAllPokemon } from '../data/pokemon-db';
+import { ALL_GENS, getPokemonForGens, getAllPokemon, queryPokemon } from '../data/pokemon-db';
 import { getArtworkUrl } from '../utils/pokeApi';
-import { PokemonItem } from '../types';
+import { PokemonItem, StatName } from '../types';
 import NetworkImage from '../components/NetworkImage';
 import PokemonCardModal from '../components/PokemonCardModal';
 
@@ -24,6 +24,15 @@ const NUM_COLUMNS = 3;
 const GRID_GAP = 10;
 const HORIZONTAL_PADDING = 16;
 
+const STAT_OPTIONS: { key: StatName; label: string }[] = [
+  { key: 'hp', label: 'HP' },
+  { key: 'attack', label: 'Attack' },
+  { key: 'defense', label: 'Defense' },
+  { key: 'sp_attack', label: 'Sp. Atk' },
+  { key: 'sp_defense', label: 'Sp. Def' },
+  { key: 'speed', label: 'Speed' },
+];
+
 export default function PokedexScreen({ navigation }: Props) {
   useBGM('pokedex');
 
@@ -31,17 +40,24 @@ export default function PokedexScreen({ navigation }: Props) {
   const cellSize = (screenWidth - HORIZONTAL_PADDING * 2 - GRID_GAP * (NUM_COLUMNS - 1)) / NUM_COLUMNS;
 
   const [selectedGen, setSelectedGen] = useState<number | null>(null);
+  const [selectedStat, setSelectedStat] = useState<StatName | null>(null);
   const [search, setSearch] = useState('');
   const [selectedPokemon, setSelectedPokemon] = useState<PokemonItem | null>(null);
 
   const pokemon = useMemo(() => {
+    if (selectedStat) {
+      return queryPokemon({
+        generations: selectedGen ? [selectedGen] : undefined,
+        statRank: { stat: selectedStat, topN: 20 },
+      });
+    }
     let list = selectedGen ? getPokemonForGens([selectedGen]) : getAllPokemon();
     if (search.trim()) {
       const query = search.trim().toLowerCase();
       list = list.filter((p) => p.name.toLowerCase().includes(query));
     }
     return list;
-  }, [selectedGen, search]);
+  }, [selectedGen, selectedStat, search]);
 
   const renderItem = useCallback(
     ({ item }: { item: PokemonItem }) => (
@@ -116,6 +132,25 @@ export default function PokedexScreen({ navigation }: Props) {
           >
             <Text style={[styles.filterText, selectedGen === gen && styles.filterTextActive]}>
               Gen {gen}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.filterRow}
+        style={styles.statScroll}
+      >
+        {STAT_OPTIONS.map((s) => (
+          <TouchableOpacity
+            key={s.key}
+            style={[styles.filterChip, selectedStat === s.key && styles.statChipActive]}
+            onPress={() => setSelectedStat(selectedStat === s.key ? null : s.key)}
+          >
+            <Text style={[styles.filterText, selectedStat === s.key && styles.filterTextActive]}>
+              {selectedStat === s.key ? `Top 20 ${s.label}` : s.label}
             </Text>
           </TouchableOpacity>
         ))}
@@ -225,6 +260,14 @@ const styles = StyleSheet.create({
   filterChipActive: {
     borderColor: '#e63946',
     backgroundColor: '#3a2a3e',
+  },
+  statScroll: {
+    flexShrink: 0,
+    marginBottom: 12,
+  },
+  statChipActive: {
+    borderColor: '#f4a261',
+    backgroundColor: '#3e3a2a',
   },
   filterText: {
     color: '#a0a0b0',
