@@ -7,15 +7,15 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "prebuildCommand": "npm run prebuild-check"
+      "prebuildCommand": "sh -c 'npx tsc --noEmit && vitest run && jest'"
     },
     "preview": {
       "distribution": "internal",
-      "prebuildCommand": "npm run prebuild-check"
+      "prebuildCommand": "sh -c 'npx tsc --noEmit && vitest run && jest'"
     },
     "production": {
       "autoIncrement": true,
-      "prebuildCommand": "npm run prebuild-check"
+      "prebuildCommand": "sh -c 'npx tsc --noEmit && vitest run && jest'"
     }
   },
   "submit": {
