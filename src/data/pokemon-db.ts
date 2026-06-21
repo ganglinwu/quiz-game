@@ -109,6 +109,19 @@ export function getEvolutionChain(pokemonId: number): EvolutionChainMember[] {
   return sorted;
 }
 
+export interface PokemonMeta {
+  generation: number;
+  is_legendary: number;
+  is_mythical: number;
+}
+
+export function getPokemonMeta(pokemonId: number): PokemonMeta | null {
+  return getDb().getFirstSync<PokemonMeta>(
+    'SELECT generation, is_legendary, is_mythical FROM pokemon WHERE id = ?',
+    [pokemonId]
+  );
+}
+
 export function getAllFruits(): FruitItem[] {
   return getDb().getAllSync<FruitItem>('SELECT name FROM fruits ORDER BY name');
 }

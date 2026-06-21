@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,10 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
+  Animated,
 } from 'react-native';
 import { getArtworkUrl } from '../utils/pokeApi';
-import { getEvolutionChain, type EvolutionChainMember } from '../data/pokemon-db';
+import { getEvolutionChain, getPokemonMeta, type EvolutionChainMember } from '../data/pokemon-db';
 import { useAudio } from '../audio';
 import PokeballLoader from './PokeballLoader';
 import NetworkImage from './NetworkImage';
@@ -49,6 +50,54 @@ interface Props {
   onClose: () => void;
 }
 
+const GEN_REGIONS: Record<number, { numeral: string; region: string }> = {
+  1: { numeral: 'I', region: 'Kanto' },
+  2: { numeral: 'II', region: 'Johto' },
+  3: { numeral: 'III', region: 'Hoenn' },
+  4: { numeral: 'IV', region: 'Sinnoh' },
+  5: { numeral: 'V', region: 'Unova' },
+  6: { numeral: 'VI', region: 'Kalos' },
+};
+
+function ShimmerBadge({ label, color }: { label: string; color: string }) {
+  const shimmerAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.timing(shimmerAnim, {
+        toValue: 1,
+        duration: 2400,
+        useNativeDriver: true,
+      })
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [shimmerAnim]);
+
+  const translateX = shimmerAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [-60, 120, 120],
+  });
+
+  const sheenOpacity = shimmerAnim.interpolate({
+    inputRange: [0, 0.55, 0.7, 0.85, 1],
+    outputRange: [0, 0, 0.22, 0, 0],
+  });
+
+  return (
+    <View style={[styles.specialBadge, { backgroundColor: color }]}>
+      <Animated.View style={[styles.sheenOverlay, { opacity: sheenOpacity }]} />
+      <Animated.View
+        style={[
+          styles.shimmerStripe,
+          { transform: [{ translateX }, { rotate: '20deg' }] },
+        ]}
+      />
+      <Text style={styles.specialBadgeText}>{label}</Text>
+    </View>
+  );
+}
+
 function getCryUrl(name: string): string {
   const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '');
   return `https://play.pokemonshowdown.com/audio/cries/${slug}.mp3`;
@@ -63,6 +112,9 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, onCl
   const [loading, setLoading] = useState(true);
   const [chain, setChain] = useState<EvolutionChainMember[]>([]);
   const [cryPlaying, setCryPlaying] = useState(false);
+  const [generation, setGeneration] = useState<number | null>(null);
+  const [isLegendary, setIsLegendary] = useState(false);
+  const [isMythical, setIsMythical] = useState(false);
 
   useEffect(() => {
     if (!visible) return;
@@ -76,6 +128,11 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, onCl
     setLoading(true);
     setData(null);
     setFlavorText('');
+
+    const meta = getPokemonMeta(displayId);
+    setGeneration(meta?.generation ?? null);
+    setIsLegendary(!!meta?.is_legendary);
+    setIsMythical(!!meta?.is_mythical);
 
     Promise.all([
       fetch(`https://pokeapi.co/api/v2/pokemon/${displayId}`).then((r) => r.json()),
@@ -144,7 +201,17 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, onCl
                 </View>
               </TouchableOpacity>
 
-              <Text style={styles.dexNumber}>#{String(displayId).padStart(3, '0')}</Text>
+              <Text style={styles.dexNumber}>
+                #{String(displayId).padStart(3, '0')}
+                {generation != null && GEN_REGIONS[generation] && (
+                  <Text style={styles.genText}>
+                    {' '}Gen {GEN_REGIONS[generation].numeral} ({GEN_REGIONS[generation].region})
+                  </Text>
+                )}
+              </Text>
+
+              {isMythical && <ShimmerBadge label="Mythical" color="#D4A017" />}
+              {isLegendary && <ShimmerBadge label="Legendary" color="#7B2FF7" />}
 
               {showChain && (
                 <View style={styles.chainRow}>
@@ -319,6 +386,35 @@ const styles = StyleSheet.create({
     color: '#777',
     fontWeight: '700',
     marginBottom: 6,
+  },
+  genText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  specialBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 8,
+    marginBottom: 6,
+    overflow: 'hidden',
+  },
+  sheenOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#fff',
+  },
+  shimmerStripe: {
+    position: 'absolute',
+    top: -10,
+    bottom: -10,
+    width: 20,
+    backgroundColor: 'rgba(255,255,255,0.35)',
+  },
+  specialBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   chainRow: {
     flexDirection: 'row',
