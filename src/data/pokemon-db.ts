@@ -84,10 +84,29 @@ export function getEvolutionChain(pokemonId: number): EvolutionChainMember[] {
     [pokemonId]
   );
   if (!chainRow?.evolution_chain_id) return [];
-  return getDb().getAllSync<EvolutionChainMember>(
-    'SELECT id, name FROM pokemon WHERE evolution_chain_id = ? ORDER BY id',
+  const members = getDb().getAllSync<EvolutionChainMember & { evolves_from_id: number | null }>(
+    'SELECT id, name, evolves_from_id FROM pokemon WHERE evolution_chain_id = ?',
     [chainRow.evolution_chain_id]
   );
+  if (members.length <= 1) return members;
+
+  const byParent = new Map<number | null, (typeof members)[number][]>();
+  for (const m of members) {
+    const key = m.evolves_from_id;
+    const arr = byParent.get(key);
+    if (arr) arr.push(m);
+    else byParent.set(key, [m]);
+  }
+
+  const sorted: EvolutionChainMember[] = [];
+  const queue = byParent.get(null) ?? [];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    sorted.push({ id: current.id, name: current.name });
+    const children = byParent.get(current.id);
+    if (children) queue.push(...children);
+  }
+  return sorted;
 }
 
 export function getAllFruits(): FruitItem[] {
