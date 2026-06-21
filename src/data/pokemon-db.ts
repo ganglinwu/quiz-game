@@ -73,6 +73,23 @@ export function getAllAliases(): Record<string, string> {
   return result;
 }
 
+export interface EvolutionChainMember {
+  id: number;
+  name: string;
+}
+
+export function getEvolutionChain(pokemonId: number): EvolutionChainMember[] {
+  const chainRow = getDb().getFirstSync<{ evolution_chain_id: number | null }>(
+    'SELECT evolution_chain_id FROM pokemon WHERE id = ?',
+    [pokemonId]
+  );
+  if (!chainRow?.evolution_chain_id) return [];
+  return getDb().getAllSync<EvolutionChainMember>(
+    'SELECT id, name FROM pokemon WHERE evolution_chain_id = ? ORDER BY id',
+    [chainRow.evolution_chain_id]
+  );
+}
+
 export function getAllFruits(): FruitItem[] {
   return getDb().getAllSync<FruitItem>('SELECT name FROM fruits ORDER BY name');
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { getArtworkUrl } from '../utils/pokeApi';
+import { getEvolutionChain, type EvolutionChainMember } from '../data/pokemon-db';
 import PokeballLoader from './PokeballLoader';
 import NetworkImage from './NetworkImage';
 
@@ -47,9 +48,19 @@ interface Props {
 }
 
 export default function PokemonCardModal({ visible, pokemonName, pokemonId, onClose }: Props) {
+  const [displayId, setDisplayId] = useState(pokemonId);
+  const [displayName, setDisplayName] = useState(pokemonName);
   const [data, setData] = useState<PokemonApiData | null>(null);
   const [flavorText, setFlavorText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [chain, setChain] = useState<EvolutionChainMember[]>([]);
+
+  useEffect(() => {
+    if (!visible) return;
+    setDisplayId(pokemonId);
+    setDisplayName(pokemonName);
+    setChain(getEvolutionChain(pokemonId));
+  }, [visible, pokemonId, pokemonName]);
 
   useEffect(() => {
     if (!visible) return;
@@ -58,8 +69,8 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, onCl
     setFlavorText('');
 
     Promise.all([
-      fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`).then((r) => r.json()),
-      fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}`).then((r) => r.json()),
+      fetch(`https://pokeapi.co/api/v2/pokemon/${displayId}`).then((r) => r.json()),
+      fetch(`https://pokeapi.co/api/v2/pokemon-species/${displayId}`).then((r) => r.json()),
     ])
       .then(([pokemon, species]) => {
         setData({
@@ -80,18 +91,24 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, onCl
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, [visible, pokemonId]);
+  }, [visible, displayId]);
+
+  const switchToEvolution = useCallback((member: EvolutionChainMember) => {
+    setDisplayId(member.id);
+    setDisplayName(member.name);
+  }, []);
 
   const primaryType = data?.types[0] ?? 'normal';
   const cardColor = TYPE_COLORS[primaryType] ?? TYPE_COLORS.normal;
   const hp = data?.stats.find((s) => s.name === 'hp')?.value ?? '??';
+  const showChain = chain.length > 1;
 
   return (
     <Modal visible={visible} transparent animationType="fade">
       <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose}>
         <TouchableOpacity activeOpacity={1} style={[styles.card, { borderColor: cardColor }]}>
           <View style={[styles.header, { backgroundColor: cardColor }]}>
-            <Text style={styles.headerName}>{pokemonName}</Text>
+            <Text style={styles.headerName}>{displayName}</Text>
             <Text style={styles.headerHp}>HP {hp}</Text>
           </View>
 
@@ -102,10 +119,44 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, onCl
           ) : (
             <ScrollView contentContainerStyle={styles.cardBody} bounces={false}>
               <View style={[styles.artFrame, { borderColor: cardColor }]}>
-                <NetworkImage uri={getArtworkUrl(pokemonId)} style={styles.artwork} loaderSize={36} />
+                <NetworkImage uri={getArtworkUrl(displayId)} style={styles.artwork} loaderSize={36} />
               </View>
 
-              <Text style={styles.dexNumber}>#{String(pokemonId).padStart(3, '0')}</Text>
+              <Text style={styles.dexNumber}>#{String(displayId).padStart(3, '0')}</Text>
+
+              {showChain && (
+                <View style={styles.chainRow}>
+                  {chain.map((member, i) => (
+                    <React.Fragment key={member.id}>
+                      {i > 0 && <Text style={styles.chainArrow}>→</Text>}
+                      <TouchableOpacity
+                        activeOpacity={0.7}
+                        onPress={() => switchToEvolution(member)}
+                        style={[
+                          styles.chainItem,
+                          member.id === displayId && styles.chainItemActive,
+                          member.id === displayId && { borderColor: cardColor },
+                        ]}
+                      >
+                        <NetworkImage
+                          uri={getArtworkUrl(member.id)}
+                          style={styles.chainImage}
+                          loaderSize={12}
+                        />
+                        <Text
+                          style={[
+                            styles.chainName,
+                            member.id === displayId && styles.chainNameActive,
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {member.name}
+                        </Text>
+                      </TouchableOpacity>
+                    </React.Fragment>
+                  ))}
+                </View>
+              )}
 
               <View style={styles.typesRow}>
                 {data?.types.map((type) => (
@@ -230,6 +281,43 @@ const styles = StyleSheet.create({
     color: '#777',
     fontWeight: '700',
     marginBottom: 6,
+  },
+  chainRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  chainArrow: {
+    fontSize: 14,
+    color: '#999',
+    marginHorizontal: 2,
+  },
+  chainItem: {
+    alignItems: 'center',
+    padding: 4,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  chainItemActive: {
+    backgroundColor: 'rgba(0,0,0,0.06)',
+  },
+  chainImage: {
+    width: 40,
+    height: 40,
+  },
+  chainName: {
+    fontSize: 9,
+    color: '#999',
+    fontWeight: '600',
+    maxWidth: 56,
+  },
+  chainNameActive: {
+    color: '#444',
+    fontWeight: '700',
   },
   typesRow: {
     flexDirection: 'row',
