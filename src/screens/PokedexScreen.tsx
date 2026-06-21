@@ -17,6 +17,7 @@ import { getArtworkUrl } from '../utils/pokeApi';
 import { PokemonItem, StatName } from '../types';
 import NetworkImage from '../components/NetworkImage';
 import PokemonCardModal from '../components/PokemonCardModal';
+import ShimmerBadge from '../components/ShimmerBadge';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Pokedex'>;
 
@@ -74,6 +75,8 @@ export default function PokedexScreen({ navigation }: Props) {
         <Text style={styles.pokemonName} numberOfLines={1}>
           {item.name}
         </Text>
+        {!!item.isMythical && <ShimmerBadge label="Mythical" color="#D4A017" />}
+        {!!item.isLegendary && <ShimmerBadge label="Legendary" color="#7B2FF7" />}
       </TouchableOpacity>
     ),
     [cellSize],

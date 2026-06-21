@@ -16,14 +16,14 @@ export function getPokemonForGens(gens: number[]): PokemonItem[] {
   if (gens.length === 0) return [];
   const placeholders = gens.map(() => '?').join(',');
   return getDb().getAllSync<PokemonItem>(
-    `SELECT name, id as pokedexNumber FROM pokemon WHERE generation IN (${placeholders}) ORDER BY id`,
+    `SELECT name, id as pokedexNumber, is_legendary as isLegendary, is_mythical as isMythical FROM pokemon WHERE generation IN (${placeholders}) ORDER BY id`,
     gens
   );
 }
 
 export function getAllPokemon(): PokemonItem[] {
   return getDb().getAllSync<PokemonItem>(
-    'SELECT name, id as pokedexNumber FROM pokemon ORDER BY id'
+    'SELECT name, id as pokedexNumber, is_legendary as isLegendary, is_mythical as isMythical FROM pokemon ORDER BY id'
   );
 }
 

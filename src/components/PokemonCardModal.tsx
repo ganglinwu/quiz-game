@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,13 +7,13 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Animated,
 } from 'react-native';
 import { getArtworkUrl } from '../utils/pokeApi';
 import { getEvolutionChain, getPokemonMeta, type EvolutionChainMember } from '../data/pokemon-db';
 import { useAudio } from '../audio';
 import PokeballLoader from './PokeballLoader';
 import NetworkImage from './NetworkImage';
+import ShimmerBadge from './ShimmerBadge';
 
 const TYPE_COLORS: Record<string, string> = {
   normal: '#A8A77A',
@@ -58,45 +58,6 @@ const GEN_REGIONS: Record<number, { numeral: string; region: string }> = {
   5: { numeral: 'V', region: 'Unova' },
   6: { numeral: 'VI', region: 'Kalos' },
 };
-
-function ShimmerBadge({ label, color }: { label: string; color: string }) {
-  const shimmerAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.timing(shimmerAnim, {
-        toValue: 1,
-        duration: 2400,
-        useNativeDriver: true,
-      })
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [shimmerAnim]);
-
-  const translateX = shimmerAnim.interpolate({
-    inputRange: [0, 0.5, 1],
-    outputRange: [-60, 120, 120],
-  });
-
-  const sheenOpacity = shimmerAnim.interpolate({
-    inputRange: [0, 0.55, 0.7, 0.85, 1],
-    outputRange: [0, 0, 0.22, 0, 0],
-  });
-
-  return (
-    <View style={[styles.specialBadge, { backgroundColor: color }]}>
-      <Animated.View style={[styles.sheenOverlay, { opacity: sheenOpacity }]} />
-      <Animated.View
-        style={[
-          styles.shimmerStripe,
-          { transform: [{ translateX }, { rotate: '20deg' }] },
-        ]}
-      />
-      <Text style={styles.specialBadgeText}>{label}</Text>
-    </View>
-  );
-}
 
 function getCryUrl(name: string): string {
   const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -390,31 +351,6 @@ const styles = StyleSheet.create({
   genText: {
     fontSize: 11,
     fontWeight: '600',
-  },
-  specialBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 8,
-    marginBottom: 6,
-    overflow: 'hidden',
-  },
-  sheenOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#fff',
-  },
-  shimmerStripe: {
-    position: 'absolute',
-    top: -10,
-    bottom: -10,
-    width: 20,
-    backgroundColor: 'rgba(255,255,255,0.35)',
-  },
-  specialBadgeText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: 'bold',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
   },
   chainRow: {
     flexDirection: 'row',

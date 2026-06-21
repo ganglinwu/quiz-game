@@ -41,6 +41,8 @@ export type Category =
 export interface PokemonItem {
   name: string;
   pokedexNumber: number;
+  isLegendary?: number;
+  isMythical?: number;
 }
 
 export interface FruitItem {
