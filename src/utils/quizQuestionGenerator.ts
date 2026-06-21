@@ -115,9 +115,9 @@ function buildConstraintPool(
 
   const STAT_RANK_N = 20;
   const allowedStats: StatName[] =
-    filter.stats && filter.stats.length > 0
-      ? filter.stats
-      : ['hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed'];
+    filter.stats === undefined
+      ? ['hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed']
+      : filter.stats;
   for (const stat of allowedStats) {
     pool.push({ kind: 'statRank', stat, topN: STAT_RANK_N });
   }

@@ -87,7 +87,7 @@ export default function QuizFilterModal({ visible, onClose, filter, onFilterChan
   };
 
   const selectedStats = new Set(filter.stats ?? []);
-  const allStatsSelected = selectedStats.size === 0;
+  const allStatsSelected = filter.stats === undefined;
 
   const toggleStat = (stat: StatName) => {
     const next = new Set(selectedStats);
@@ -95,10 +95,6 @@ export default function QuizFilterModal({ visible, onClose, filter, onFilterChan
       STAT_OPTIONS.forEach((s) => { if (s.key !== stat) next.add(s.key); });
     } else if (next.has(stat)) {
       next.delete(stat);
-      if (next.size === 0) {
-        onFilterChange({ ...filter, stats: undefined });
-        return;
-      }
     } else {
       next.add(stat);
       if (next.size === STAT_OPTIONS.length) {
