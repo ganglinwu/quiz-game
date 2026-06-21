@@ -57,7 +57,7 @@ export class AudioManager {
 
   // --- SFX (independent, bypasses queue) ---
 
-  playSfx(source: AudioSource): void {
+  playSfx(source: AudioSource, onFinish?: () => void): void {
     try {
       const sfxPlayer = createAudioPlayer(source);
       sfxPlayer.volume = 0.5;
@@ -66,10 +66,12 @@ export class AudioManager {
       sfxPlayer.addListener('playbackStatusUpdate', (status) => {
         if (status.didJustFinish) {
           sfxPlayer.remove();
+          onFinish?.();
         }
       });
     } catch (e) {
       console.error('[AudioManager] SFX error:', e);
+      onFinish?.();
     }
   }
 

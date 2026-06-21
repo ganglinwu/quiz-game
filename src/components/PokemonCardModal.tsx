@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { getArtworkUrl } from '../utils/pokeApi';
 import { getEvolutionChain, type EvolutionChainMember } from '../data/pokemon-db';
+import { useAudio } from '../audio';
 import PokeballLoader from './PokeballLoader';
 import NetworkImage from './NetworkImage';
 
@@ -47,13 +48,20 @@ interface Props {
   onClose: () => void;
 }
 
+function getCryUrl(name: string): string {
+  const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return `https://play.pokemonshowdown.com/audio/cries/${slug}.mp3`;
+}
+
 export default function PokemonCardModal({ visible, pokemonName, pokemonId, onClose }: Props) {
+  const { manager } = useAudio();
   const [displayId, setDisplayId] = useState(pokemonId);
   const [displayName, setDisplayName] = useState(pokemonName);
   const [data, setData] = useState<PokemonApiData | null>(null);
   const [flavorText, setFlavorText] = useState('');
   const [loading, setLoading] = useState(true);
   const [chain, setChain] = useState<EvolutionChainMember[]>([]);
+  const [cryPlaying, setCryPlaying] = useState(false);
 
   useEffect(() => {
     if (!visible) return;
@@ -98,6 +106,12 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, onCl
     setDisplayName(member.name);
   }, []);
 
+  const playCry = useCallback(() => {
+    if (cryPlaying) return;
+    setCryPlaying(true);
+    manager.playSfx({ uri: getCryUrl(displayName) }, () => setCryPlaying(false));
+  }, [displayName, cryPlaying, manager]);
+
   const primaryType = data?.types[0] ?? 'normal';
   const cardColor = TYPE_COLORS[primaryType] ?? TYPE_COLORS.normal;
   const hp = data?.stats.find((s) => s.name === 'hp')?.value ?? '??';
@@ -118,9 +132,16 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, onCl
             </View>
           ) : (
             <ScrollView contentContainerStyle={styles.cardBody} bounces={false}>
-              <View style={[styles.artFrame, { borderColor: cardColor }]}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={playCry}
+                style={[styles.artFrame, { borderColor: cardColor }]}
+              >
                 <NetworkImage uri={getArtworkUrl(displayId)} style={styles.artwork} loaderSize={36} />
-              </View>
+                <View style={styles.cryIndicator}>
+                  <Text style={styles.cryIcon}>{cryPlaying ? '🔊' : '🔈'}</Text>
+                </View>
+              </TouchableOpacity>
 
               <Text style={styles.dexNumber}>#{String(displayId).padStart(3, '0')}</Text>
 
@@ -275,6 +296,20 @@ const styles = StyleSheet.create({
   artwork: {
     width: 160,
     height: 160,
+  },
+  cryIndicator: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cryIcon: {
+    fontSize: 11,
   },
   dexNumber: {
     fontSize: 13,
