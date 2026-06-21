@@ -6,6 +6,7 @@ import {
   Modal,
   StyleSheet,
   ScrollView,
+  Pressable,
 } from 'react-native';
 import { getArtworkUrl } from '../utils/pokeApi';
 import { getEvolutionChain, type EvolutionChainMember } from '../data/pokemon-db';
@@ -119,8 +120,8 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, onCl
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose}>
-        <TouchableOpacity activeOpacity={1} style={[styles.card, { borderColor: cardColor }]}>
+      <Pressable style={styles.backdrop} onPress={onClose}>
+        <Pressable style={[styles.card, { borderColor: cardColor }]} onPress={(e) => e.stopPropagation()}>
           <View style={[styles.header, { backgroundColor: cardColor }]}>
             <Text style={styles.headerName}>{displayName}</Text>
             <Text style={styles.headerHp}>HP {hp}</Text>
@@ -131,7 +132,7 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, onCl
               <PokeballLoader size={52} />
             </View>
           ) : (
-            <ScrollView contentContainerStyle={styles.cardBody} bounces={false}>
+            <ScrollView contentContainerStyle={styles.cardBody}>
               <TouchableOpacity
                 activeOpacity={0.7}
                 onPress={playCry}
@@ -222,8 +223,8 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, onCl
               {flavorText !== '' && <Text style={styles.flavorText}>{flavorText}</Text>}
             </ScrollView>
           )}
-        </TouchableOpacity>
-      </TouchableOpacity>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }
@@ -252,11 +253,12 @@ const styles = StyleSheet.create({
   },
   card: {
     width: 300,
-    maxHeight: '80%',
+    maxHeight: '85%',
     backgroundColor: '#f5f0e1',
     borderRadius: 16,
     borderWidth: 5,
     overflow: 'hidden',
+    flexShrink: 1,
   },
   header: {
     flexDirection: 'row',
@@ -284,6 +286,7 @@ const styles = StyleSheet.create({
   },
   cardBody: {
     padding: 14,
+    paddingBottom: 20,
     alignItems: 'center',
   },
   artFrame: {
