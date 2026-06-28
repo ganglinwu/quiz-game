@@ -64,6 +64,11 @@ export function buildBaselineQuery(
   };
   if (!filter.includeLegendary) query.isLegendary = false;
   if (!filter.includeMythical) query.isMythical = false;
+  // Mono/Dual ("Type Pairing") is a global filter like legendary/mythical. When
+  // the user picks Mono or Dual it is dropped from the per-question constraint
+  // pool (see buildConstraintPool) and applied here so it restricts the whole
+  // answer pool; "Any" leaves it unset so dual/mono can appear as a constraint.
+  if (filter.allowDualType !== undefined) query.isDualType = filter.allowDualType;
   return query;
 }
 
