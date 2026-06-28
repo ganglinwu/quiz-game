@@ -92,6 +92,7 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, gene
 
   useEffect(() => {
     if (!visible) return;
+    let cancelled = false;
     setLoading(true);
     setData(null);
     setFlavorText('');
@@ -106,6 +107,11 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, gene
       fetch(`https://pokeapi.co/api/v2/pokemon-species/${displayId}`).then((r) => r.json()),
     ])
       .then(([pokemon, species]) => {
+        // A newer evolution member may have been tapped while this request was
+        // in flight; ignore the stale response so the body (types/stats/size)
+        // can't end up describing a different Pokemon than the header + artwork,
+        // which track displayId synchronously.
+        if (cancelled) return;
         setData({
           types: pokemon.types.map((t: any) => t.type.name),
           stats: pokemon.stats.map((s: any) => ({
@@ -123,7 +129,13 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, gene
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [visible, displayId]);
 
   const switchToEvolution = useCallback((member: EvolutionChainMember) => {

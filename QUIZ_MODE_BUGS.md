@@ -4,7 +4,7 @@ _Static code audit + SQLite verification against `assets/quiz.db`. No app run (n
 
 Bug #1 from the original request (evolution-stage classification ignoring the active generation, e.g. Pikachu being treated as "middle" because of Pichu) was **already fixed** in the previous iteration (commit `c75bcf1`). That fix was re-verified and holds — see "What I verified as correct" at the bottom.
 
-This report covers the **other bugs** found while tracing the quiz-mode code paths. The original request also asked me to "click through the app and see if you find any other bugs," so a **whole-app pass beyond quiz mode** has been added at the bottom — see **[Whole-app pass (beyond quiz mode)](#whole-app-pass-beyond-quiz-mode)**, which includes a **High-severity** broken-feature bug (the "Remove generation" button). Four further passes follow it: a **[Pokédex & card-modal pass](#pokédex--card-modal-pass-ui-subsystems)** (Bugs 10–14 — **Bug 10 now fixed**: the Pokédex search box was silently ignored whenever a stat filter was active; search now narrows the stat-ranked list too), a **[Voice input pass](#voice-input-pass-micbutton--speech-recognition)** (Bugs 15–16, verified against the `expo-speech-recognition` native iOS source — **now both fixed**: the mic no longer soft-locks on an unrecognized utterance and a release-before-start no longer orphans a recognition session), an **[Evolution-chain display pass](#evolution-chain-display-pass-your-original-example-in-the-card-modal)** (Bug 17) — most relevant to your original complaint — and a **[Core reducer / turn-order pass](#core-reducer--turn-order-pass-the-game-state-machine)** (Bug 18), which audits the game state machine itself and found — and **now fixes** — a **gameplay** bug: in a 3+ player game, a mid-order player giving up sent the turn to the wrong player. **Bug 17 was your exact example resurfacing**: the Pokémon card modal still showed `Pichu → Pikachu → Raichu` in a Gen-1 context, because the iteration-1 fix corrected quiz-mode *stage classification* but the card modal's *displayed chain* was never gen-scoped. **Bug 17 is now fixed** — the card modal's evolution chain is generation-scoped, so a Gen-1 context shows `Pikachu → Raichu`. See the [Bug 17 section](#bug-17--card-modal-evolution-chain-ignores-the-active-generation-medium) for the implementation and verification.
+This report covers the **other bugs** found while tracing the quiz-mode code paths. The original request also asked me to "click through the app and see if you find any other bugs," so a **whole-app pass beyond quiz mode** has been added at the bottom — see **[Whole-app pass (beyond quiz mode)](#whole-app-pass-beyond-quiz-mode)**, which includes a **High-severity** broken-feature bug (the "Remove generation" button). Four further passes follow it: a **[Pokédex & card-modal pass](#pokédex--card-modal-pass-ui-subsystems)** (Bugs 10–14 — **Bug 10 now fixed**: the Pokédex search box was silently ignored whenever a stat filter was active, search now narrows the stat-ranked list too; **Bug 11 now fixed**: the card modal's evolution-member fetch is now cancellation-guarded so a stale response can't show one Pokémon's stats under another's name/artwork; **Bug 13 re-classified as masked** — a genuine `NetworkImage` code smell that a full call-site audit shows never actually manifests today), a **[Voice input pass](#voice-input-pass-micbutton--speech-recognition)** (Bugs 15–16, verified against the `expo-speech-recognition` native iOS source — **now both fixed**: the mic no longer soft-locks on an unrecognized utterance and a release-before-start no longer orphans a recognition session), an **[Evolution-chain display pass](#evolution-chain-display-pass-your-original-example-in-the-card-modal)** (Bug 17) — most relevant to your original complaint — and a **[Core reducer / turn-order pass](#core-reducer--turn-order-pass-the-game-state-machine)** (Bug 18), which audits the game state machine itself and found — and **now fixes** — a **gameplay** bug: in a 3+ player game, a mid-order player giving up sent the turn to the wrong player. **Bug 17 was your exact example resurfacing**: the Pokémon card modal still showed `Pichu → Pikachu → Raichu` in a Gen-1 context, because the iteration-1 fix corrected quiz-mode *stage classification* but the card modal's *displayed chain* was never gen-scoped. **Bug 17 is now fixed** — the card modal's evolution chain is generation-scoped, so a Gen-1 context shows `Pikachu → Raichu`. See the [Bug 17 section](#bug-17--card-modal-evolution-chain-ignores-the-active-generation-medium) for the implementation and verification.
 
 ## Summary
 
@@ -260,9 +260,9 @@ The two passes above cover quiz logic and the core Pokémon/result/stats flow. T
 | # | Bug | Severity | Status |
 |---|-----|----------|--------|
 | 10 | **Pokédex search box is silently ignored whenever a stat filter is active** | Medium | **Fixed** |
-| 11 | Card modal: switching evolution members has no fetch cancellation — out-of-order responses can show the wrong Pokémon's stats | Low | Confirmed |
+| 11 | Card modal: switching evolution members has no fetch cancellation — out-of-order responses can show the wrong Pokémon's stats | Low | **Fixed** |
 | 12 | Card modal: a failed PokeAPI fetch renders a blank "normal-type" card with 0.0 m / 0.0 kg and no error/retry | Low | Confirmed |
-| 13 | `NetworkImage` doesn't reset on `uri` change — swapping artwork shows the previous image with no loader | Low | Confirmed |
+| 13 | `NetworkImage` doesn't reset on `uri` change — swapping artwork shows the previous image with no loader | Low | **Masked** (not reproducible in current usage) |
 | 14 | `PlayerSetupScreen` mutates the route-param `category.generations` array in place during render (`.sort()`) | Low | Confirmed |
 
 ---
@@ -339,20 +339,28 @@ useEffect(() => {
 
 It's transient and self-corrects on the next interaction, hence **Low** — but it's a genuine stale-response race. (The cross-*open* variant doesn't apply: both call sites — `ResultScreen.tsx:189` and `PokedexScreen.tsx:177` — render the modal as `{selected && <PokemonCardModal … />}`, so it unmounts on close and remounts fresh each open.)
 
-**Recommended fix (standard):** guard with a cancelled flag (or `AbortController`):
+> **Note — the `loading` toggle does *not* mask this.** One might think the full-card `PokeballLoader` (`:154`) that shows while `loading` is true prevents the race, but it doesn't: each fetch's `.then` calls **both** `setData(...)` and `setLoading(false)`, so when the stale (older) response lands *after* the fresh one, it overwrites `data` and re-clears `loading` — the body then describes the old Pokémon under the new header/artwork. (Contrast **Bug 13** below, which the same `loading` toggle *does* mask, because that unmounts the artwork `NetworkImage` entirely.)
+
+**Fix applied (standard, low risk).** The fetch effect now guards its `.then`/`.catch` with a `cancelled` flag set by the effect's cleanup, so a superseded request can no longer write state (`PokemonCardModal.tsx:93-135`):
 
 ```ts
 useEffect(() => {
   if (!visible) return;
   let cancelled = false;
-  // …
-  Promise.all([...]).then(([pokemon, species]) => {
-    if (cancelled) return;
-    setData(…); setLoading(false);
-  }).catch(() => { if (!cancelled) setLoading(false); });
-  return () => { cancelled = true; };
+  setLoading(true); setData(null); setFlavorText('');
+  // …meta + Promise.all([...])
+    .then(([pokemon, species]) => {
+      if (cancelled) return;          // ← stale response from a previous member: drop it
+      setData(…); /* flavor */ setLoading(false);
+    })
+    .catch(() => { if (!cancelled) setLoading(false); });
+  return () => { cancelled = true; };  // ← supersede the in-flight request on displayId change
 }, [visible, displayId]);
 ```
+
+Each `displayId` change runs the previous effect's cleanup (flipping its `cancelled` to `true`) before the new fetch starts, so whichever response lands last, only the **current** member's data is committed — header, artwork, and body now always agree. Closing the modal (`visible` false) also cancels cleanly.
+
+**Verification.** `npx tsc --noEmit` passes. Traced both interleavings (old-resolves-last and new-resolves-last) through the per-run closure: the stale run's `.then` early-returns on its own `cancelled`, the fresh run commits normally; no double `setLoading(false)`, no cross-member `data`.
 
 ---
 
@@ -364,11 +372,20 @@ When the PokeAPI request fails (offline, rate-limited, 404), the catch only flip
 
 ---
 
-## Bug 13 — `NetworkImage` doesn't reset when its `uri` changes (Low)
+## Bug 13 — `NetworkImage` doesn't reset when its `uri` changes (Low / **masked — not reproducible in current usage**)
 
 **Where:** `src/components/NetworkImage.tsx` (`loaded` state + `opacity` ref).
 
-`NetworkImage` tracks `loaded` (starts `false`, set `true` on the first `onLoad`) and fades the image in via an `opacity` Animated value. Neither is keyed to `uri`, so when the **same instance** gets a new `uri` — exactly what happens for the main artwork when you tap through the evolution chain in the card modal (`PokemonCardModal.tsx:159`, no `key`) — `loaded` stays `true` and `opacity` stays `1`. Result: the PokeballLoader never reappears and the **previous** Pokémon's artwork stays visible until the new image finishes loading. Minor visual glitch (**Low**). **Fix:** reset on uri change (`useEffect(() => { setLoaded(false); opacity.setValue(0); }, [uri])`) or pass `key={uri}` at the call site to force a remount.
+**The latent code smell is real:** `NetworkImage` tracks `loaded` (starts `false`, set `true` on the first `onLoad`) and fades the image in via an `opacity` Animated value. Neither is keyed to `uri`, so if the **same instance** ever received a new `uri`, `loaded` would stay `true` / `opacity` `1` and the **previous** artwork would linger with no loader until the new image downloaded.
+
+**But a full call-site audit shows it never actually manifests today.** Every one of the five `NetworkImage` usages avoids the bad path:
+
+- **Card modal — main artwork** (`PokemonCardModal.tsx:165`, uri = `getArtworkUrl(displayId)`): the uri *does* change when you tap an evolution member, **but** the `loading` toggle (`:154`) unmounts the entire `ScrollView` (and this `NetworkImage` with it) for the duration of the fetch, then remounts it fresh — so the instance never survives a uri change. _(This is the inverse of **Bug 11**: the same `loading` toggle that masks this stale-image glitch does **not** mask Bug 11's stale-data race, because Bug 11 is about `setData` after the toggle clears.)_
+- **Card modal — chain thumbnails** (`:197`, uri = `getArtworkUrl(member.id)`): each thumbnail's `member.id` is fixed for the life of the chain row, so its uri never changes.
+- **`HintOverlay.tsx:32`** and **`ResultScreen.tsx:63`** (silhouette ↔ revealed): both pass an explicit `key={isSilhouette ? … }` / `key={revealed ? … }`, which **forces a remount** on the only state change that matters (same uri, tint added/removed) — sidestepping the reset problem deliberately.
+- **`PokedexScreen.tsx:71`** and **`ResultScreen.tsx:83`**: grid/list items with a stable per-item uri.
+
+**Decision: left unfixed (not a live bug).** Because no call site exposes the bad path, adding the obvious reset (`useEffect(() => { setLoaded(false); opacity.setValue(0); }, [uri])`) would be a defensive no-op that changes no observable behavior — so per "don't touch code that isn't part of a real fix," it's deferred. It's worth keeping the one-line reset in mind **only if** a future change starts reusing a `NetworkImage` instance across uris without a `key` (e.g. dropping the card-modal `loading` full-card loader so the old card stays visible during the fetch) — that change would immediately make this manifest.
 
 ---
 
