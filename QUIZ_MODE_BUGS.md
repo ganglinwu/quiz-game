@@ -4,7 +4,7 @@ _Static code audit + SQLite verification against `assets/quiz.db`. No app run (n
 
 Bug #1 from the original request (evolution-stage classification ignoring the active generation, e.g. Pikachu being treated as "middle" because of Pichu) was **already fixed** in the previous iteration (commit `c75bcf1`). That fix was re-verified and holds — see "What I verified as correct" at the bottom.
 
-This report covers the **other bugs** found while tracing the quiz-mode code paths. The original request also asked me to "click through the app and see if you find any other bugs," so a **whole-app pass beyond quiz mode** has been added at the bottom — see **[Whole-app pass (beyond quiz mode)](#whole-app-pass-beyond-quiz-mode)**, which includes a **High-severity** broken-feature bug (the "Remove generation" button). Two further passes follow it: a **[Pokédex & card-modal pass](#pokédex--card-modal-pass-ui-subsystems)** (Bugs 10–14) and a **[Voice input pass](#voice-input-pass-micbutton--speech-recognition)** (Bugs 15–16), the latter verified against the `expo-speech-recognition` native iOS source.
+This report covers the **other bugs** found while tracing the quiz-mode code paths. The original request also asked me to "click through the app and see if you find any other bugs," so a **whole-app pass beyond quiz mode** has been added at the bottom — see **[Whole-app pass (beyond quiz mode)](#whole-app-pass-beyond-quiz-mode)**, which includes a **High-severity** broken-feature bug (the "Remove generation" button). Three further passes follow it: a **[Pokédex & card-modal pass](#pokédex--card-modal-pass-ui-subsystems)** (Bugs 10–14), a **[Voice input pass](#voice-input-pass-micbutton--speech-recognition)** (Bugs 15–16, verified against the `expo-speech-recognition` native iOS source), and — most relevant to your original complaint — an **[Evolution-chain display pass](#evolution-chain-display-pass-your-original-example-in-the-card-modal)** (Bug 17). **Bug 17 is your exact example resurfacing**: the Pokémon card modal still shows `Pichu → Pikachu → Raichu` in a Gen-1 context, because the iteration-1 fix corrected quiz-mode *stage classification* but the card modal's *displayed chain* was never gen-scoped.
 
 ## Summary
 
@@ -379,7 +379,7 @@ When the PokeAPI request fails (offline, rate-limited, 404), the catch only flip
 
 - **Pokédex generation + stat compose correctly:** `selectedGen` is passed into both `getPokemonForGens` and `queryPokemon(statRank)`, so "Gen 2 + Top 20 Speed" is genuinely Gen-2-scoped; only *search* (Bug 10) is dropped.
 - **`'pokedex'` BGM track is registered** (`tracks.ts:8` → `yellow-opening.mp3`), so `useBGM('pokedex')` resolves and the `TRACK_REGISTRY.get(...) → if (!track) return` guard isn't hit.
-- **Card modal evolution chain is built once from the family base** (`getEvolutionChain(pokemonId)` on open) and correctly *not* re-fetched when switching members — every member shares one chain, so the BFS-ordered list (Pichu→Pikachu→Raichu) stays stable while you tap through it.
+- **Card modal evolution chain is built once from the family base** (`getEvolutionChain(pokemonId)` on open) and correctly *not* re-fetched when switching members — every member shares one chain, so the BFS-ordered list (Pichu→Pikachu→Raichu) stays stable while you tap through it. _(The **mechanics** here — one build, no re-fetch — are correct; but the chain's **content** is the full real-world chain regardless of the active generation, which is itself **[Bug 17](#evolution-chain-display-pass-your-original-example-in-the-card-modal)** — your original `Pichu→Pikachu→Raichu` complaint. I'd previously logged this as correct; Bug 17 is the correction.)_
 - **Player-name validation** is sound: blanks default to `Player N`, the duplicate check is case-insensitive (`toLowerCase()`), and color assignment by index is safe (`PLAYER_COLORS` has ≥ `MAX_PLAYERS` entries).
 
 ---
@@ -484,3 +484,79 @@ This makes a release-before-start a true cancel, and a normal hold still starts 
 - **Speech ↔ BGM bridge is edge-triggered correctly:** `useAudioSpeechBridge` uses a `prevRef` so `notifySpeechStart`/`notifySpeechEnd` fire exactly once per `isListening` transition, and the `resume` command re-arms the iOS audio session (`setAudioModeAsync`) before replaying — the documented session-reclaim. (The one gap is upstream: Bug 15 means `isListening` can fail to flip back to `false`, so the *resume never gets requested* — the bridge itself is fine.)
 - **Mic gesture happy path** (hold ≥ 300 ms → `audiostart` → spinner becomes pulsing "ready" → speak → `result` isFinal → `processInput`) and the safety timeout (2 s fallback to "ready", cleared on transition/unmount) are correct.
 - **Minor caveat (not filed as a bug):** `playSfx` samples `this.isMuted` at player-creation time, so toggling mute *during* a one-shot SFX (e.g. the ~1 s hint-success jingle) won't take effect until the next SFX. Cosmetic only.
+
+---
+
+# Evolution-chain display pass (your original example, in the card modal)
+
+This last pass circles back to **bug #1 from your original message** — _"the evolve chain especially when we limit the quiz to a certain generation. for example pichu → pikachu → raichu but realistically in generation 1 it is only pikachu → raichu."_
+
+The iteration-1 fix (commit `c75bcf1`) resolved this for **quiz-mode logic**: the evolution-*stage* constraint (`base`/`middle`/`final`) is now generation-scoped, so Pikachu is correctly classed **base** in a Gen-1 quiz instead of **middle** (because Pichu is excluded). That fix is correct and holds.
+
+But your literal example — the *visible chain* reading `Pichu → Pikachu → Raichu` — lives in a **different** code path that the iteration-1 fix never touched: the **Pokémon card modal**. That path is still wrong, so I'm filing it explicitly.
+
+| # | Bug | Severity | Status |
+|---|-----|----------|--------|
+| 17 | **Card modal shows the full real-world evolution chain, ignoring the active generation — so a Gen-1 context still displays `Pichu → Pikachu → Raichu`** | Medium | Confirmed (DB-verified) |
+
+---
+
+## Bug 17 — Card-modal evolution chain ignores the active generation (Medium)
+
+**Where:** `src/data/pokemon-db.ts:81-110` (`getEvolutionChain`), called at `src/components/PokemonCardModal.tsx:84`; rendered from `src/screens/ResultScreen.tsx:190` and `src/screens/PokedexScreen.tsx:178`.
+
+**What happens:** Open any Pokémon's card in a Gen-1 context and the evolution chain you tap through includes Pokémon from **later** generations. Your exact example: tap **Pikachu** and the chain shows **Pichu → Pikachu → Raichu**, even though Pichu is a **Gen-2** Pokémon and "in Gen 1 it's only Pikachu → Raichu."
+
+**Why:** `getEvolutionChain(pokemonId)` takes only a Pokémon id — **no generation parameter** — and returns *every* member sharing that `evolution_chain_id`, BFS-ordered from the null-parent base:
+
+```ts
+// pokemon-db.ts:87-90  — pulls the WHOLE chain, no generation filter
+const members = getDb().getAllSync(
+  'SELECT id, name, evolves_from_id FROM pokemon WHERE evolution_chain_id = ?',
+  [chainRow.evolution_chain_id]
+);
+```
+
+Neither call site can fix this from the outside: `PokemonCardModal`'s `Props` (`PokemonCardModal.tsx:46-51`) is `{ visible, pokemonName, pokemonId, onClose }` — there is **no way to pass which generations are active**, so the modal can't scope the chain even though both screens know the context (the Result screen has `state.activeGenerations`; the Pokédex has its `selectedGen` filter).
+
+**Repro (deterministic, click-through):** Home → **Pokédex** → set the generation filter to **Gen 1** → tap **Pikachu**. The card's evolution row shows **Pichu → Pikachu → Raichu** — a Gen-2 Pokémon (Pichu) displayed while you're explicitly browsing **Gen 1**. (Also reachable from the post-game learning section after a Gen-1-only quiz: tap any revealed Gen-1 Pokémon with a cross-gen relative.)
+
+**Evidence (`assets/quiz.db`):** chain `10` holds all three, and Pichu is Gen 2:
+
+```
+id   name     generation  evolves_from_id
+25   Pikachu  1           172 (Pichu)
+26   Raichu   1           25  (Pikachu)
+172  Pichu    2           NULL          <- the BFS base, so the chain RENDERS as Pichu → Pikachu → Raichu
+```
+
+This is **not a one-off**: **39 of 151 Gen-1 Pokémon (26%)** have a card chain that pulls in a later-generation member. A few of the most familiar:
+
+```
+Pikachu / Raichu      ← Pichu (Gen 2)
+Clefairy / Clefable   ← Cleffa (Gen 2)
+Jigglypuff/Wigglytuff ← Igglybuff (Gen 2)
+Eevee + all eeveelutions ← Espeon, Umbreon (Gen 2)  [and Leafeon/Glaceon/Sylveon in later gens]
+Onix → Steelix (Gen 2),  Scyther → Scizor (Gen 2),  Magnemite/Magneton → Magnezone (Gen 4)
+```
+
+**Is it a bug or a design choice? — your call.** Two honest readings:
+
+- **It's the bug you reported.** You stated the expectation plainly: in a Gen-1 context the chain should be Pikachu → Raichu. By that standard this is the same defect as #1, just in the display path, and it's the most on-topic finding in this whole report.
+- **It's arguably intentional for the card.** Unlike the quiz (which scores answers), the card modal is a *"learn about this Pokémon"* surface that fetches live PokeAPI data. Showing the **complete** real-world family (including that Pikachu *does* evolve from Pichu in later games) is defensible as educational — and tapping Pichu to read its card is a feature, not a leak.
+
+Because it's a genuine product decision (and because you asked me to *surface* the post-fix findings rather than change more code), I did **not** patch it. **If you want it gen-scoped, here's the shape of the fix** (medium, low-risk):
+
+1. Give `getEvolutionChain` an optional `generations?: number[]` and, when present, filter members with the **same gen-relative logic the iteration-1 fix already uses** for stage classification — i.e. drop members whose generation isn't active, but keep the chain contiguous (if an *intermediate* member is inactive you must decide whether to bridge or split; for the baby-Pokémon case here the inactive member is always the *base*, so a simple `WHERE generation IN (...)` filter yields the correct Pikachu → Raichu).
+2. Add `generations` to `PokemonCardModal`'s `Props` and thread it from both call sites: `state.activeGenerations` at `ResultScreen.tsx:190`, and `selectedGen ? [selectedGen] : <all>` at `PokedexScreen.tsx:178`.
+3. Leave `getEvolutionChain` gen-agnostic when no `generations` are passed, so any all-gens caller is unchanged.
+
+Edge case to decide with the design: a chain whose **active** members are non-contiguous (an inactive Pokémon sits *between* two active ones). None of the Gen-1 baby-Pokémon cases hit this (the inactive member is always the base), but a general fix should pick a rule — bridge across the gap, or render the chain as separate segments.
+
+---
+
+## Evolution-chain display — what I verified as correct
+
+- **The iteration-1 quiz fix is unaffected and still correct.** Bug 17 is purely about the card modal's *display*; the quiz's stage classification, generation, and per-constraint feedback paths remain gen-scoped as fixed.
+- **`getEvolutionChain` itself is otherwise correct:** the BFS from the null-parent base produces the right order, branchy chains (Eevee's many evolutions all hang off Eevee) are handled by the `byParent` multimap, and single-member families short-circuit (`members.length <= 1`).
+- **Reachability confirmed by code, not run:** both modal call sites are `{selected && <PokemonCardModal .../>}` and pass a real `pokemonId`, and `getEvolutionChain` is invoked unconditionally on open (`PokemonCardModal.tsx:84`), so the full chain is always what renders — there is no other filter between the DB and the chain row.
