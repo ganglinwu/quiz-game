@@ -4,7 +4,7 @@ _Static code audit + SQLite verification against `assets/quiz.db`. No app run (n
 
 Bug #1 from the original request (evolution-stage classification ignoring the active generation, e.g. Pikachu being treated as "middle" because of Pichu) was **already fixed** in the previous iteration (commit `c75bcf1`). That fix was re-verified and holds — see "What I verified as correct" at the bottom.
 
-This report covers the **other bugs** found while tracing the quiz-mode code paths. The original request also asked me to "click through the app and see if you find any other bugs," so a **whole-app pass beyond quiz mode** has been added at the bottom — see **[Whole-app pass (beyond quiz mode)](#whole-app-pass-beyond-quiz-mode)**, which includes a **High-severity** broken-feature bug (the "Remove generation" button). Four further passes follow it: a **[Pokédex & card-modal pass](#pokédex--card-modal-pass-ui-subsystems)** (Bugs 10–14 — **Bug 10 now fixed**: the Pokédex search box was silently ignored whenever a stat filter was active, search now narrows the stat-ranked list too; **Bug 11 now fixed**: the card modal's evolution-member fetch is now cancellation-guarded so a stale response can't show one Pokémon's stats under another's name/artwork; **Bug 13 re-classified as masked** — a genuine `NetworkImage` code smell that a full call-site audit shows never actually manifests today), a **[Voice input pass](#voice-input-pass-micbutton--speech-recognition)** (Bugs 15–16, verified against the `expo-speech-recognition` native iOS source — **now both fixed**: the mic no longer soft-locks on an unrecognized utterance and a release-before-start no longer orphans a recognition session), an **[Evolution-chain display pass](#evolution-chain-display-pass-your-original-example-in-the-card-modal)** (Bug 17) — most relevant to your original complaint — and a **[Core reducer / turn-order pass](#core-reducer--turn-order-pass-the-game-state-machine)** (Bug 18), which audits the game state machine itself and found — and **now fixes** — a **gameplay** bug: in a 3+ player game, a mid-order player giving up sent the turn to the wrong player. **Bug 17 was your exact example resurfacing**: the Pokémon card modal still showed `Pichu → Pikachu → Raichu` in a Gen-1 context, because the iteration-1 fix corrected quiz-mode *stage classification* but the card modal's *displayed chain* was never gen-scoped. **Bug 17 is now fixed** — the card modal's evolution chain is generation-scoped, so a Gen-1 context shows `Pikachu → Raichu`. See the [Bug 17 section](#bug-17--card-modal-evolution-chain-ignores-the-active-generation-medium) for the implementation and verification.
+This report covers the **other bugs** found while tracing the quiz-mode code paths. The original request also asked me to "click through the app and see if you find any other bugs," so a **whole-app pass beyond quiz mode** has been added at the bottom — see **[Whole-app pass (beyond quiz mode)](#whole-app-pass-beyond-quiz-mode)**, which includes a **High-severity** broken-feature bug (the "Remove generation" button). Four further passes follow it: a **[Pokédex & card-modal pass](#pokédex--card-modal-pass-ui-subsystems)** (Bugs 10–14 — **Bug 10 now fixed**: the Pokédex search box was silently ignored whenever a stat filter was active, search now narrows the stat-ranked list too; **Bug 11 now fixed**: the card modal's evolution-member fetch is now cancellation-guarded so a stale response can't show one Pokémon's stats under another's name/artwork; **Bug 13 re-classified as masked** — a genuine `NetworkImage` code smell that a full call-site audit shows never actually manifests today; **Bug 14 now fixed** — `PlayerSetupScreen` no longer mutates the route-param `generations` array in place during render), a **[Voice input pass](#voice-input-pass-micbutton--speech-recognition)** (Bugs 15–16, verified against the `expo-speech-recognition` native iOS source — **now both fixed**: the mic no longer soft-locks on an unrecognized utterance and a release-before-start no longer orphans a recognition session), an **[Evolution-chain display pass](#evolution-chain-display-pass-your-original-example-in-the-card-modal)** (Bug 17) — most relevant to your original complaint — and a **[Core reducer / turn-order pass](#core-reducer--turn-order-pass-the-game-state-machine)** (Bug 18), which audits the game state machine itself and found — and **now fixes** — a **gameplay** bug: in a 3+ player game, a mid-order player giving up sent the turn to the wrong player. **Bug 17 was your exact example resurfacing**: the Pokémon card modal still showed `Pichu → Pikachu → Raichu` in a Gen-1 context, because the iteration-1 fix corrected quiz-mode *stage classification* but the card modal's *displayed chain* was never gen-scoped. **Bug 17 is now fixed** — the card modal's evolution chain is generation-scoped, so a Gen-1 context shows `Pikachu → Raichu`. See the [Bug 17 section](#bug-17--card-modal-evolution-chain-ignores-the-active-generation-medium) for the implementation and verification.
 
 ## Summary
 
@@ -161,7 +161,7 @@ The original request was "click through the app and see if you find any other bu
 | # | Bug | Severity | Status |
 |---|-----|----------|--------|
 | 6 | **"Remove generation" button doesn't remove — it re-adds the gen (duplicate) and the vote even says "Add"** | **High** | Confirmed |
-| 7 | `state.activeGenerations.sort()` mutates reducer state during render | Low | Confirmed |
+| 7 | `state.activeGenerations.sort()` mutates reducer state during render | Low | **Fixed** |
 | 8 | Per-turn stats: first turn includes pre-game time; a give-up inflates the next player's turn time | Low | Confirmed |
 | 9 | "Try these next time!" post-game suggestions ignore the quiz filters | Low (design) | Confirmed |
 
@@ -212,7 +212,19 @@ const categoryLabel = isPokemon
   : 'Fruits';
 ```
 
-`Array.prototype.sort` sorts **in place**, so this mutates the `activeGenerations` array held in reducer state, during render. Reducer state must be treated as immutable; mutating it during render is a React anti-pattern (can tear under StrictMode/concurrent rendering and makes the state object lie about its own contents). In practice it's currently benign because the sort is idempotent and query order doesn't matter — but it's latent, and it's what turns Bug 6's duplicate into the visible `1, 2, 2` ordering. **Fix:** copy before sorting — `[...state.activeGenerations].sort((a, b) => a - b)`.
+`Array.prototype.sort` sorts **in place**, so this mutates the `activeGenerations` array held in reducer state, during render. Reducer state must be treated as immutable; mutating it during render is a React anti-pattern (can tear under StrictMode/concurrent rendering and makes the state object lie about its own contents). In practice it's currently benign because the sort is idempotent and query order doesn't matter — but it's latent, and it's what turns Bug 6's duplicate into the visible `1, 2, 2` ordering.
+
+**Fix applied (one-line, behavior-preserving).** The array is now copied before sorting (`GameScreen.tsx:363`):
+
+```ts
+const categoryLabel = isPokemon
+  ? `Pokemon Gen ${[...state.activeGenerations].sort((a, b) => a - b).join(', ')}`
+  : 'Fruits';
+```
+
+`[...state.activeGenerations]` produces a fresh array, so `sort()` no longer touches reducer state. The displayed label is identical (same numeric sort, same join), so this is purely the removal of the render-time mutation hazard.
+
+**Verification.** `npx tsc --noEmit` passes. A repo-wide grep for in-place `.sort()` on shared/state arrays confirms the only two genuine cases were this and Bug 14 (the `HomeScreen` sorts are on a fresh `Array.from(selectedGens)`, so they're safe).
 
 ---
 
@@ -263,7 +275,7 @@ The two passes above cover quiz logic and the core Pokémon/result/stats flow. T
 | 11 | Card modal: switching evolution members has no fetch cancellation — out-of-order responses can show the wrong Pokémon's stats | Low | **Fixed** |
 | 12 | Card modal: a failed PokeAPI fetch renders a blank "normal-type" card with 0.0 m / 0.0 kg and no error/retry | Low | Confirmed |
 | 13 | `NetworkImage` doesn't reset on `uri` change — swapping artwork shows the previous image with no loader | Low | **Masked** (not reproducible in current usage) |
-| 14 | `PlayerSetupScreen` mutates the route-param `category.generations` array in place during render (`.sort()`) | Low | Confirmed |
+| 14 | `PlayerSetupScreen` mutates the route-param `category.generations` array in place during render (`.sort()`) | Low | **Fixed** |
 
 ---
 
@@ -397,7 +409,20 @@ When the PokeAPI request fails (offline, rate-limited, 404), the catch only flip
 `Pokemon Gen ${category.generations.sort().join(', ')}`
 ```
 
-`Array.prototype.sort` sorts **in place**, so this mutates `category.generations` — an array that lives on the navigation route params — during render. Same anti-pattern family as **Bug 7** (`GameScreen.tsx:362`): currently benign (idempotent sort, order irrelevant) but it mutates shared state on the render path. **Fix:** `[...category.generations].sort(…)`.
+`Array.prototype.sort` sorts **in place**, so this mutates `category.generations` — an array that lives on the navigation route params — during render. Same anti-pattern family as **Bug 7** (`GameScreen.tsx:362`): currently benign (idempotent sort, order irrelevant) but it mutates shared state on the render path. The subtitle referenced it **twice** (the quiz and non-quiz ternary branches), so it mutated the route-param array on every render in either branch.
+
+**Fix applied (behavior-preserving).** A single sorted-copy label is computed once at the top of the component and reused in both branches (`PlayerSetupScreen.tsx:32-36`):
+
+```ts
+const genLabel =
+  category.type === 'pokemon'
+    ? [...category.generations].sort().join(', ')
+    : '';
+```
+
+The `category.type === 'pokemon'` guard is required because `Category` is a discriminated union (`generations` exists only on the pokemon variant), so an unconditional access fails type-narrowing. `[...category.generations]` copies before sorting, so the route-param array is no longer mutated; the existing (bare) comparator is preserved so the label is byte-for-byte identical (gens are single-digit, so lexicographic = numeric order).
+
+**Verification.** `npx tsc --noEmit` passes (the union-narrowing guard resolves the `Property 'generations' does not exist on type '{ type: "fruits" }'` error a naïve top-level access would cause).
 
 ---
 

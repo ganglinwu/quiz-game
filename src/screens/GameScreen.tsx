@@ -360,7 +360,7 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
   const hintActive = state.hintPhase !== 'none' && state.hintPokemonId !== null;
 
   const categoryLabel = isPokemon
-    ? `Pokemon Gen ${state.activeGenerations.sort((a, b) => a - b).join(', ')}`
+    ? `Pokemon Gen ${[...state.activeGenerations].sort((a, b) => a - b).join(', ')}`
     : 'Fruits';
 
   const quizHintActive = isQuizMode && hintActive;

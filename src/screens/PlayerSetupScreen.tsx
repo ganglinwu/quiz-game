@@ -28,6 +28,12 @@ const HINT_OPTIONS: { label: string; value: HintLimit }[] = [
 
 export default function PlayerSetupScreen({ navigation, route }: Props) {
   const { category } = route.params;
+  // Copy before sorting — sort() mutates in place and category.generations
+  // lives on the navigation route params (shared state) (Bug 14).
+  const genLabel =
+    category.type === 'pokemon'
+      ? [...category.generations].sort().join(', ')
+      : '';
   const [names, setNames] = useState(['', '']);
   const [hintLimit, setHintLimit] = useState<HintLimit>(0);
 
@@ -74,8 +80,8 @@ export default function PlayerSetupScreen({ navigation, route }: Props) {
       <Text style={styles.subtitle}>
         {category.type === 'pokemon'
           ? category.quizConfig
-            ? `Quiz Mode (${category.quizConfig.difficulty.charAt(0).toUpperCase() + category.quizConfig.difficulty.slice(1)}) · Gen ${category.generations.sort().join(', ')}`
-            : `Pokemon Gen ${category.generations.sort().join(', ')}`
+            ? `Quiz Mode (${category.quizConfig.difficulty.charAt(0).toUpperCase() + category.quizConfig.difficulty.slice(1)}) · Gen ${genLabel}`
+            : `Pokemon Gen ${genLabel}`
           : 'Fruits'}
       </Text>
 
