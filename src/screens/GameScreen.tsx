@@ -349,6 +349,7 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
       turnRecords: state.turnRecords,
       gameStartTime: state.gameStartTime,
       revealedHints: hints,
+      activeGenerations: [...state.activeGenerations],
     });
   }, [state.isGameOver, state.winner, state.isDraw]);
 

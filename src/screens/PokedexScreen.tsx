@@ -179,6 +179,7 @@ export default function PokedexScreen({ navigation }: Props) {
           visible
           pokemonName={selectedPokemon.name}
           pokemonId={selectedPokemon.pokedexNumber}
+          generations={selectedGen ? [selectedGen] : undefined}
           onClose={() => setSelectedPokemon(null)}
         />
       )}

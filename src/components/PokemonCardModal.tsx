@@ -47,6 +47,9 @@ interface Props {
   visible: boolean;
   pokemonName: string;
   pokemonId: number;
+  /** When set, the evolution chain is scoped to these generations (e.g. a
+   *  Gen-1 context shows Pikachu → Raichu, not Pichu → Pikachu → Raichu). */
+  generations?: number[];
   onClose: () => void;
 }
 
@@ -64,7 +67,7 @@ function getCryUrl(name: string): string {
   return `https://play.pokemonshowdown.com/audio/cries/${slug}.mp3`;
 }
 
-export default function PokemonCardModal({ visible, pokemonName, pokemonId, onClose }: Props) {
+export default function PokemonCardModal({ visible, pokemonName, pokemonId, generations, onClose }: Props) {
   const { manager } = useAudio();
   const [displayId, setDisplayId] = useState(pokemonId);
   const [displayName, setDisplayName] = useState(pokemonName);
@@ -77,12 +80,15 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, onCl
   const [isLegendary, setIsLegendary] = useState(false);
   const [isMythical, setIsMythical] = useState(false);
 
+  // Stable primitive so a fresh `generations` array reference each render
+  // doesn't re-run the effect (which would reset evolution-chain navigation).
+  const genKey = generations?.join(',') ?? '';
   useEffect(() => {
     if (!visible) return;
     setDisplayId(pokemonId);
     setDisplayName(pokemonName);
-    setChain(getEvolutionChain(pokemonId));
-  }, [visible, pokemonId, pokemonName]);
+    setChain(getEvolutionChain(pokemonId, generations));
+  }, [visible, pokemonId, pokemonName, genKey]);
 
   useEffect(() => {
     if (!visible) return;

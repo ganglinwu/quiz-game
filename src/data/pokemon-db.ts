@@ -78,21 +78,41 @@ export interface EvolutionChainMember {
   name: string;
 }
 
-export function getEvolutionChain(pokemonId: number): EvolutionChainMember[] {
+export function getEvolutionChain(
+  pokemonId: number,
+  generations?: number[]
+): EvolutionChainMember[] {
   const chainRow = getDb().getFirstSync<{ evolution_chain_id: number | null }>(
     'SELECT evolution_chain_id FROM pokemon WHERE id = ?',
     [pokemonId]
   );
   if (!chainRow?.evolution_chain_id) return [];
-  const members = getDb().getAllSync<EvolutionChainMember & { evolves_from_id: number | null }>(
-    'SELECT id, name, evolves_from_id FROM pokemon WHERE evolution_chain_id = ?',
+  let members = getDb().getAllSync<
+    EvolutionChainMember & { evolves_from_id: number | null; generation: number }
+  >(
+    'SELECT id, name, evolves_from_id, generation FROM pokemon WHERE evolution_chain_id = ?',
     [chainRow.evolution_chain_id]
   );
+
+  // Generation-scope the chain so a Gen-1 context shows Pikachu → Raichu rather
+  // than Pichu → Pikachu → Raichu (Pichu is Gen 2). Members in inactive
+  // generations are dropped; the BFS below re-roots any survivor whose parent
+  // was dropped, keeping the visible chain contiguous. When no generations are
+  // passed the full real-world chain is returned (unchanged behavior).
+  if (generations && generations.length > 0) {
+    const active = new Set(generations);
+    members = members.filter((m) => active.has(m.generation));
+  }
+
   if (members.length <= 1) return members;
 
+  const ids = new Set(members.map((m) => m.id));
   const byParent = new Map<number | null, (typeof members)[number][]>();
   for (const m of members) {
-    const key = m.evolves_from_id;
+    // Treat a member whose parent isn't in the (possibly filtered) set as a
+    // root, so dropping an inactive base/intermediate doesn't orphan the rest.
+    const key =
+      m.evolves_from_id !== null && ids.has(m.evolves_from_id) ? m.evolves_from_id : null;
     const arr = byParent.get(key);
     if (arr) arr.push(m);
     else byParent.set(key, [m]);

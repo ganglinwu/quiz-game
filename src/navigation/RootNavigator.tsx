@@ -20,6 +20,7 @@ export type RootStackParamList = {
     turnRecords: TurnRecord[];
     gameStartTime: number;
     revealedHints: HintRecord[];
+    activeGenerations: number[];
   };
 };
 

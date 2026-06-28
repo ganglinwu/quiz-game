@@ -87,7 +87,7 @@ function RevealedCard({ hint, onCardTap }: { hint: HintRecord; onCardTap: (h: Hi
 }
 
 export default function ResultScreen({ navigation, route }: Props) {
-  const { winner, isDraw, eliminatedPlayers, players, turnRecords, gameStartTime, revealedHints } = route.params;
+  const { winner, isDraw, eliminatedPlayers, players, turnRecords, gameStartTime, revealedHints, activeGenerations } = route.params;
   useBGM('result');
   const [showStats, setShowStats] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false);
@@ -191,6 +191,7 @@ export default function ResultScreen({ navigation, route }: Props) {
           visible
           pokemonName={selectedPokemon.pokemonName}
           pokemonId={selectedPokemon.pokemonId}
+          generations={activeGenerations}
           onClose={() => setSelectedPokemon(null)}
         />
       )}
