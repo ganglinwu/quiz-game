@@ -13,6 +13,7 @@ interface Props {
 export default function GenerationVoteOverlay({ vote, activePlayers, players, onVote }: Props) {
   const yesCount = Object.values(vote.votes).filter(Boolean).length;
   const noCount = Object.values(vote.votes).filter((v) => !v).length;
+  const verb = vote.action === 'remove' ? 'Remove' : 'Add';
 
   return (
     <View style={styles.overlay}>
@@ -22,10 +23,10 @@ export default function GenerationVoteOverlay({ vote, activePlayers, players, on
             <Text style={styles.label}>
               {vote.triggerPokemon} is a Gen {vote.generation} Pokemon
             </Text>
-            <Text style={styles.question}>Add Gen {vote.generation}?</Text>
+            <Text style={styles.question}>{verb} Gen {vote.generation}?</Text>
           </>
         ) : (
-          <Text style={styles.question}>Add Gen {vote.generation}?</Text>
+          <Text style={styles.question}>{verb} Gen {vote.generation}?</Text>
         )}
 
         <Text style={styles.tally}>

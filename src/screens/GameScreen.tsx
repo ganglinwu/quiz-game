@@ -167,6 +167,7 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
             generation: result.generation,
             triggerPokemon: result.match!,
             source: 'auto-detect',
+            action: 'add',
           });
         } else {
           dispatch({ type: 'PROPOSE_ITEM', item: result.match! });
@@ -524,10 +525,10 @@ function GameContent({ navigation, category }: { navigation: Props['navigation']
           activeGenerations={state.activeGenerations}
           usedItems={state.usedItems}
           onProposeAdd={(gen) =>
-            dispatch({ type: 'PROPOSE_GEN_CHANGE', generation: gen, triggerPokemon: null, source: 'settings' })
+            dispatch({ type: 'PROPOSE_GEN_CHANGE', generation: gen, triggerPokemon: null, source: 'settings', action: 'add' })
           }
           onProposeRemove={(gen) =>
-            dispatch({ type: 'PROPOSE_GEN_CHANGE', generation: gen, triggerPokemon: null, source: 'settings' })
+            dispatch({ type: 'PROPOSE_GEN_CHANGE', generation: gen, triggerPokemon: null, source: 'settings', action: 'remove' })
           }
         />
       )}

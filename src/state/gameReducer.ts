@@ -168,6 +168,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           votes: initialVotes,
           requiredVoters: [...state.activePlayers],
           source: action.source,
+          action: action.action,
         },
         errorMessage: null,
         transcribedText: '',
@@ -228,7 +229,15 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         };
       }
 
-      const newGens = [...state.activeGenerations, state.pendingGenVote.generation];
+      // Approved: a 'remove' vote filters the gen out, an 'add' vote appends it.
+      // (Removal is only ever proposed for an already-active gen with no items
+      // named from it — canRemove in GenerationSettingsModal — so filtering can't
+      // orphan a used item, and add is only proposed for an inactive gen so it
+      // can't duplicate.)
+      const newGens =
+        state.pendingGenVote.action === 'remove'
+          ? state.activeGenerations.filter((g) => g !== state.pendingGenVote!.generation)
+          : [...state.activeGenerations, state.pendingGenVote.generation];
       const newTotalItems = computeTotalItems(state.category, newGens);
       const vote = state.pendingGenVote;
 

@@ -61,6 +61,7 @@ export interface GenerationVote {
   votes: Record<string, boolean>;
   requiredVoters: string[];
   source: 'auto-detect' | 'settings';
+  action: 'add' | 'remove';
 }
 
 export type HintLimit = 'unlimited' | number;
@@ -126,7 +127,7 @@ export type GameAction =
   | { type: 'GIVE_UP' }
   | { type: 'SET_ERROR'; message: string | null }
   | { type: 'RESET' }
-  | { type: 'PROPOSE_GEN_CHANGE'; generation: number; triggerPokemon: string | null; source: 'auto-detect' | 'settings' }
+  | { type: 'PROPOSE_GEN_CHANGE'; generation: number; triggerPokemon: string | null; source: 'auto-detect' | 'settings'; action: 'add' | 'remove' }
   | { type: 'CAST_GEN_VOTE'; player: string; approve: boolean }
   | { type: 'SHOW_HINT'; pokemonName: string; pokemonId: number }
   | { type: 'REVEAL_HINT' }
