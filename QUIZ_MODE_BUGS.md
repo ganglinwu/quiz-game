@@ -245,3 +245,139 @@ When a quiz-mode game ends, the result screen pads its learning section with ran
 - **Duplicate detection** (exact + alias, `findDuplicate`) runs before fuzzy matching and correctly short-circuits, with the voice "Show me when" path intact.
 - **Hint/elimination/turn flow** in normal mode: hint countdown reveal, `revealedHints` cap of 5, bonus padding excluding used + already-hinted Pokémon, and one-countdown-at-a-time on the result screen (`countdownActive` gate) all behave as intended.
 - **Fuzzy match thresholds** (0 / 1 / 2 by input length) and the active-then-all-gens fallback in `fuzzyMatchWithGenDetection` are correct; aliases that resolve to inactive-gen Pokémon flow into the gen-vote path in normal mode and into per-constraint rejection in quiz mode.
+
+---
+
+# Pokédex & card-modal pass (UI subsystems)
+
+The two passes above cover quiz logic and the core Pokémon/result/stats flow. This third pass covers the standalone **Pokédex browser** (`PokedexScreen`, reachable from Home — note it isn't documented in `CLAUDE.md`) and the **Pokémon card modal** (`PokemonCardModal`, shared by the Pokédex and the result screen), plus the `NetworkImage` helper and player setup. These subsystems hadn't been audited before. Each finding below is traced through code; the network/data behaviour is reasoned from the code paths (no simulator/network in this environment).
+
+| # | Bug | Severity | Status |
+|---|-----|----------|--------|
+| 10 | **Pokédex search box is silently ignored whenever a stat filter is active** | Medium | Confirmed |
+| 11 | Card modal: switching evolution members has no fetch cancellation — out-of-order responses can show the wrong Pokémon's stats | Low | Confirmed |
+| 12 | Card modal: a failed PokeAPI fetch renders a blank "normal-type" card with 0.0 m / 0.0 kg and no error/retry | Low | Confirmed |
+| 13 | `NetworkImage` doesn't reset on `uri` change — swapping artwork shows the previous image with no loader | Low | Confirmed |
+| 14 | `PlayerSetupScreen` mutates the route-param `category.generations` array in place during render (`.sort()`) | Low | Confirmed |
+
+---
+
+## Bug 10 — Pokédex search is silently dropped when a stat filter is active (Medium)
+
+**Where:** `src/screens/PokedexScreen.tsx:48-61` (the `pokemon` `useMemo`).
+
+**What happens:** In the Pokédex, the search box and the stat chips (HP / Attack / … "Top 20") are both always visible. If you tap a stat chip and then type in the search box — or type first, then tap a stat — **the search text does nothing**. The list stays as the unfiltered "Top 20 <stat>" set, while the search box still shows your text as if it were filtering.
+
+**Why:** the memo early-returns on `selectedStat` *before* the search filter is ever applied:
+
+```ts
+const pokemon = useMemo(() => {
+  if (selectedStat) {
+    return queryPokemon({                       // <-- returns here…
+      generations: selectedGen ? [selectedGen] : undefined,
+      statRank: { stat: selectedStat, topN: 20 },
+    });
+  }
+  let list = selectedGen ? getPokemonForGens([selectedGen]) : getAllPokemon();
+  if (search.trim()) {                          // <-- …so this is never reached
+    const query = search.trim().toLowerCase();
+    list = list.filter((p) => p.name.toLowerCase().includes(query));
+  }
+  return list;
+}, [selectedGen, selectedStat, search]);
+```
+
+`search` is in the dependency array (so typing *does* recompute the memo), but the `selectedStat` branch discards the result. Generation + stat compose correctly (the gen is passed into `queryPokemon`); only **search** is the dropped dimension.
+
+**Repro (click-through):** Home → Pokédex → tap **Attack** (list becomes "Top 20 Attack") → type `char` in the search box. Nothing filters; "Charizard" is not isolated. Clearing the stat chip makes search work again.
+
+**Recommended fix (low risk):** apply the search filter to the stat-ranked list too, e.g. lift the search filter out of the `else` branch:
+
+```ts
+const pokemon = useMemo(() => {
+  let list = selectedStat
+    ? queryPokemon({ generations: selectedGen ? [selectedGen] : undefined, statRank: { stat: selectedStat, topN: 20 } })
+    : (selectedGen ? getPokemonForGens([selectedGen]) : getAllPokemon());
+  const q = search.trim().toLowerCase();
+  if (q) list = list.filter((p) => p.name.toLowerCase().includes(q));
+  return list;
+}, [selectedGen, selectedStat, search]);
+```
+
+(Decision for you: should searching within "Top 20 Attack" search *only those 20*, as above, or clear the stat filter and search all Pokémon? The snippet does the former — least surprising given the chip stays highlighted.)
+
+---
+
+## Bug 11 — Card modal: no fetch cancellation when switching evolution members (Low)
+
+**Where:** `src/components/PokemonCardModal.tsx:87-121` (the fetch `useEffect`) and `:123-126` (`switchToEvolution`).
+
+**What happens:** The card modal shows an evolution chain you can tap through (Bulbasaur → Ivysaur → Venusaur). Tapping a member calls `setDisplayId`/`setDisplayName` *synchronously* (header name + artwork update instantly) and re-fires the PokeAPI fetch. If you tap members in quick succession on a slow/jittery connection, the responses can arrive **out of order**, and the older response overwrites the newer one — so the body (types, height/weight, stat bars, HP) shows the *wrong* Pokémon under the current name and artwork.
+
+**Why:** the effect has no cleanup function, so the in-flight `Promise.all` for the previous `displayId` is never cancelled or ignored:
+
+```ts
+useEffect(() => {
+  if (!visible) return;
+  setLoading(true); setData(null); setFlavorText('');
+  // …
+  Promise.all([ fetch(`…/pokemon/${displayId}`)…, fetch(`…/pokemon-species/${displayId}`)… ])
+    .then(([pokemon, species]) => { setData(…); setLoading(false); })
+    .catch(() => setLoading(false));
+  // no `return () => { cancelled = true }`
+}, [visible, displayId]);
+```
+
+It's transient and self-corrects on the next interaction, hence **Low** — but it's a genuine stale-response race. (The cross-*open* variant doesn't apply: both call sites — `ResultScreen.tsx:189` and `PokedexScreen.tsx:177` — render the modal as `{selected && <PokemonCardModal … />}`, so it unmounts on close and remounts fresh each open.)
+
+**Recommended fix (standard):** guard with a cancelled flag (or `AbortController`):
+
+```ts
+useEffect(() => {
+  if (!visible) return;
+  let cancelled = false;
+  // …
+  Promise.all([...]).then(([pokemon, species]) => {
+    if (cancelled) return;
+    setData(…); setLoading(false);
+  }).catch(() => { if (!cancelled) setLoading(false); });
+  return () => { cancelled = true; };
+}, [visible, displayId]);
+```
+
+---
+
+## Bug 12 — Card modal: a failed fetch shows a blank card, not an error (Low)
+
+**Where:** `src/components/PokemonCardModal.tsx:120` (`.catch(() => setLoading(false))`).
+
+When the PokeAPI request fails (offline, rate-limited, 404), the catch only flips `loading` off and leaves `data` as `null`. The card then renders its fallback values: a grey **normal**-type header, `HP ??`, no type badges, **0.0 m / 0.0 kg**, and no stat bars. There's no error message and no retry — it just looks like a broken/empty card. Same applies if `fetch` returns a non-OK status, since `r.json()` is called without an `r.ok` check (`:99-100`) and a parsed error body throws into the same catch. **Low** (cosmetic/degraded), but worth a small "Couldn't load — tap to retry" state.
+
+---
+
+## Bug 13 — `NetworkImage` doesn't reset when its `uri` changes (Low)
+
+**Where:** `src/components/NetworkImage.tsx` (`loaded` state + `opacity` ref).
+
+`NetworkImage` tracks `loaded` (starts `false`, set `true` on the first `onLoad`) and fades the image in via an `opacity` Animated value. Neither is keyed to `uri`, so when the **same instance** gets a new `uri` — exactly what happens for the main artwork when you tap through the evolution chain in the card modal (`PokemonCardModal.tsx:159`, no `key`) — `loaded` stays `true` and `opacity` stays `1`. Result: the PokeballLoader never reappears and the **previous** Pokémon's artwork stays visible until the new image finishes loading. Minor visual glitch (**Low**). **Fix:** reset on uri change (`useEffect(() => { setLoaded(false); opacity.setValue(0); }, [uri])`) or pass `key={uri}` at the call site to force a remount.
+
+---
+
+## Bug 14 — `PlayerSetupScreen` mutates route-param state during render (Low)
+
+**Where:** `src/screens/PlayerSetupScreen.tsx:77` (and the non-quiz branch on the same expression).
+
+```ts
+`Pokemon Gen ${category.generations.sort().join(', ')}`
+```
+
+`Array.prototype.sort` sorts **in place**, so this mutates `category.generations` — an array that lives on the navigation route params — during render. Same anti-pattern family as **Bug 7** (`GameScreen.tsx:362`): currently benign (idempotent sort, order irrelevant) but it mutates shared state on the render path. **Fix:** `[...category.generations].sort(…)`.
+
+---
+
+## Pokédex & card-modal pass — what I verified as correct
+
+- **Pokédex generation + stat compose correctly:** `selectedGen` is passed into both `getPokemonForGens` and `queryPokemon(statRank)`, so "Gen 2 + Top 20 Speed" is genuinely Gen-2-scoped; only *search* (Bug 10) is dropped.
+- **`'pokedex'` BGM track is registered** (`tracks.ts:8` → `yellow-opening.mp3`), so `useBGM('pokedex')` resolves and the `TRACK_REGISTRY.get(...) → if (!track) return` guard isn't hit.
+- **Card modal evolution chain is built once from the family base** (`getEvolutionChain(pokemonId)` on open) and correctly *not* re-fetched when switching members — every member shares one chain, so the BFS-ordered list (Pichu→Pikachu→Raichu) stays stable while you tap through it.
+- **Player-name validation** is sound: blanks default to `Player N`, the duplicate check is case-insensitive (`toLowerCase()`), and color assignment by index is safe (`PLAYER_COLORS` has ≥ `MAX_PLAYERS` entries).
