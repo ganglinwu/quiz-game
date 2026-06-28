@@ -27,6 +27,7 @@ export default function MicButton({
   audioManager,
 }: Props) {
   const pressStart = useRef(0);
+  const isHeld = useRef(false);
   const [micPhase, setMicPhase] = useState<MicPhase>('idle');
   const safetyTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -133,8 +134,27 @@ export default function MicButton({
     setMicPhase('idle');
   });
 
+  // iOS fires `nomatch` (a final result with no significant recognition) WITHOUT
+  // a `result` event, so surface the same feedback the empty-transcript path gives.
+  useSpeechRecognitionEvent('nomatch', () => {
+    console.log('[MicButton] nomatch event');
+    onError("Didn't catch that, try again");
+    setIsListening(false);
+    setMicPhase('idle');
+  });
+
+  // `end` fires on every terminal path (after result/error/nomatch, and after a
+  // stop()/abort() with no active recognizer). Catch-all reset so the mic can
+  // never stick in the pulsing "listening" state with BGM left paused. Idempotent
+  // with the handlers above, which already reset before `end` arrives.
+  useSpeechRecognitionEvent('end', () => {
+    setIsListening(false);
+    setMicPhase('idle');
+  });
+
   const handlePressIn = async () => {
     pressStart.current = Date.now();
+    isHeld.current = true;
     setIsListening(true);
     setMicPhase('preparing');
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -161,6 +181,20 @@ export default function MicButton({
       return;
     }
 
+    // The permission request above yields. If the button was released while it
+    // was pending (the first-run grant dialog cancels the touch, or a quick tap),
+    // don't start an orphaned session that would keep listening to ambient audio
+    // and could auto-submit a word the player never spoke.
+    if (!isHeld.current) {
+      setIsListening(false);
+      setMicPhase('idle');
+      if (safetyTimeout.current) {
+        clearTimeout(safetyTimeout.current);
+        safetyTimeout.current = null;
+      }
+      return;
+    }
+
     ExpoSpeechRecognitionModule.start({
       lang: 'en-US',
       interimResults: false,
@@ -168,6 +202,7 @@ export default function MicButton({
   };
 
   const handlePressOut = () => {
+    isHeld.current = false;
     const duration = Date.now() - pressStart.current;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (duration < 300) {

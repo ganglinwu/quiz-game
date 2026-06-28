@@ -4,7 +4,7 @@ _Static code audit + SQLite verification against `assets/quiz.db`. No app run (n
 
 Bug #1 from the original request (evolution-stage classification ignoring the active generation, e.g. Pikachu being treated as "middle" because of Pichu) was **already fixed** in the previous iteration (commit `c75bcf1`). That fix was re-verified and holds — see "What I verified as correct" at the bottom.
 
-This report covers the **other bugs** found while tracing the quiz-mode code paths. The original request also asked me to "click through the app and see if you find any other bugs," so a **whole-app pass beyond quiz mode** has been added at the bottom — see **[Whole-app pass (beyond quiz mode)](#whole-app-pass-beyond-quiz-mode)**, which includes a **High-severity** broken-feature bug (the "Remove generation" button). Four further passes follow it: a **[Pokédex & card-modal pass](#pokédex--card-modal-pass-ui-subsystems)** (Bugs 10–14), a **[Voice input pass](#voice-input-pass-micbutton--speech-recognition)** (Bugs 15–16, verified against the `expo-speech-recognition` native iOS source), an **[Evolution-chain display pass](#evolution-chain-display-pass-your-original-example-in-the-card-modal)** (Bug 17) — most relevant to your original complaint — and a **[Core reducer / turn-order pass](#core-reducer--turn-order-pass-the-game-state-machine)** (Bug 18), which audits the game state machine itself and found — and **now fixes** — a **gameplay** bug: in a 3+ player game, a mid-order player giving up sent the turn to the wrong player. **Bug 17 was your exact example resurfacing**: the Pokémon card modal still showed `Pichu → Pikachu → Raichu` in a Gen-1 context, because the iteration-1 fix corrected quiz-mode *stage classification* but the card modal's *displayed chain* was never gen-scoped. **Bug 17 is now fixed** — the card modal's evolution chain is generation-scoped, so a Gen-1 context shows `Pikachu → Raichu`. See the [Bug 17 section](#bug-17--card-modal-evolution-chain-ignores-the-active-generation-medium) for the implementation and verification.
+This report covers the **other bugs** found while tracing the quiz-mode code paths. The original request also asked me to "click through the app and see if you find any other bugs," so a **whole-app pass beyond quiz mode** has been added at the bottom — see **[Whole-app pass (beyond quiz mode)](#whole-app-pass-beyond-quiz-mode)**, which includes a **High-severity** broken-feature bug (the "Remove generation" button). Four further passes follow it: a **[Pokédex & card-modal pass](#pokédex--card-modal-pass-ui-subsystems)** (Bugs 10–14), a **[Voice input pass](#voice-input-pass-micbutton--speech-recognition)** (Bugs 15–16, verified against the `expo-speech-recognition` native iOS source — **now both fixed**: the mic no longer soft-locks on an unrecognized utterance and a release-before-start no longer orphans a recognition session), an **[Evolution-chain display pass](#evolution-chain-display-pass-your-original-example-in-the-card-modal)** (Bug 17) — most relevant to your original complaint — and a **[Core reducer / turn-order pass](#core-reducer--turn-order-pass-the-game-state-machine)** (Bug 18), which audits the game state machine itself and found — and **now fixes** — a **gameplay** bug: in a 3+ player game, a mid-order player giving up sent the turn to the wrong player. **Bug 17 was your exact example resurfacing**: the Pokémon card modal still showed `Pichu → Pikachu → Raichu` in a Gen-1 context, because the iteration-1 fix corrected quiz-mode *stage classification* but the card modal's *displayed chain* was never gen-scoped. **Bug 17 is now fixed** — the card modal's evolution chain is generation-scoped, so a Gen-1 context shows `Pikachu → Raichu`. See the [Bug 17 section](#bug-17--card-modal-evolution-chain-ignores-the-active-generation-medium) for the implementation and verification.
 
 ## Summary
 
@@ -390,8 +390,8 @@ The passes above cover game logic and the visual UI. This fourth pass covers the
 
 | # | Bug | Severity | Status |
 |---|-----|----------|--------|
-| 15 | **MicButton ignores the `nomatch` and `end` events → mic sticks in the pulsing "listening" state, BGM stays paused, and the spoken word is silently dropped with no error** | Medium | Confirmed (native source) |
-| 16 | **`start()` runs after the permission `await` even if the button was already released → an orphaned recognition session keeps listening (auto-submits ambient audio; confusing first-run grant)** | Medium | Confirmed |
+| 15 | **MicButton ignores the `nomatch` and `end` events → mic sticks in the pulsing "listening" state, BGM stays paused, and the spoken word is silently dropped with no error** | Medium | **Fixed** (native source) |
+| 16 | **`start()` runs after the permission `await` even if the button was already released → an orphaned recognition session keeps listening (auto-submits ambient audio; confusing first-run grant)** | Medium | **Fixed** |
 
 ---
 
@@ -420,16 +420,26 @@ Because `state.isListening` stays `true`, `useAudioSpeechBridge` (`GameScreen.ts
 
 **Repro (click-through):** Game screen → hold the mic → make a brief non-word sound (or hold in a noisy/echoey room) and release. Result: the "..." button keeps pulsing, the music stays off, and no toast appears. Tap the mic again to unstick it.
 
-**Recommended fix (low risk, robust):** add an `end` listener as a catch-all reset — it fires on every terminal path, so it covers `nomatch` and any future end-without-result case in one place:
+**Fix applied (low risk, robust).** Two listeners were added to `MicButton.tsx` (after the `error` handler):
 
 ```ts
+// nomatch — iOS returns a final result with no recognition WITHOUT firing `result`
+useSpeechRecognitionEvent('nomatch', () => {
+  onError("Didn't catch that, try again");   // same feedback as the empty-transcript path
+  setIsListening(false);
+  setMicPhase('idle');
+});
+
+// end — fires on EVERY terminal path; catch-all reset so the mic can't soft-lock
 useSpeechRecognitionEvent('end', () => {
   setIsListening(false);
   setMicPhase('idle');
 });
 ```
 
-Optionally also add a `nomatch` listener that shows the existing "Didn't catch that, try again" toast so the user gets feedback (the `end` handler alone fixes the stuck state but stays silent). Note: the existing `result` handler already calls `setIsListening(false)` before `end` arrives, so the extra `end` reset is idempotent and harmless on the happy path.
+The `end` listener is the robust catch-all (covers `nomatch` and any future end-without-result path); the `nomatch` listener adds the user-facing "Didn't catch that" toast so a mumble gives feedback instead of silently resetting. Both are idempotent with the existing `result`/`error` handlers (which already reset before `end` arrives), so there's no double-reset and no double-toast on the happy path (`result` and `nomatch` are mutually exclusive on iOS).
+
+**Verification.** `npx tsc --noEmit` passes (`end` and `nomatch` are declared in `ExpoSpeechRecognitionNativeEventMap`, so the listeners typecheck). Event-flow traced for each terminal path: happy `result` → reset + `end` reset (idempotent, one `onTranscription`); empty transcript → `result` toast + `end`; mumble → `nomatch` toast + `end` (previously stuck); `error` → toast + `end`; stop()/abort() with no active recognizer → `end` alone now resets. Because `isListening` now always flips back to `false`, `useAudioSpeechBridge` reliably calls `notifySpeechEnd()` and the paused BGM resumes.
 
 ---
 
@@ -463,18 +473,29 @@ const handlePressOut = () => {
 
 There's no flag tying `start()` to "is the button still held?". (This also compounds Bug 15: the `stop()`-before-`start()` path emits only `end`, which is unhandled, so the UI is left stuck while the orphaned session runs.)
 
-**Recommended fix (low risk):** track press state in a ref and gate `start()` on it:
+**Fix applied (low risk).** Press state is now tracked in an `isHeld` ref and `start()` is gated on it:
 
 ```ts
 const isHeld = useRef(false);
-// handlePressIn: set isHeld.current = true at the top
-// after the await:
-if (!isHeld.current) return;                 // released during permission prompt → don't start
-ExpoSpeechRecognitionModule.start({ ... });
-// handlePressOut: set isHeld.current = false at the top
+
+// handlePressIn — mark held before the await:
+isHeld.current = true;
+// …after `await requestPermissionsAsync()` and the !granted check:
+if (!isHeld.current) {           // released during the permission prompt / quick tap
+  setIsListening(false);
+  setMicPhase('idle');
+  if (safetyTimeout.current) { clearTimeout(safetyTimeout.current); safetyTimeout.current = null; }
+  return;                        // → don't start an orphaned session
+}
+ExpoSpeechRecognitionModule.start({ lang: 'en-US', interimResults: false });
+
+// handlePressOut — clear held at the top:
+isHeld.current = false;
 ```
 
-This makes a release-before-start a true cancel, and a normal hold still starts and stops as before.
+A release-before-start is now a true cancel: it resets the UI to idle and clears the 2 s safety timeout (so it can't flip to a phantom "ready" state) rather than leaving an orphaned recognition session listening to ambient audio. A normal hold still starts and stops exactly as before. The check is placed *after* the `!granted` branch so a genuine permission denial still shows its own message.
+
+**Verification.** `npx tsc --noEmit` passes. This composes with the Bug 15 fix: the `stop()`/`abort()`-before-`start()` paths emit `end`, which the new `end` listener now handles, so the UI no longer sticks while a cancelled press unwinds.
 
 ---
 
