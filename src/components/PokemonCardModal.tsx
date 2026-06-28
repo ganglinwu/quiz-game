@@ -74,6 +74,8 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, gene
   const [data, setData] = useState<PokemonApiData | null>(null);
   const [flavorText, setFlavorText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [retryToken, setRetryToken] = useState(0);
   const [chain, setChain] = useState<EvolutionChainMember[]>([]);
   const [cryPlaying, setCryPlaying] = useState(false);
   const [generation, setGeneration] = useState<number | null>(null);
@@ -96,15 +98,24 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, gene
     setLoading(true);
     setData(null);
     setFlavorText('');
+    setError(false);
 
     const meta = getPokemonMeta(displayId);
     setGeneration(meta?.generation ?? null);
     setIsLegendary(!!meta?.is_legendary);
     setIsMythical(!!meta?.is_mythical);
 
+    const fetchJson = (url: string) =>
+      fetch(url).then((r) => {
+        // Without this, a 404/429/5xx body would be parsed and silently render a
+        // blank "normal-type" fallback card instead of surfacing the failure.
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      });
+
     Promise.all([
-      fetch(`https://pokeapi.co/api/v2/pokemon/${displayId}`).then((r) => r.json()),
-      fetch(`https://pokeapi.co/api/v2/pokemon-species/${displayId}`).then((r) => r.json()),
+      fetchJson(`https://pokeapi.co/api/v2/pokemon/${displayId}`),
+      fetchJson(`https://pokeapi.co/api/v2/pokemon-species/${displayId}`),
     ])
       .then(([pokemon, species]) => {
         // A newer evolution member may have been tapped while this request was
@@ -130,18 +141,25 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, gene
         setLoading(false);
       })
       .catch(() => {
-        if (!cancelled) setLoading(false);
+        // Offline / rate-limited / non-OK response: show an explicit error +
+        // retry instead of a blank fallback card (data stays null).
+        if (!cancelled) {
+          setError(true);
+          setLoading(false);
+        }
       });
 
     return () => {
       cancelled = true;
     };
-  }, [visible, displayId]);
+  }, [visible, displayId, retryToken]);
 
   const switchToEvolution = useCallback((member: EvolutionChainMember) => {
     setDisplayId(member.id);
     setDisplayName(member.name);
   }, []);
+
+  const handleRetry = useCallback(() => setRetryToken((t) => t + 1), []);
 
   const playCry = useCallback(() => {
     if (cryPlaying) return;
@@ -166,6 +184,19 @@ export default function PokemonCardModal({ visible, pokemonName, pokemonId, gene
           {loading ? (
             <View style={styles.loadingContainer}>
               <PokeballLoader size={52} />
+            </View>
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorIcon}>📡</Text>
+              <Text style={styles.errorText}>Couldn't load this Pokémon.</Text>
+              <Text style={styles.errorHint}>Check your connection.</Text>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={handleRetry}
+                style={styles.retryButton}
+              >
+                <Text style={styles.retryButtonText}>Tap to retry</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <ScrollView contentContainerStyle={styles.cardBody}>
@@ -329,6 +360,41 @@ const styles = StyleSheet.create({
     height: 300,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  errorContainer: {
+    height: 300,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  errorIcon: {
+    fontSize: 40,
+    marginBottom: 12,
+  },
+  errorText: {
+    fontSize: 15,
+    color: '#444',
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  errorHint: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 4,
+    marginBottom: 18,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#e3350d',
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
   cardBody: {
     padding: 14,
