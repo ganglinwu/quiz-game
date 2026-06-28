@@ -4,7 +4,7 @@ _Static code audit + SQLite verification against `assets/quiz.db`. No app run (n
 
 Bug #1 from the original request (evolution-stage classification ignoring the active generation, e.g. Pikachu being treated as "middle" because of Pichu) was **already fixed** in the previous iteration (commit `c75bcf1`). That fix was re-verified and holds — see "What I verified as correct" at the bottom.
 
-This report covers the **other bugs** found while tracing the quiz-mode code paths. The original request also asked me to "click through the app and see if you find any other bugs," so a **whole-app pass beyond quiz mode** has been added at the bottom — see **[Whole-app pass (beyond quiz mode)](#whole-app-pass-beyond-quiz-mode)**, which includes a **High-severity** broken-feature bug (the "Remove generation" button).
+This report covers the **other bugs** found while tracing the quiz-mode code paths. The original request also asked me to "click through the app and see if you find any other bugs," so a **whole-app pass beyond quiz mode** has been added at the bottom — see **[Whole-app pass (beyond quiz mode)](#whole-app-pass-beyond-quiz-mode)**, which includes a **High-severity** broken-feature bug (the "Remove generation" button). Two further passes follow it: a **[Pokédex & card-modal pass](#pokédex--card-modal-pass-ui-subsystems)** (Bugs 10–14) and a **[Voice input pass](#voice-input-pass-micbutton--speech-recognition)** (Bugs 15–16), the latter verified against the `expo-speech-recognition` native iOS source.
 
 ## Summary
 
@@ -381,3 +381,106 @@ When the PokeAPI request fails (offline, rate-limited, 404), the catch only flip
 - **`'pokedex'` BGM track is registered** (`tracks.ts:8` → `yellow-opening.mp3`), so `useBGM('pokedex')` resolves and the `TRACK_REGISTRY.get(...) → if (!track) return` guard isn't hit.
 - **Card modal evolution chain is built once from the family base** (`getEvolutionChain(pokemonId)` on open) and correctly *not* re-fetched when switching members — every member shares one chain, so the BFS-ordered list (Pichu→Pikachu→Raichu) stays stable while you tap through it.
 - **Player-name validation** is sound: blanks default to `Player N`, the duplicate check is case-insensitive (`toLowerCase()`), and color assignment by index is safe (`PLAYER_COLORS` has ≥ `MAX_PLAYERS` entries).
+
+---
+
+# Voice input pass (MicButton / speech recognition)
+
+The passes above cover game logic and the visual UI. This fourth pass covers the **voice input flow** — the push-to-hold `MicButton` (`src/components/MicButton.tsx`), the `expo-speech-recognition` event handling, and the `AudioManager` ↔ speech bridge. This subsystem had not been audited before. Unlike the data-dependent bugs above, these are verified against the **library's native iOS source** (`node_modules/expo-speech-recognition/ios/ExpoSpeechRecognitionModule.swift`), since the event semantics are the crux — no simulator was available in this environment.
+
+| # | Bug | Severity | Status |
+|---|-----|----------|--------|
+| 15 | **MicButton ignores the `nomatch` and `end` events → mic sticks in the pulsing "listening" state, BGM stays paused, and the spoken word is silently dropped with no error** | Medium | Confirmed (native source) |
+| 16 | **`start()` runs after the permission `await` even if the button was already released → an orphaned recognition session keeps listening (auto-submits ambient audio; confusing first-run grant)** | Medium | Confirmed |
+
+---
+
+## Bug 15 — `nomatch` / `end` events are unhandled, so voice input can soft-lock (Medium)
+
+**Where:** `src/components/MicButton.tsx:108-134` (the only three `useSpeechRecognitionEvent` listeners: `audiostart`, `result`, `error`).
+
+**What happens:** You hold the mic and make a sound the recognizer can't turn into words (a mumble, a noise, an unusual Pokémon name with no transcription). Nothing happens: **no answer, no "Didn't catch that" toast, the mic button keeps pulsing as if still listening, and the background music stays paused.** Pressing the mic again is the only way to recover.
+
+**Why:** MicButton only resets its state (`setIsListening(false)`, `setMicPhase('idle')`) inside the `result` and `error` handlers. But iOS has two terminal outcomes that fire **neither**:
+
+- **`nomatch`** — when speech recognition returns a final result with no significant recognition, the native module fires `nomatch` *and returns without firing `result`*:
+
+  ```swift
+  // ExpoSpeechRecognitionModule.swift:506-510  (isFinal && results.isEmpty)
+  // The nomatch event ... is fired when the speech recognition service
+  // returns a final result with no significant recognition.
+  sendEvent("nomatch")
+  return            // <-- no "result" event is sent
+  ```
+  `nomatch` is a declared event (`ExpoSpeechRecognitionModule.types.d.ts:120`) but MicButton has no listener for it, so the `result`/`error` reset logic never runs.
+
+- **`end` with no preceding `result`/`error`** — `stop()` and `abort()` emit `end` directly when no recognizer is active (`ExpoSpeechRecognitionModule.swift:365, 377`), and `end` is fired after *every* session terminates (after result, after nomatch, after error). MicButton listens to none of these, so any path that ends without a `result`/`error` leaves the UI stuck.
+
+Because `state.isListening` stays `true`, `useAudioSpeechBridge` (`GameScreen.tsx:51`) never fires `notifySpeechEnd()`, so the BGM the mic paused is **never resumed**.
+
+**Repro (click-through):** Game screen → hold the mic → make a brief non-word sound (or hold in a noisy/echoey room) and release. Result: the "..." button keeps pulsing, the music stays off, and no toast appears. Tap the mic again to unstick it.
+
+**Recommended fix (low risk, robust):** add an `end` listener as a catch-all reset — it fires on every terminal path, so it covers `nomatch` and any future end-without-result case in one place:
+
+```ts
+useSpeechRecognitionEvent('end', () => {
+  setIsListening(false);
+  setMicPhase('idle');
+});
+```
+
+Optionally also add a `nomatch` listener that shows the existing "Didn't catch that, try again" toast so the user gets feedback (the `end` handler alone fixes the stuck state but stays silent). Note: the existing `result` handler already calls `setIsListening(false)` before `end` arrives, so the extra `end` reset is idempotent and harmless on the happy path.
+
+---
+
+## Bug 16 — `start()` can fire after the button is released, orphaning a recognition session (Medium)
+
+**Where:** `src/components/MicButton.tsx:136-185` (`handlePressIn` is `async` and calls `start()` *after* `await requestPermissionsAsync()`; `handlePressOut` runs synchronously).
+
+**What happens:** Two related symptoms:
+
+1. **First-run permission grant:** the very first time you hold the mic, iOS shows the permission dialog. Presenting it cancels the touch, so `handlePressOut` fires *while* `handlePressIn` is still awaiting the permission result. You tap **Allow** → the `await` resolves → `start()` runs → recognition begins even though your finger is off the button. The button may already show idle, yet the mic is now live and listening to the room.
+2. **Quick taps:** a tap shorter than the permission promise's resolution calls `stop()`/`abort()` before `start()` has run (they no-op against a not-yet-started recognizer), and then `start()` fires anyway → an orphaned session.
+
+In both cases the orphaned recognition runs until its silence timeout (iOS 17-: ~3 s) or until it hears something, and if it produces a `result` it calls `onTranscription(...)` → `processInput(...)` (`GameScreen.tsx:477`) — i.e. **an answer the player never spoke can get submitted from ambient audio.**
+
+**Why:** the start call is sequenced after an `await`, but the release handler has no way to cancel it:
+
+```ts
+const handlePressIn = async () => {
+  ...
+  const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync(); // <-- yields
+  if (!result.granted) { ...return; }
+  ExpoSpeechRecognitionModule.start({ lang: 'en-US', interimResults: false }); // <-- runs even if released
+};
+
+const handlePressOut = () => {
+  ...
+  if (duration < 300) { ...; ExpoSpeechRecognitionModule.abort(); ...return; } // no-op before start()
+  ExpoSpeechRecognitionModule.stop();                                          // no-op before start()
+};
+```
+
+There's no flag tying `start()` to "is the button still held?". (This also compounds Bug 15: the `stop()`-before-`start()` path emits only `end`, which is unhandled, so the UI is left stuck while the orphaned session runs.)
+
+**Recommended fix (low risk):** track press state in a ref and gate `start()` on it:
+
+```ts
+const isHeld = useRef(false);
+// handlePressIn: set isHeld.current = true at the top
+// after the await:
+if (!isHeld.current) return;                 // released during permission prompt → don't start
+ExpoSpeechRecognitionModule.start({ ... });
+// handlePressOut: set isHeld.current = false at the top
+```
+
+This makes a release-before-start a true cancel, and a normal hold still starts and stops as before.
+
+---
+
+## Voice input & audio — what I verified as correct
+
+- **`AudioManager`'s serial command queue is sound:** commands run one-at-a-time through `processQueue`, so the "pause arrives while the track is still loading" race can't happen — a queued `play` completes synchronously (status → `playing`) before the following `pause` executes, so the speech-pause always lands on a `playing` track. Superseded `play` commands are correctly coalesced to the latest (`findLastIndex` skip), and `requestTrack`'s dedupe guard only short-circuits when the queue is empty.
+- **Speech ↔ BGM bridge is edge-triggered correctly:** `useAudioSpeechBridge` uses a `prevRef` so `notifySpeechStart`/`notifySpeechEnd` fire exactly once per `isListening` transition, and the `resume` command re-arms the iOS audio session (`setAudioModeAsync`) before replaying — the documented session-reclaim. (The one gap is upstream: Bug 15 means `isListening` can fail to flip back to `false`, so the *resume never gets requested* — the bridge itself is fine.)
+- **Mic gesture happy path** (hold ≥ 300 ms → `audiostart` → spinner becomes pulsing "ready" → speak → `result` isFinal → `processInput`) and the safety timeout (2 s fallback to "ready", cleared on transition/unmount) are correct.
+- **Minor caveat (not filed as a bug):** `playSfx` samples `this.isMuted` at player-creation time, so toggling mute *during* a one-shot SFX (e.g. the ~1 s hint-success jingle) won't take effect until the next SFX. Cosmetic only.
