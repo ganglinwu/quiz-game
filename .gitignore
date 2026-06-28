@@ -40,5 +40,9 @@ yarn-error.*
 /ios
 /android
 
+# SQLite WAL journal files
+*.db-shm
+*.db-wal
+
 # scratchpad
 scratchpad/
