@@ -53,6 +53,11 @@ export interface TurnRecord {
   player: string;
   item: string;
   timestamp: number;
+  // Wall-clock ms this player actually spent on the turn (captured at record
+  // creation as now - turnStartTime). Stored rather than differenced from
+  // adjacent timestamps so a give-up (which creates no record) can't bleed its
+  // deliberation time into the next player's turn.
+  durationMs: number;
 }
 
 export interface GenerationVote {

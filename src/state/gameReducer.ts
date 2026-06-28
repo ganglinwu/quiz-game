@@ -79,6 +79,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         player: state.currentPlayer,
         item: state.confirmationItem,
         timestamp: now,
+        durationMs: now - state.turnStartTime,
       };
       const newUsedItems = [...state.usedItems, state.confirmationItem];
       const allExhausted = state.totalItems > 0 && newUsedItems.length >= state.totalItems;
@@ -136,6 +137,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         // seating order. Passing the already-filtered newActive made indexOf
         // return -1, always sending the turn back to the first survivor.
         currentPlayer: getNextActivePlayer(state.currentPlayer, state.activePlayers),
+        // Start the next player's turn clock now: a give-up creates no record,
+        // so without this reset the give-up deliberation would be charged to
+        // the next player's recorded turn duration.
+        turnStartTime: Date.now(),
         confirmationItem: null,
         hintPhase: 'none',
         hintPokemonName: null,
@@ -247,6 +252,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           player: state.currentPlayer,
           item: vote.triggerPokemon,
           timestamp: now,
+          durationMs: now - state.turnStartTime,
         };
         const newUsedItems = [...state.usedItems, vote.triggerPokemon];
         const allExhausted = newTotalItems > 0 && newUsedItems.length >= newTotalItems;

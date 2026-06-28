@@ -5,14 +5,15 @@ export function calculateStats(
   gameStartTime: number,
   players: string[]
 ): GameStats {
-  const turnTimes = turnRecords.map((record, i) => {
-    const prevTime = i === 0 ? gameStartTime : turnRecords[i - 1].timestamp;
-    return {
-      player: record.player,
-      time: record.timestamp - prevTime,
-      item: record.item,
-    };
-  });
+  // Use the per-turn duration captured when each record was created, rather
+  // than differencing adjacent timestamps. Differencing charged a give-up's
+  // deliberation (which leaves no record) to the next player's turn; the stored
+  // durationMs is the wall-clock time the player actually spent on that turn.
+  const turnTimes = turnRecords.map((record) => ({
+    player: record.player,
+    time: record.durationMs,
+    item: record.item,
+  }));
 
   const avg = (arr: number[]) =>
     arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;

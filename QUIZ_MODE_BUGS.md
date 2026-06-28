@@ -180,7 +180,7 @@ The original request was "click through the app and see if you find any other bu
 |---|-----|----------|--------|
 | 6 | **"Remove generation" button doesn't remove — it re-adds the gen (duplicate) and the vote even says "Add"** | **High** | **Fixed** |
 | 7 | `state.activeGenerations.sort()` mutates reducer state during render | Low | **Fixed** |
-| 8 | Per-turn stats: first turn includes pre-game time; a give-up inflates the next player's turn time | Low | Confirmed |
+| 8 | Per-turn stats: a give-up inflates the next player's turn time | Low | **Fixed** (give-up bleed) |
 | 9 | "Try these next time!" post-game suggestions ignore the quiz filters | Low (design) | Confirmed |
 
 ---
@@ -264,9 +264,11 @@ const categoryLabel = isPokemon
 
 ---
 
-## Bug 8 — Per-turn stats charge setup time and give-up time to the wrong turn (Low)
+## Bug 8 — A give-up inflates the next player's turn time in the stats (Low)
 
-**Where:** `src/utils/statsCalculator.ts:8-15`.
+**Where:** `src/utils/statsCalculator.ts:8-15` (the differencing) and `src/state/gameReducer.ts` (`GIVE_UP` never reset the turn clock).
+
+**What happened:** Turn time was computed as `thisRecord.timestamp - previousRecord.timestamp` — differencing adjacent turn records:
 
 ```ts
 const turnTimes = turnRecords.map((record, i) => {
@@ -275,12 +277,19 @@ const turnTimes = turnRecords.map((record, i) => {
 });
 ```
 
-Turn time is `thisRecord.timestamp - previousRecord.timestamp`. Two consequences:
+Because a give-up (or elimination) creates **no turn record**, the *next* player's recorded turn spanned all the way back to the last *successful* answer — so it silently absorbed the give-up deliberation time and was over-counted. (A 4-second turn that followed a player thinking for 12 seconds before quitting was logged as 16 seconds; see the verification below.) This only affected the end-of-game stats panel (cosmetic), hence Low — but it's a genuine accuracy bug with one unambiguous correct behavior, no product decision involved.
 
-- **First turn** is measured from `gameStartTime` (game creation), so it includes however long players spent on the setup/first-glance before the opening answer — inflating player 1's first turn and skewing "slowest turn."
-- **Give-ups/eliminations create no turn record.** When a player gives up, the *next* player's recorded turn spans from the last *successful* answer, so it silently absorbs the give-up deliberation time and is over-counted.
+> _Note on the "first turn includes setup time" angle from earlier drafts:_ the first turn is measured from `gameStartTime`, but that **is** the moment player 1's turn begins (the game screen mounts straight into player 1's turn — there is no separate "setup done" event), so it's not a real inaccuracy. The fix preserves the first turn's value exactly and targets only the give-up bleed.
 
-These only affect the end-of-game stats panel (cosmetic), hence Low. **Fix (if desired):** track a real per-turn start timestamp (the reducer already maintains `turnStartTime`) and record `record.timestamp - turnStartAtThatMoment` per turn instead of differencing adjacent records.
+**Fix applied (low risk — uses the already-maintained `turnStartTime`).** The reducer already tracked `turnStartTime` (set at game start and reset on every confirm) but it was **dead state — set in three places, read nowhere**. The fix puts it to use:
+
+- `TurnRecord` (`types/index.ts:52`) gains a `durationMs: number` — the wall-clock time the player actually spent on the turn, **captured at record creation** as `now - state.turnStartTime` (in both record-creating reducer paths: `CONFIRM_ITEM` and the auto-detect `CAST_GEN_VOTE`).
+- `GIVE_UP` now resets `turnStartTime: Date.now()` in its continue branch (`gameReducer.ts`), so the next player's turn clock starts at the give-up rather than at the last successful answer — the give-up deliberation is charged to no one (the giver-upper completed no turn, so they correctly have no turn time).
+- `statsCalculator` uses the stored `record.durationMs` instead of differencing adjacent timestamps. `timestamp` is retained on the record (the History modal still uses it for the time-of-day label).
+
+**Why this changes nothing else:** for the first turn, `turnStartTime` equals `gameStartTime`, so `durationMs` is identical to the old `timestamp - gameStartTime`; for any two consecutive confirms with no give-up between them, `turnStartTime` equals the previous record's timestamp, so `durationMs` equals the old difference. The **only** value that changes is a turn that immediately follows a give-up — exactly the bug.
+
+**Verification.** `npx tsc --noEmit` passes. A faithful simulation of the reducer accounting (`[A,B,C,D]`, with C deliberating 12 s then giving up before D's 4 s turn) confirms the post-give-up turn drops from the old **16 s** to the correct **4 s**, while every non-give-up turn (3 s, 5 s, 3 s) is byte-for-byte unchanged from the old model.
 
 ---
 
@@ -752,4 +761,4 @@ currentPlayer: getNextActivePlayer(state.currentPlayer, state.activePlayers),  /
 - **Last-player-standing win is correct:** `GIVE_UP` with `newActive.length === 1` sets `isGameOver` + `winner = newActive[0]` and never reaches the buggy advance; a 2-player give-up ends the game immediately with the right winner.
 - **Pool-exhaustion → draw is intentional:** `CONFIRM_ITEM` sets `isGameOver`/`isDraw` when `usedItems.length >= totalItems` and keeps `currentPlayer` (no advance), matching the quiz `QUESTION_POOL_EXHAUSTED` draw. The last namer isn't credited as winner — a design choice, not a defect.
 - **Hint accounting:** `REVEAL_HINT` always increments `hintsUsed[currentPlayer]` (the per-player limit counter) but caps `revealedHints` at 5 (the post-game display list) — these are deliberately separate, so a 6th hint still counts against the limit without bloating the result screen.
-- **Note (already covered):** `GIVE_UP` does not reset `turnStartTime`, so the next player's recorded turn absorbs the give-up deliberation — this is the same stats-only inaccuracy already filed as **[Bug 8](#bug-8--per-turn-stats-charge-setup-time-and-give-up-time-to-the-wrong-turn-low)**, not a new finding.
+- **Note (now fixed):** `GIVE_UP` previously did not reset `turnStartTime`, so the next player's recorded turn absorbed the give-up deliberation — the stats-only inaccuracy filed as **[Bug 8](#bug-8--a-give-up-inflates-the-next-players-turn-time-in-the-stats-low)**, which is now fixed (the continue branch resets `turnStartTime`, and per-turn durations are captured at record creation).
