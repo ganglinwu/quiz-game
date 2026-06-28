@@ -360,8 +360,12 @@ export function validateAnswerPerConstraint(
   const effectiveGens = genConstraint ? [genConstraint.generation] : activeGens;
 
   for (const constraint of question.constraints) {
+    // statRank (top-N) and evolutionStage (base/middle/final) are both relative
+    // to the active generation set, so they must be evaluated gen-scoped.
     const baseline: PokemonQuery =
-      constraint.kind === 'statRank' ? { generations: effectiveGens } : {};
+      constraint.kind === 'statRank' || constraint.kind === 'evolutionStage'
+        ? { generations: effectiveGens }
+        : {};
     const query = constraintsToQuery(baseline, [constraint]);
     const matches = queryPokemon(query);
     results.push({

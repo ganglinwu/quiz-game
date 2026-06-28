@@ -191,14 +191,42 @@ export function queryPokemon(query: PokemonQuery): PokemonDetailItem[] {
     params.push(...query.excludeNames);
   }
 
-  if (query.evolutionStage === 'base') {
-    conditions.push('evolves_from_id IS NULL');
-  } else if (query.evolutionStage === 'middle') {
-    conditions.push('evolves_from_id IS NOT NULL');
-    conditions.push('id IN (SELECT DISTINCT evolves_from_id FROM pokemon WHERE evolves_from_id IS NOT NULL)');
-  } else if (query.evolutionStage === 'final') {
-    conditions.push('evolves_from_id IS NOT NULL');
-    conditions.push('id NOT IN (SELECT DISTINCT evolves_from_id FROM pokemon WHERE evolves_from_id IS NOT NULL)');
+  if (query.evolutionStage) {
+    // Evolution stage is relative to the active generation set. A Pokemon whose
+    // pre-evolution lives in an inactive generation counts as "base" within the
+    // active scope (e.g. Pikachu is base in a Gen-1-only quiz because Pichu is
+    // Gen 2). Likewise a Pokemon whose evolution is inactive counts as "final"
+    // (e.g. Golbat in Gen 1, since Crobat is Gen 2).
+    const gens = query.generations;
+    if (gens?.length) {
+      const genIn = `generation IN (${gens.map(() => '?').join(',')})`;
+      const hasParentInGens = `evolves_from_id IN (SELECT id FROM pokemon WHERE ${genIn})`;
+      const isParentInGens = `id IN (SELECT evolves_from_id FROM pokemon WHERE evolves_from_id IS NOT NULL AND ${genIn})`;
+      if (query.evolutionStage === 'base') {
+        conditions.push(
+          `(evolves_from_id IS NULL OR evolves_from_id NOT IN (SELECT id FROM pokemon WHERE ${genIn}))`
+        );
+        params.push(...gens);
+      } else if (query.evolutionStage === 'middle') {
+        conditions.push(hasParentInGens);
+        params.push(...gens);
+        conditions.push(isParentInGens);
+        params.push(...gens);
+      } else if (query.evolutionStage === 'final') {
+        conditions.push(hasParentInGens);
+        params.push(...gens);
+        conditions.push(`NOT (${isParentInGens})`);
+        params.push(...gens);
+      }
+    } else if (query.evolutionStage === 'base') {
+      conditions.push('evolves_from_id IS NULL');
+    } else if (query.evolutionStage === 'middle') {
+      conditions.push('evolves_from_id IS NOT NULL');
+      conditions.push('id IN (SELECT DISTINCT evolves_from_id FROM pokemon WHERE evolves_from_id IS NOT NULL)');
+    } else if (query.evolutionStage === 'final') {
+      conditions.push('evolves_from_id IS NOT NULL');
+      conditions.push('id NOT IN (SELECT DISTINCT evolves_from_id FROM pokemon WHERE evolves_from_id IS NOT NULL)');
+    }
   }
 
   if (query.isDualType === true) {
