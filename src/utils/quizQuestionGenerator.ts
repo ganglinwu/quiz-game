@@ -69,6 +69,17 @@ export function buildBaselineQuery(
   // pool (see buildConstraintPool) and applied here so it restricts the whole
   // answer pool; "Any" leaves it unset so dual/mono can appear as a constraint.
   if (filter.allowDualType !== undefined) query.isDualType = filter.allowDualType;
+  // A single evolution-stage selection ("fully evolved only") is the same shape
+  // of global filter: buildConstraintPool's `length > 1` guard drops it from the
+  // per-question pool, so it's applied here to restrict the whole answer pool.
+  // Evolution stage is generation-relative, so queryPokemon scopes it to the
+  // active generations set above. A multi-stage selection still only biases the
+  // question pool (it stays in the constraint pool) — making *that* a hard
+  // restriction would need evolutionStage-as-array support and is a separate
+  // product decision (Bug 3 multi-stage / Bug 4 in the report).
+  if (filter.evolutionStages && filter.evolutionStages.length === 1) {
+    query.evolutionStage = filter.evolutionStages[0];
+  }
   return query;
 }
 
