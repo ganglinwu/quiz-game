@@ -4,7 +4,7 @@ _Static code audit + SQLite verification against `assets/quiz.db`. No app run (n
 
 Bug #1 from the original request (evolution-stage classification ignoring the active generation, e.g. Pikachu being treated as "middle" because of Pichu) was **already fixed** in the previous iteration (commit `c75bcf1`). That fix was re-verified and holds — see "What I verified as correct" at the bottom.
 
-This report covers the **other bugs** found while tracing the quiz-mode code paths. The original request also asked me to "click through the app and see if you find any other bugs," so a **whole-app pass beyond quiz mode** has been added at the bottom — see **[Whole-app pass (beyond quiz mode)](#whole-app-pass-beyond-quiz-mode)**, which includes a **High-severity** broken-feature bug (the "Remove generation" button). Four further passes follow it: a **[Pokédex & card-modal pass](#pokédex--card-modal-pass-ui-subsystems)** (Bugs 10–14), a **[Voice input pass](#voice-input-pass-micbutton--speech-recognition)** (Bugs 15–16, verified against the `expo-speech-recognition` native iOS source — **now both fixed**: the mic no longer soft-locks on an unrecognized utterance and a release-before-start no longer orphans a recognition session), an **[Evolution-chain display pass](#evolution-chain-display-pass-your-original-example-in-the-card-modal)** (Bug 17) — most relevant to your original complaint — and a **[Core reducer / turn-order pass](#core-reducer--turn-order-pass-the-game-state-machine)** (Bug 18), which audits the game state machine itself and found — and **now fixes** — a **gameplay** bug: in a 3+ player game, a mid-order player giving up sent the turn to the wrong player. **Bug 17 was your exact example resurfacing**: the Pokémon card modal still showed `Pichu → Pikachu → Raichu` in a Gen-1 context, because the iteration-1 fix corrected quiz-mode *stage classification* but the card modal's *displayed chain* was never gen-scoped. **Bug 17 is now fixed** — the card modal's evolution chain is generation-scoped, so a Gen-1 context shows `Pikachu → Raichu`. See the [Bug 17 section](#bug-17--card-modal-evolution-chain-ignores-the-active-generation-medium) for the implementation and verification.
+This report covers the **other bugs** found while tracing the quiz-mode code paths. The original request also asked me to "click through the app and see if you find any other bugs," so a **whole-app pass beyond quiz mode** has been added at the bottom — see **[Whole-app pass (beyond quiz mode)](#whole-app-pass-beyond-quiz-mode)**, which includes a **High-severity** broken-feature bug (the "Remove generation" button). Four further passes follow it: a **[Pokédex & card-modal pass](#pokédex--card-modal-pass-ui-subsystems)** (Bugs 10–14 — **Bug 10 now fixed**: the Pokédex search box was silently ignored whenever a stat filter was active; search now narrows the stat-ranked list too), a **[Voice input pass](#voice-input-pass-micbutton--speech-recognition)** (Bugs 15–16, verified against the `expo-speech-recognition` native iOS source — **now both fixed**: the mic no longer soft-locks on an unrecognized utterance and a release-before-start no longer orphans a recognition session), an **[Evolution-chain display pass](#evolution-chain-display-pass-your-original-example-in-the-card-modal)** (Bug 17) — most relevant to your original complaint — and a **[Core reducer / turn-order pass](#core-reducer--turn-order-pass-the-game-state-machine)** (Bug 18), which audits the game state machine itself and found — and **now fixes** — a **gameplay** bug: in a 3+ player game, a mid-order player giving up sent the turn to the wrong player. **Bug 17 was your exact example resurfacing**: the Pokémon card modal still showed `Pichu → Pikachu → Raichu` in a Gen-1 context, because the iteration-1 fix corrected quiz-mode *stage classification* but the card modal's *displayed chain* was never gen-scoped. **Bug 17 is now fixed** — the card modal's evolution chain is generation-scoped, so a Gen-1 context shows `Pikachu → Raichu`. See the [Bug 17 section](#bug-17--card-modal-evolution-chain-ignores-the-active-generation-medium) for the implementation and verification.
 
 ## Summary
 
@@ -254,7 +254,7 @@ The two passes above cover quiz logic and the core Pokémon/result/stats flow. T
 
 | # | Bug | Severity | Status |
 |---|-----|----------|--------|
-| 10 | **Pokédex search box is silently ignored whenever a stat filter is active** | Medium | Confirmed |
+| 10 | **Pokédex search box is silently ignored whenever a stat filter is active** | Medium | **Fixed** |
 | 11 | Card modal: switching evolution members has no fetch cancellation — out-of-order responses can show the wrong Pokémon's stats | Low | Confirmed |
 | 12 | Card modal: a failed PokeAPI fetch renders a blank "normal-type" card with 0.0 m / 0.0 kg and no error/retry | Low | Confirmed |
 | 13 | `NetworkImage` doesn't reset on `uri` change — swapping artwork shows the previous image with no loader | Low | Confirmed |
@@ -291,20 +291,24 @@ const pokemon = useMemo(() => {
 
 **Repro (click-through):** Home → Pokédex → tap **Attack** (list becomes "Top 20 Attack") → type `char` in the search box. Nothing filters; "Charizard" is not isolated. Clearing the stat chip makes search work again.
 
-**Recommended fix (low risk):** apply the search filter to the stat-ranked list too, e.g. lift the search filter out of the `else` branch:
+**Fix applied (low risk).** The `pokemon` memo no longer early-returns on `selectedStat`; the stat-ranked query is just one way of computing the base `list`, and the search filter is then applied to *whatever* list was produced:
 
 ```ts
 const pokemon = useMemo(() => {
   let list = selectedStat
     ? queryPokemon({ generations: selectedGen ? [selectedGen] : undefined, statRank: { stat: selectedStat, topN: 20 } })
-    : (selectedGen ? getPokemonForGens([selectedGen]) : getAllPokemon());
-  const q = search.trim().toLowerCase();
-  if (q) list = list.filter((p) => p.name.toLowerCase().includes(q));
+    : selectedGen ? getPokemonForGens([selectedGen]) : getAllPokemon();
+  if (search.trim()) {
+    const query = search.trim().toLowerCase();
+    list = list.filter((p) => p.name.toLowerCase().includes(query));
+  }
   return list;
 }, [selectedGen, selectedStat, search]);
 ```
 
-(Decision for you: should searching within "Top 20 Attack" search *only those 20*, as above, or clear the stat filter and search all Pokémon? The snippet does the former — least surprising given the chip stays highlighted.)
+Searching within "Top 20 Attack" now searches *only those 20* (the stat chip stays highlighted, so this is the least-surprising behavior — the search narrows the visible stat-ranked set rather than silently clearing the chip). All three pre-existing paths (no-stat/no-search, no-stat/with-search, stat/no-search) are byte-for-byte equivalent to before; only the previously-broken stat+search combination changes.
+
+**Verification.** `npx tsc --noEmit` passes. Traced all four filter combinations: only the stat-active + non-empty-search case differs from the old behavior, and it now applies the search filter that was previously discarded.
 
 ---
 
@@ -377,7 +381,7 @@ When the PokeAPI request fails (offline, rate-limited, 404), the catch only flip
 
 ## Pokédex & card-modal pass — what I verified as correct
 
-- **Pokédex generation + stat compose correctly:** `selectedGen` is passed into both `getPokemonForGens` and `queryPokemon(statRank)`, so "Gen 2 + Top 20 Speed" is genuinely Gen-2-scoped; only *search* (Bug 10) is dropped.
+- **Pokédex generation + stat compose correctly:** `selectedGen` is passed into both `getPokemonForGens` and `queryPokemon(statRank)`, so "Gen 2 + Top 20 Speed" is genuinely Gen-2-scoped. (Search was the one dropped dimension when a stat filter was active — that was **[Bug 10](#bug-10--pokédex-search-is-silently-dropped-when-a-stat-filter-is-active-medium)**, now fixed, so all three dimensions compose.)
 - **`'pokedex'` BGM track is registered** (`tracks.ts:8` → `yellow-opening.mp3`), so `useBGM('pokedex')` resolves and the `TRACK_REGISTRY.get(...) → if (!track) return` guard isn't hit.
 - **Card modal evolution chain is built once from the family base** (`getEvolutionChain(pokemonId)` on open) and correctly *not* re-fetched when switching members — every member shares one chain, so the BFS-ordered list (Pichu→Pikachu→Raichu) stays stable while you tap through it. _(The **mechanics** here — one build, no re-fetch — are correct; but the chain's **content** is the full real-world chain regardless of the active generation, which is itself **[Bug 17](#evolution-chain-display-pass-your-original-example-in-the-card-modal)** — your original `Pichu→Pikachu→Raichu` complaint. I'd previously logged this as correct; Bug 17 is the correction.)_
 - **Player-name validation** is sound: blanks default to `Player N`, the duplicate check is case-insensitive (`toLowerCase()`), and color assignment by index is safe (`PLAYER_COLORS` has ≥ `MAX_PLAYERS` entries).

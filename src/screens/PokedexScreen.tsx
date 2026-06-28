@@ -46,13 +46,14 @@ export default function PokedexScreen({ navigation }: Props) {
   const [selectedPokemon, setSelectedPokemon] = useState<PokemonItem | null>(null);
 
   const pokemon = useMemo(() => {
-    if (selectedStat) {
-      return queryPokemon({
-        generations: selectedGen ? [selectedGen] : undefined,
-        statRank: { stat: selectedStat, topN: 20 },
-      });
-    }
-    let list = selectedGen ? getPokemonForGens([selectedGen]) : getAllPokemon();
+    let list = selectedStat
+      ? queryPokemon({
+          generations: selectedGen ? [selectedGen] : undefined,
+          statRank: { stat: selectedStat, topN: 20 },
+        })
+      : selectedGen
+        ? getPokemonForGens([selectedGen])
+        : getAllPokemon();
     if (search.trim()) {
       const query = search.trim().toLowerCase();
       list = list.filter((p) => p.name.toLowerCase().includes(query));
