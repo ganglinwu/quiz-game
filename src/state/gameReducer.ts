@@ -131,7 +131,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         activePlayers: newActive,
         eliminatedPlayers: newEliminated,
-        currentPlayer: getNextActivePlayer(state.currentPlayer, newActive),
+        // Advance from the *unfiltered* list (which still contains the current
+        // player) so indexOf resolves and the turn passes to the next player in
+        // seating order. Passing the already-filtered newActive made indexOf
+        // return -1, always sending the turn back to the first survivor.
+        currentPlayer: getNextActivePlayer(state.currentPlayer, state.activePlayers),
         confirmationItem: null,
         hintPhase: 'none',
         hintPokemonName: null,

@@ -4,7 +4,7 @@ _Static code audit + SQLite verification against `assets/quiz.db`. No app run (n
 
 Bug #1 from the original request (evolution-stage classification ignoring the active generation, e.g. Pikachu being treated as "middle" because of Pichu) was **already fixed** in the previous iteration (commit `c75bcf1`). That fix was re-verified and holds — see "What I verified as correct" at the bottom.
 
-This report covers the **other bugs** found while tracing the quiz-mode code paths. The original request also asked me to "click through the app and see if you find any other bugs," so a **whole-app pass beyond quiz mode** has been added at the bottom — see **[Whole-app pass (beyond quiz mode)](#whole-app-pass-beyond-quiz-mode)**, which includes a **High-severity** broken-feature bug (the "Remove generation" button). Four further passes follow it: a **[Pokédex & card-modal pass](#pokédex--card-modal-pass-ui-subsystems)** (Bugs 10–14), a **[Voice input pass](#voice-input-pass-micbutton--speech-recognition)** (Bugs 15–16, verified against the `expo-speech-recognition` native iOS source), an **[Evolution-chain display pass](#evolution-chain-display-pass-your-original-example-in-the-card-modal)** (Bug 17) — most relevant to your original complaint — and a **[Core reducer / turn-order pass](#core-reducer--turn-order-pass-the-game-state-machine)** (Bug 18), which audits the game state machine itself and found a **gameplay** bug: in a 3+ player game, a mid-order player giving up sends the turn to the wrong player. **Bug 17 was your exact example resurfacing**: the Pokémon card modal still showed `Pichu → Pikachu → Raichu` in a Gen-1 context, because the iteration-1 fix corrected quiz-mode *stage classification* but the card modal's *displayed chain* was never gen-scoped. **Bug 17 is now fixed** — the card modal's evolution chain is generation-scoped, so a Gen-1 context shows `Pikachu → Raichu`. See the [Bug 17 section](#bug-17--card-modal-evolution-chain-ignores-the-active-generation-medium) for the implementation and verification.
+This report covers the **other bugs** found while tracing the quiz-mode code paths. The original request also asked me to "click through the app and see if you find any other bugs," so a **whole-app pass beyond quiz mode** has been added at the bottom — see **[Whole-app pass (beyond quiz mode)](#whole-app-pass-beyond-quiz-mode)**, which includes a **High-severity** broken-feature bug (the "Remove generation" button). Four further passes follow it: a **[Pokédex & card-modal pass](#pokédex--card-modal-pass-ui-subsystems)** (Bugs 10–14), a **[Voice input pass](#voice-input-pass-micbutton--speech-recognition)** (Bugs 15–16, verified against the `expo-speech-recognition` native iOS source), an **[Evolution-chain display pass](#evolution-chain-display-pass-your-original-example-in-the-card-modal)** (Bug 17) — most relevant to your original complaint — and a **[Core reducer / turn-order pass](#core-reducer--turn-order-pass-the-game-state-machine)** (Bug 18), which audits the game state machine itself and found — and **now fixes** — a **gameplay** bug: in a 3+ player game, a mid-order player giving up sent the turn to the wrong player. **Bug 17 was your exact example resurfacing**: the Pokémon card modal still showed `Pichu → Pikachu → Raichu` in a Gen-1 context, because the iteration-1 fix corrected quiz-mode *stage classification* but the card modal's *displayed chain* was never gen-scoped. **Bug 17 is now fixed** — the card modal's evolution chain is generation-scoped, so a Gen-1 context shows `Pikachu → Raichu`. See the [Bug 17 section](#bug-17--card-modal-evolution-chain-ignores-the-active-generation-medium) for the implementation and verification.
 
 ## Summary
 
@@ -570,7 +570,7 @@ Every pass above covered a feature surface (quiz logic, gen-vote, Pokédex, voic
 
 | # | Bug | Severity | Status |
 |---|-----|----------|--------|
-| 18 | **A mid-order player giving up rewinds the turn to the first player — the player who just went goes again, and the players who should be next are skipped** | Medium | Confirmed (reducer simulation) |
+| 18 | **A mid-order player giving up rewinds the turn to the first player — the player who just went goes again, and the players who should be next are skipped** | Medium | **Fixed** (reducer simulation) |
 
 ---
 
@@ -615,14 +615,16 @@ D gives up -> code next = A,  correct = A   [OK ]   (D was last; the order wraps
 
 The helper always returns `newActive[0]` (the first survivor); that only coincides with the correct next-in-order player at the two edges (giver-upper was first, or was last and the order wraps). For every player *between* those, it's wrong. (3 players `[A,B,C]`: `B` gives up → code says `A`, correct is `C` — same BUG.)
 
-**Recommended fix (one-token, low risk):** compute the next player from the **original** (pre-filter) list, which still contains the current player so `indexOf` resolves correctly:
+**Fix applied (one-token, low risk).** The next player is now computed from the **original** (pre-filter) list, which still contains the current player so `indexOf` resolves correctly:
 
 ```ts
 // gameReducer.ts:134
 currentPlayer: getNextActivePlayer(state.currentPlayer, state.activePlayers),  // was: newActive
 ```
 
-`GIVE_UP` only reaches this branch when `newActive.length >= 2` (the `=== 1` case returns a winner above), i.e. `state.activePlayers.length >= 3`. The current player's next-in-order is therefore always a *different*, still-active player, so no extra guard is needed — `getNextActivePlayer(cur, [A,B,C,D])` returns `C` when `cur = B`, exactly as intended.
+`GIVE_UP` only reaches this branch when `newActive.length >= 2` (the `=== 1` case returns a winner above), i.e. `state.activePlayers.length >= 3`. The current player's next-in-order is therefore always a *different*, still-active player (only the current player was filtered out, so the next-by-index player is guaranteed to be in `newActive`), so no extra guard is needed — `getNextActivePlayer(cur, [A,B,C,D])` returns `C` when `cur = B`, exactly as intended.
+
+**Verification.** `npx tsc --noEmit` passes. The exact reducer logic was re-simulated for every give-up position in `[A,B,C,D]` and `[A,B,C]`: the fixed call now matches the expected next-in-seating-order survivor in **all** positions (B→C, C→D, D→A in the 4-player case; B→C, C→A in the 3-player case), whereas the old `newActive` call returned the first survivor (A) for every mid-order give-up. `CONFIRM_ITEM` and `CAST_GEN_VOTE` were already passing the unfiltered list, so this brings `GIVE_UP` into line with them; no other call site is affected.
 
 ---
 
