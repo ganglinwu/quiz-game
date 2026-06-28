@@ -83,7 +83,12 @@ export function buildBaselineQuery(
   return query;
 }
 
-function buildConstraintPool(
+// Exported for unit testing (quizGeneration.vitest.ts). This is the per-question
+// constraint pool the generator samples from; it encodes which filters become
+// per-question constraints vs. which are dropped to be applied globally in the
+// baseline (single-stage evolution, Mono/Dual), so a regression that quietly
+// reshapes the pool — including the documented gated behaviors — is caught here.
+export function buildConstraintPool(
   filter: QuizFilter,
   activeGens: number[],
 ): QuizConstraint[] {
@@ -141,7 +146,11 @@ function buildConstraintPool(
   return pool;
 }
 
-function areCompatible(constraints: QuizConstraint[]): boolean {
+// Exported for unit testing (quizGeneration.vitest.ts). The compatibility gate
+// that prevents nonsensical/impossible constraint combos (≤2 types, no Mono+2
+// types, no duplicate non-type kinds, no superEffective+type, no
+// superEffective+statRank); a regression here silently degrades question quality.
+export function areCompatible(constraints: QuizConstraint[]): boolean {
   const kinds = constraints.map((c) => c.kind);
   const nonTypeKinds = kinds.filter((k) => k !== 'type');
   if (new Set(nonTypeKinds).size !== nonTypeKinds.length) return false;
