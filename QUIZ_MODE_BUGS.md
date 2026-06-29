@@ -6,17 +6,22 @@ Bug #1 from the original request (evolution-stage classification ignoring the ac
 
 This report covers the **other bugs** found while tracing the quiz-mode code paths. The original request also asked me to "click through the app and see if you find any other bugs," so a **whole-app pass beyond quiz mode** has been added at the bottom — see **[Whole-app pass (beyond quiz mode)](#whole-app-pass-beyond-quiz-mode)**, which includes a **High-severity** broken-feature bug (the "Remove generation" button — **now fixed**: removal was structurally impossible and an approved "remove" vote duplicated the gen, e.g. header `Gen 1, 2, 2`; a real `add`/`remove` discriminator now makes the existing vote actually remove the generation). Four further passes follow it: a **[Pokédex & card-modal pass](#pokédex--card-modal-pass-ui-subsystems)** (Bugs 10–14 — **Bug 10 now fixed**: the Pokédex search box was silently ignored whenever a stat filter was active, search now narrows the stat-ranked list too; **Bug 11 now fixed**: the card modal's evolution-member fetch is now cancellation-guarded so a stale response can't show one Pokémon's stats under another's name/artwork; **Bug 12 now fixed**: a failed PokeAPI fetch now shows an explicit "Couldn't load — tap to retry" error card (with an `r.ok` check so non-OK HTTP responses are treated as failures) instead of a blank fake "normal-type" card; **Bug 13 re-classified as masked** — a genuine `NetworkImage` code smell that a full call-site audit shows never actually manifests today; **Bug 14 now fixed** — `PlayerSetupScreen` no longer mutates the route-param `generations` array in place during render), a **[Voice input pass](#voice-input-pass-micbutton--speech-recognition)** (Bugs 15–16, verified against the `expo-speech-recognition` native iOS source — **now both fixed**: the mic no longer soft-locks on an unrecognized utterance and a release-before-start no longer orphans a recognition session), an **[Evolution-chain display pass](#evolution-chain-display-pass-your-original-example-in-the-card-modal)** (Bug 17) — most relevant to your original complaint — and a **[Core reducer / turn-order pass](#core-reducer--turn-order-pass-the-game-state-machine)** (Bug 18), which audits the game state machine itself and found — and **now fixes** — a **gameplay** bug: in a 3+ player game, a mid-order player giving up sent the turn to the wrong player. **Bug 17 was your exact example resurfacing**: the Pokémon card modal still showed `Pichu → Pikachu → Raichu` in a Gen-1 context, because the iteration-1 fix corrected quiz-mode *stage classification* but the card modal's *displayed chain* was never gen-scoped. **Bug 17 is now fixed** — the card modal's evolution chain is generation-scoped, so a Gen-1 context shows `Pikachu → Raichu`. See the [Bug 17 section](#bug-17--card-modal-evolution-chain-ignores-the-active-generation-medium) for the implementation and verification.
 
+> ### Design decision (2026-06-29, Ganglin) — Filters are pool-biasers, not answer-restrictions
+> Quiz pre-game **Filters bias question generation and hint selection, but must NOT gate which answers are accepted.** A "no legendary" quiz that asks "Name a Psychic type" still correctly **accepts Mewtwo** — legendary-ness simply isn't used as a question constraint, and a legendary may still be named to satisfy other constraints.
+>
+> Consequently the items this report had flagged as filter-enforcement defects are **won't-fix / by-design**: **Bug 2** (the only one left at High), **Bug 4**, **Bug 5**, **Bug 9**, and the **Bug 3 multi-stage** gap. The **merged code already behaves this way** — the grading gate `validateAnswerPerConstraint` never receives `filter`, and `buildBaselineQuery(filter, …)` feeds only generation + hints. The already-merged **Bug 1** (Mono/Dual) and **Bug 3** (single-stage) generation-side fixes remain valid: they bias the question/hint pool, never the accepted answers. Sections below are kept for reference with their status updated.
+
 ## Summary
 
 | # | Bug | Severity | Status |
 |---|-----|----------|--------|
-| 1 | **"Type Pairing: Mono / Dual" filter is completely ignored** | High | **Fixed** (generation) — validation gap is Bug 2 |
-| 2 | **Pre-game filters (no-legendary / no-mythical) are NOT enforced on answers** | High | Confirmed |
-| 3 | **Selecting a single Evolution Stage filter does nothing** | Medium | **Fixed** (single-stage generation) — multi-stage + validation gap remain |
-| 4 | Type / Stat / multi-stage filters only *bias the question pool*, they don't restrict answers | Low (design) | Confirmed |
-| 5 | "Strong against X" questions ignore the Type filter | Low (design) | Confirmed |
+| 1 | **"Type Pairing: Mono / Dual" filter is completely ignored** | High | **Fixed** (generation); answer-validation is **by-design** (see decision) |
+| 2 | **Pre-game filters (no-legendary / no-mythical) are NOT enforced on answers** | High | **Won't-fix — by design** (filters don't restrict answers) |
+| 3 | **Selecting a single Evolution Stage filter does nothing** | Medium | **Fixed** (single-stage generation); multi-stage + validation are **by-design** |
+| 4 | Type / Stat / multi-stage filters only *bias the question pool*, they don't restrict answers | Low (design) | **Won't-fix — by design** (this is the chosen model) |
+| 5 | "Strong against X" questions ignore the Type filter | Low (design) | **Won't-fix — by design** |
 
-**Root cause for #1, #2, #3, #4:** answer validation (`validateAnswerPerConstraint`) only checks the per-question *constraints*. It never sees the pre-game *filter* at all — the function signature doesn't even take it (`quizQuestionGenerator.ts:357`). The baseline-query builder (`buildBaselineQuery`, `quizQuestionGenerator.ts:56`) now applies legendary, mythical, dual-type (Bug 1 fix) **and** a single evolution-stage selection (Bug 3 fix), but those baseline filters are still only honored at *generation*, never re-checked when an answer is *graded*. So the remaining defect (Bug 2) is purely on the validation side: every baseline filter shapes the question pool correctly but a hand-typed answer that fits the visible constraints can still slip past a disallowed legendary/mythical/dual-type/wrong-stage Pokémon.
+**Root cause for #1, #2, #3, #4:** answer validation (`validateAnswerPerConstraint`) only checks the per-question *constraints*. It never sees the pre-game *filter* at all — the function signature doesn't even take it (`quizQuestionGenerator.ts:357`). The baseline-query builder (`buildBaselineQuery`, `quizQuestionGenerator.ts:56`) now applies legendary, mythical, dual-type (Bug 1 fix) **and** a single evolution-stage selection (Bug 3 fix), but those baseline filters are still only honored at *generation*, never re-checked when an answer is *graded*. This validation-side behavior was originally written up as the remaining defect (Bug 2): every baseline filter shapes the question pool but a hand-typed answer that fits the visible constraints is still accepted even if it's a disallowed legendary/mythical/dual-type/wrong-stage Pokémon. **Per the design decision above, this is intended — Bug 2 is won't-fix.** The generation-side fixes (#1, #3) stand; only the (never-built) validation enforcement is declined.
 
 ---
 
@@ -59,11 +64,13 @@ if (filter.allowDualType !== undefined) query.isDualType = filter.allowDualType;
 
 **Verification.** `npx tsc --noEmit` passes. DB-checked against `assets/quiz.db` that the restriction never starves the generator: Gen-1 has 84 mono / 67 dual Pokémon, a Mono+Fire question keeps 10 valid answers (Charizard/Moltres now correctly excluded), and a Mono "Strong against Grass" question keeps 23 — every realistic combo stays non-empty, and any genuinely-impossible combo (e.g. a 2-type question under Mono) is dropped by the existing empty-pool guard (`generateQuestion`, `:327`) rather than crashing.
 
-**Residual gap (Bug 2, not yet fixed):** generation now respects Mono/Dual, but **answer validation still doesn't** — `validateAnswerPerConstraint` never receives the filter, so a player can still *answer* dual-type Charizard on a Mono "Fire type" question and have it accepted. This is the same root cause as Bug 2 (legendary/mythical have the identical validation gap) and is left for the visible-vs-silent product decision below — `allowDualType` is now exactly parallel to the legendary/mythical filters: applied in the baseline, not yet re-checked at grading.
+**Validation behavior (Bug 2 — by design, won't-fix):** generation now respects Mono/Dual, but **answer validation intentionally doesn't** — `validateAnswerPerConstraint` never receives the filter, so a player can *answer* dual-type Charizard on a Mono "Fire type" question and have it accepted. Per the 2026-06-29 decision (filters are pool-biasers, not answer-restrictions) this is intended, not a defect. `allowDualType` is exactly parallel to the legendary/mythical filters: applied in the baseline to bias generation/hints, never re-checked at grading.
 
 ---
 
 ## Bug 2 — Pre-game filters are not enforced when grading an answer (High)
+
+> **Resolution: Won't-fix — by design (2026-06-29).** Per Ganglin's decision, filters are pool-biasers, not answer-restrictions: accepting a constraint-correct answer (e.g. Mewtwo on a Psychic question in a no-legendary quiz) is the *intended* behavior. The grading gate correctly checks only the visible question constraints. The fix below is **not being implemented**; the analysis is retained for reference.
 
 **Where:** `src/utils/quizQuestionGenerator.ts:341` (`validateAnswerPerConstraint`) and `src/screens/GameScreen.tsx:200-228` (the accept/reject gate).
 
@@ -89,7 +96,7 @@ Mew       psychic         mythical
 - After the constraint loop, if `!filter.includeLegendary` push `{ label: 'Not legendary', passed: <pokemon is not legendary> }`, similarly for mythical and `allowDualType`.
 - These extra rows feed `feedback.every(...)`, so a disallowed Pokémon is rejected. The banner already renders all rows generically, so this needs no banner change.
 
-Decision needed from you: should these baseline filters show as **visible constraint rows** in the question banner (so the player knows "no legendaries"), or stay invisible and only reject on submit? I'd lean toward visible — silent rejection of a type-correct answer is confusing.
+~~Decision needed from you: should these baseline filters show as **visible constraint rows** in the question banner (so the player knows "no legendaries"), or stay invisible and only reject on submit?~~ **Decision made (2026-06-29): neither — filters do not restrict answers at all, so no validation enforcement is added.**
 
 ---
 
@@ -129,10 +136,10 @@ if (filter.evolutionStages && filter.evolutionStages.length === 1) {
 
 **Verification.** `npx tsc --noEmit` passes. DB-checked against `assets/quiz.db`: "Final only" + Fire in Gen 1 now yields exactly the 5 final-stage Fire Pokémon `{Charizard, Ninetales, Arcanine, Rapidash, Flareon}`, correctly excluding base Charmander/Vulpix/Growlithe/Ponyta, middle Charmeleon, and the gen-relative-base Magmar/Moltres (their Gen-1 chains have no in-gen parent). The restriction never starves the generator: every Gen-1 type except `dark` (which has no Gen-1 members at all) has ≥1 final-stage Pokémon, statRank intersections stay healthy (e.g. Final ∩ Top-20 Attack = 13), and the rare empty combo is dropped by the existing empty-pool guard (`generateQuestion`, `:327`).
 
-**Still open — multi-stage + validation gap.**
+**Multi-stage + validation — by design (2026-06-29), not fixed.**
 
-- *Multi-stage selection* (e.g. Base **and** Middle, excluding Final) still only **biases the question pool** (it stays in the per-question constraint pool), it does not hard-restrict answers — that's the same pool-bias-vs-hard-restriction design question as **Bug 4**, and turning it into a hard restriction needs `queryPokemon` to accept an **array** of stages plus the `length > 1` guard dropped. Left for the product decision.
-- *Validation gap* — like Bug 1, the single-stage fix is on the *generation* path only; `validateAnswerPerConstraint` never receives the filter, so a player can still *type* a base-stage Pokémon on a non-stage question under "Final only" and have it accepted. This is the same unified **Bug 2** validation gap (now covering legendary, mythical, dual-type, **and** single-stage evolution).
+- *Multi-stage selection* (e.g. Base **and** Middle, excluding Final) still only **biases the question pool** (it stays in the per-question constraint pool); it does not hard-restrict answers. Per the design decision (filters are pool-biasers), this is **intended** — turning it into a hard restriction (which would need `queryPokemon` to accept an **array** of stages plus dropping the `length > 1` guard) is explicitly **not** being done. Same call as **Bug 4**.
+- *Validation* — the single-stage fix is on the *generation* path only; `validateAnswerPerConstraint` never receives the filter, so a player can *type* a base-stage Pokémon on a non-stage question under "Final only" and have it accepted. Per the decision this is **intended** — the unified **Bug 2** behavior, won't-fix.
 
 ---
 
@@ -143,7 +150,7 @@ The README frames filters as restricting "the question pool," and indeed `types`
 - "Fire/Water only" quiz, easy difficulty: a question can be "Name a Legendary Pokémon" (no type constraint) and accept any-type Mewtwo.
 - Evolution Stage = Base + Middle (excluding Final): a plain "Fire type" question still accepts Charizard (final).
 
-This matches the documented design, so it's listed as **design, not a defect** — but the Filters UI gives no hint of it, and combined with Bugs 1–3 the overall impression is "filters don't work." Worth a product decision: should filters be hard answer-restrictions, or pool-biasers? The fix for Bug 2 naturally makes them hard restrictions if you want that.
+This matches the documented design, so it's listed as **design, not a defect**. **Decided (2026-06-29): pool-biasers — won't-fix.** Filters shape which questions are asked, not which answers are accepted; this is the intended model. (If the "filters don't work" impression becomes a concern, the lightweight follow-up is UI copy clarifying that Filters pick *what gets asked*, not *what's allowed* — no logic change.)
 
 ---
 
@@ -151,7 +158,7 @@ This matches the documented design, so it's listed as **design, not a defect** �
 
 **Where:** `src/utils/quizQuestionGenerator.ts:110-114`.
 
-`superEffective` constraints for **all** target types are added to the pool regardless of `filter.types`. So a "Fire/Water only" quiz can still produce "Strong against Dragon" and accept an Ice/Dragon/Fairy Pokémon — types the user excluded. Same family as Bug 4; only relevant if you decide filters should be hard restrictions.
+`superEffective` constraints for **all** target types are added to the pool regardless of `filter.types`. So a "Fire/Water only" quiz can still produce "Strong against Dragon" and accept an Ice/Dragon/Fairy Pokémon — types the user excluded. Same family as Bug 4. **Decided (2026-06-29): pool-biasers — won't-fix.**
 
 ---
 
@@ -167,8 +174,8 @@ This matches the documented design, so it's listed as **design, not a defect** �
 
 1. ~~**Bug 1** — one-line baseline fix, immediate win.~~ **Done** (generation path). Mono/Dual now restricts generated questions + hints; only the validation side (Bug 2) remains.
 2. ~~**Bug 3 (single-stage)** — same one-line baseline pattern as Bug 1.~~ **Done** (generation path). "Fully evolved only" (and any single-stage pick) now restricts generated questions + hints, gen-relative; only the validation side (Bug 2) and the multi-stage case (Bug 4) remain.
-3. **Bug 2** — pass `filter` into validation so legendary/mythical/**dual-type**/**single-stage evolution** are re-checked at grading; needs your call on visible-vs-silent rows. (After Bugs 1 & 3, all four baseline filters share this single unified validation gap.)
-4. **Bug 3 (multi-stage) & Bugs 4 & 5** — product decision first (pool-bias vs hard restriction); multi-stage additionally needs `evolutionStage`-as-array support in `queryPokemon`, then mechanical.
+3. ~~**Bug 2** — pass `filter` into validation so legendary/mythical/dual-type/single-stage evolution are re-checked at grading.~~ **Won't-fix (2026-06-29)** — filters are pool-biasers, not answer-restrictions; accepting a constraint-correct answer is intended.
+4. ~~**Bug 3 (multi-stage) & Bugs 4 & 5** — product decision first (pool-bias vs hard restriction).~~ **Decided: pool-bias — all won't-fix.** Optional follow-up: UI copy clarifying Filters pick *what's asked*, not *what's allowed* (no logic change).
 
 ---
 
@@ -181,7 +188,7 @@ The original request was "click through the app and see if you find any other bu
 | 6 | **"Remove generation" button doesn't remove — it re-adds the gen (duplicate) and the vote even says "Add"** | **High** | **Fixed** |
 | 7 | `state.activeGenerations.sort()` mutates reducer state during render | Low | **Fixed** |
 | 8 | Per-turn stats: a give-up inflates the next player's turn time | Low | **Fixed** (give-up bleed) |
-| 9 | "Try these next time!" post-game suggestions ignore the quiz filters | Low (design) | Confirmed |
+| 9 | "Try these next time!" post-game suggestions ignore the quiz filters | Low (design) | **Won't-fix — by design** |
 
 ---
 
@@ -297,7 +304,7 @@ Because a give-up (or elimination) creates **no turn record**, the *next* player
 
 **Where:** `src/screens/GameScreen.tsx:330-343` (`pokemonItems` = `getPokemonForGens(activeGenerations)`).
 
-When a quiz-mode game ends, the result screen pads its learning section with random unused Pokémon drawn from **all** active-gen Pokémon, with no regard for the quiz's filters. So a "no legendaries" quiz can still suggest a legendary, and a "Fire/Water only" quiz can suggest an Electric Pokémon, under "Try these next time!". Arguably fine (it's a general "learn more Pokémon" nudge, not a quiz answer), but it's inconsistent with the filters the player set, so it's flagged as a design call rather than a hard defect.
+When a quiz-mode game ends, the result screen pads its learning section with random unused Pokémon drawn from **all** active-gen Pokémon, with no regard for the quiz's filters. So a "no legendaries" quiz can still suggest a legendary, and a "Fire/Water only" quiz can suggest an Electric Pokémon, under "Try these next time!". Arguably fine (it's a general "learn more Pokémon" nudge, not a quiz answer), but it's inconsistent with the filters the player set, so it's flagged as a design call rather than a hard defect. **Decided (2026-06-29): won't-fix — by design.** Consistent with filters being loose pool-biasers; the post-game nudge intentionally ranges over all active-gen Pokémon.
 
 ---
 
