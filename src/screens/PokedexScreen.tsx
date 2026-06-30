@@ -180,7 +180,10 @@ export default function PokedexScreen({ navigation }: Props) {
           visible
           pokemonName={selectedPokemon.name}
           pokemonId={selectedPokemon.pokedexNumber}
-          generations={selectedGen ? [selectedGen] : undefined}
+          // The Pokédex is a reference browser: always show the full real-world
+          // evolution lineage (e.g. Pichu → Pikachu → Raichu) even when a gen
+          // filter is active, so members from other gens stay traceable. Only
+          // quiz mode (ResultScreen) scopes the chain to the active gens.
           onClose={() => setSelectedPokemon(null)}
         />
       )}
