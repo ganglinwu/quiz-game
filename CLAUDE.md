@@ -7,7 +7,7 @@ A turn-based naming game for iOS built with Expo (React Native + TypeScript). Pl
 ## Current State
 
 ### Features Implemented
-- **2 game modes**: Pokemon (Gen 1-3, ~400 Pokemon) and Fruits (~90), with optional Quiz Mode for Pokemon
+- **2 game modes**: Pokemon (Gen 1-9, 1025 Pokemon) and Fruits (~90), with optional Quiz Mode for Pokemon
 - **2-8 players** with custom names and assigned colors
 - **Voice input** (push-to-hold mic button) via `expo-speech-recognition`
 - **Text input** always visible as fallback
@@ -33,6 +33,7 @@ A turn-based naming game for iOS built with Expo (React Native + TypeScript). Pl
   - Screens use declarative hooks: `useBGM('title')`, `useBGMDynamic(trackId)`, `useAudioSpeechBridge(isListening)`
 - **Haptic feedback** on mic button press/release
 - **Toast notifications** for voice errors and no-match results (centered on screen)
+- **Pokédex browser** (`PokedexScreen`, reachable from Home) — scrollable grid of all 1025 Pokemon with generation, stat-rank (top-20), and **type** filters (a funnel button opens `PokedexFilterModal`, an 18-type multi-select) plus name search; legendary/mythical shimmer badges; tapping a Pokemon opens the card modal showing the **full** real-world evolution lineage (quiz mode's post-game card modal gen-scopes the chain instead)
 - **Quiz Mode** (Pokemon only) — opt-in modifier that presents constrained prompts each turn:
   - Per-turn questions displayed as structured checklist: "Name a Pokemon that is..." followed by constraint bullets (e.g., "· Gen 2", "· Fire type")
   - Generation row always visible — uses question's gen constraint or implicit active-gens constraint
@@ -57,7 +58,7 @@ A turn-based naming game for iOS built with Expo (React Native + TypeScript). Pl
 - **expo-speech-recognition** — iOS speech recognition
 - **expo-audio** — background music and sound effects
 - **expo-haptics** — haptic feedback
-- **React Navigation** (native stack) — 4 screens
+- **React Navigation** (native stack) — 5 screens (Home, PlayerSetup, Game, Result, Pokedex)
 - **React Context + useReducer** — state management
 - **expo-sqlite** — pre-populated SQLite database for Pokemon/fruit/alias data
 - No backend — all data is local (SQLite database bundled as asset)
@@ -72,6 +73,7 @@ src/
 │   ├── HintOverlay.tsx           # Silhouette → reveal hint display
 │   ├── HistoryModal.tsx          # Scrollable game history with highlights
 │   ├── MicButton.tsx             # Push-to-hold voice capture
+│   ├── PokedexFilterModal.tsx    # Pokédex type-filter modal (18-type multi-select)
 │   ├── PokemonCardModal.tsx      # Trading card-style detail modal (PokeAPI)
 │   ├── QuizFilterModal.tsx       # Pre-game quiz filter config (types, legendary, evo stage, dual type, hardcore)
 │   ├── QuizQuestionBanner.tsx    # Structured constraint checklist with per-constraint ✓/✗ feedback
@@ -80,16 +82,19 @@ src/
 │   ├── TextInputField.tsx        # Text input with submit
 │   └── Toast.tsx                 # Auto-dismissing centered toast
 ├── data/
-│   ├── aliases.ts                # ~500 speech recognition alias mappings (Gen 1-3) — build-script input
+│   ├── aliases.ts                # ~630 speech recognition alias mappings (Gen 1-3) — build-script input
+│   ├── fruits.json               # Fruits category data — build-script input for generate-db
+│   ├── genRegions.ts             # Gen → Roman numeral + region map (pure, testable)
 │   ├── migrations.ts             # Runtime schema migration runner (PRAGMA user_version)
 │   └── pokemon-db.ts             # SQLite data access layer (replaces JSON imports)
 ├── navigation/
-│   └── RootNavigator.tsx         # Stack: Home → PlayerSetup → Game → Result
+│   └── RootNavigator.tsx         # Stack: Home → PlayerSetup → Game → Result (+ Pokedex)
 ├── screens/
 │   ├── HomeScreen.tsx            # Category picker
 │   ├── PlayerSetupScreen.tsx     # Enter 2-8 player names, configure hints
 │   ├── GameScreen.tsx            # Main gameplay
-│   └── ResultScreen.tsx          # Winner + elimination order + stats + learning section
+│   ├── ResultScreen.tsx          # Winner + elimination order + stats + learning section
+│   └── PokedexScreen.tsx         # Pokédex grid browser (gen/stat/type/search filters)
 ├── audio/
 │   ├── AudioManager.ts           # Singleton class: command queue, single-sound guarantee
 │   ├── AudioProvider.tsx          # React Context wrapping the manager
@@ -122,8 +127,8 @@ src/
 - **Audio manager as command queue**: `AudioManager` is a plain TypeScript class (not React) that serializes all BGM operations through an async queue. One persistent `AudioPlayer` swaps tracks via `replace()`. Superseded play commands are skipped. SFX bypasses the queue entirely. Screens declare intent via hooks (`useBGM`, `useBGMDynamic`) rather than calling play/stop directly. After speech recognition ends, `setAudioModeAsync()` is called to reclaim the iOS audio session before resuming playback.
 - **Quiz mode as two-layer system**: pre-game *filters* (QuizFilter) restrict the question pool, per-turn *constraints* (QuizConstraint[]) narrow further. Both feed into `queryPokemon()` with AND logic. The constraint pool itself respects filters — if filters say "only Fire/Water", only those type constraints appear. Question generator tries up to 50 random constraint combos, validates each against the DB, and auto-degrades difficulty (hard→medium→easy→null) if needed.
 - **Quiz answer validation as per-constraint feedback**: fuzzy matching runs against ALL Pokemon (not just valid answers) to prevent gaming via process of elimination. After a match is found, `validateAnswerPerConstraint()` checks each constraint independently (querying without generation filter for non-gen constraints) so feedback accurately reflects which constraints the Pokemon satisfies. Generation is always checked — either from the question's gen constraint or as an implicit active-gens constraint. Hardcore mode suppresses all visual feedback.
-- **Evolution stage derived from existing data**: base = `evolves_from_id IS NULL` (195), middle = has parent AND is someone's parent (44), final = has parent but nobody evolves from it (147). No schema changes needed.
-- **SQLite data layer**: Pokemon data (386 Pokemon with types, generation, legendary/mythical status, evolution chains, height, weight), ~500 voice aliases, and ~90 fruits stored in a pre-populated `assets/quiz.db`. Generated at build time by `scripts/generate-db.ts` which fetches from PokeAPI and caches in `scripts/pokeapi-cache.json`. `src/data/pokemon-db.ts` provides sync query functions via `expo-sqlite`'s `openDatabaseSync`. Includes `queryPokemon()` for multi-dimensional queries (by type, generation, legendary status, etc.).
+- **Evolution stage derived from existing data**: base = `evolves_from_id IS NULL` (541), middle = has parent AND is someone's parent (117), final = has parent but nobody evolves from it (367). These are gen-global counts; quiz mode scopes stage relative to the active generations (e.g. Pikachu is "base" in a Gen-1-only quiz because Pichu is Gen 2). No schema changes needed.
+- **SQLite data layer**: Pokemon data (1025 Pokemon across Gen 1-9 with types, generation, legendary/mythical status, evolution chains, height, weight), ~630 voice aliases (Gen 1-3 only), and 90 fruits stored in a pre-populated `assets/quiz.db`. Generated at build time by `scripts/generate-db.ts` which fetches from PokeAPI and caches in `scripts/pokeapi-cache.json`. `src/data/pokemon-db.ts` provides sync query functions via `expo-sqlite`'s `openDatabaseSync`. Includes `queryPokemon()` for multi-dimensional queries (by type, generation, legendary status, etc.).
 
 ## Build & Deploy
 ```bash
