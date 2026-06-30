@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { getArtworkUrl } from '../utils/pokeApi';
 import { getEvolutionChain, getPokemonMeta, type EvolutionChainMember } from '../data/pokemon-db';
+import { GEN_REGIONS } from '../data/genRegions';
 import { useAudio } from '../audio';
 import PokeballLoader from './PokeballLoader';
 import NetworkImage from './NetworkImage';
@@ -52,18 +53,6 @@ interface Props {
   generations?: number[];
   onClose: () => void;
 }
-
-const GEN_REGIONS: Record<number, { numeral: string; region: string }> = {
-  1: { numeral: 'I', region: 'Kanto' },
-  2: { numeral: 'II', region: 'Johto' },
-  3: { numeral: 'III', region: 'Hoenn' },
-  4: { numeral: 'IV', region: 'Sinnoh' },
-  5: { numeral: 'V', region: 'Unova' },
-  6: { numeral: 'VI', region: 'Kalos' },
-  7: { numeral: 'VII', region: 'Alola' },
-  8: { numeral: 'VIII', region: 'Galar' },
-  9: { numeral: 'IX', region: 'Paldea' },
-};
 
 function getCryUrl(name: string): string {
   const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '');
