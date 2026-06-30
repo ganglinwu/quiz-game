@@ -17,7 +17,21 @@ import { getArtworkUrl } from '../utils/pokeApi';
 import { PokemonItem, StatName } from '../types';
 import NetworkImage from '../components/NetworkImage';
 import PokemonCardModal from '../components/PokemonCardModal';
+import PokedexFilterModal from '../components/PokedexFilterModal';
 import ShimmerBadge from '../components/ShimmerBadge';
+
+// Small funnel glyph drawn with plain Views (no icon library in this project) so
+// the "filter" symbol renders identically across platforms.
+function FunnelIcon({ active }: { active: boolean }) {
+  const color = active ? '#ffffff' : '#a0a0b0';
+  return (
+    <View style={styles.funnel}>
+      <View style={[styles.funnelBar, { width: 16, backgroundColor: color }]} />
+      <View style={[styles.funnelBar, { width: 10, backgroundColor: color }]} />
+      <View style={[styles.funnelBar, { width: 4, backgroundColor: color }]} />
+    </View>
+  );
+}
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Pokedex'>;
 
@@ -42,24 +56,30 @@ export default function PokedexScreen({ navigation }: Props) {
 
   const [selectedGen, setSelectedGen] = useState<number | null>(null);
   const [selectedStat, setSelectedStat] = useState<StatName | null>(null);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [filterVisible, setFilterVisible] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedPokemon, setSelectedPokemon] = useState<PokemonItem | null>(null);
 
-  const pokemon = useMemo(() => {
-    let list = selectedStat
-      ? queryPokemon({
-          generations: selectedGen ? [selectedGen] : undefined,
-          statRank: { stat: selectedStat, topN: 20 },
-        })
-      : selectedGen
-        ? getPokemonForGens([selectedGen])
-        : getAllPokemon();
+  const pokemon = useMemo<PokemonItem[]>(() => {
+    // Route through queryPokemon whenever a stat or type filter is active (it
+    // can express both); otherwise use the lighter gen/all browse queries.
+    let list: PokemonItem[] =
+      selectedStat || selectedTypes.length > 0
+        ? queryPokemon({
+            generations: selectedGen ? [selectedGen] : undefined,
+            hasAnyOfTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
+            statRank: selectedStat ? { stat: selectedStat, topN: 20 } : undefined,
+          })
+        : selectedGen
+          ? getPokemonForGens([selectedGen])
+          : getAllPokemon();
     if (search.trim()) {
       const query = search.trim().toLowerCase();
       list = list.filter((p) => p.name.toLowerCase().includes(query));
     }
     return list;
-  }, [selectedGen, selectedStat, search]);
+  }, [selectedGen, selectedStat, selectedTypes, search]);
 
   const renderItem = useCallback(
     ({ item }: { item: PokemonItem }) => (
@@ -112,6 +132,18 @@ export default function PokedexScreen({ navigation }: Props) {
             </TouchableOpacity>
           )}
         </View>
+        <TouchableOpacity
+          style={[styles.filterBtn, selectedTypes.length > 0 && styles.filterBtnActive]}
+          onPress={() => setFilterVisible(true)}
+          accessibilityLabel="Filter by type"
+        >
+          <FunnelIcon active={selectedTypes.length > 0} />
+          {selectedTypes.length > 0 && (
+            <View style={styles.filterBadge}>
+              <Text style={styles.filterBadgeText}>{selectedTypes.length}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -175,6 +207,13 @@ export default function PokedexScreen({ navigation }: Props) {
         })}
       />
 
+      <PokedexFilterModal
+        visible={filterVisible}
+        onClose={() => setFilterVisible(false)}
+        selectedTypes={selectedTypes}
+        onTypesChange={setSelectedTypes}
+      />
+
       {selectedPokemon && (
         <PokemonCardModal
           visible
@@ -222,14 +261,59 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
     paddingHorizontal: HORIZONTAL_PADDING,
     marginBottom: 10,
   },
   searchContainer: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#2a2a3e',
     borderRadius: 10,
+  },
+  filterBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: '#2a2a3e',
+    borderWidth: 2,
+    borderColor: '#2a2a3e',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterBtnActive: {
+    borderColor: '#e63946',
+    backgroundColor: '#3a2a3e',
+  },
+  funnel: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+  },
+  funnelBar: {
+    height: 2.5,
+    borderRadius: 2,
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#e63946',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  filterBadgeText: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
   },
   searchInput: {
     flex: 1,

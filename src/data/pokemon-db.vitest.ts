@@ -63,3 +63,33 @@ describe('queryPokemon — generation-relative evolution stage', () => {
     expect(baseAll).toContain('Pichu');
   });
 });
+
+describe('queryPokemon — type filter (the Pokédex type-filter feature)', () => {
+  it('matches a type on either slot (type1 OR type2): Gen-1 Fire is exactly the 12 fire Pokémon', () => {
+    const gen1Fire = names(queryPokemon({ generations: [1], hasAnyOfTypes: ['fire'] }));
+    expect(gen1Fire).toEqual([
+      'Charmander', 'Charmeleon', 'Charizard', 'Vulpix', 'Ninetales',
+      'Growlithe', 'Arcanine', 'Ponyta', 'Rapidash', 'Magmar', 'Flareon', 'Moltres',
+    ]);
+  });
+
+  it('includes a Pokémon via its secondary type (Charizard is fire/flying, so it appears under Flying)', () => {
+    const gen1Flying = names(queryPokemon({ generations: [1], hasAnyOfTypes: ['flying'] }));
+    expect(gen1Flying).toContain('Charizard');
+  });
+
+  it('treats multiple selected types as a union (OR): Gen-1 Fire-or-Water = 44', () => {
+    const gen1FireWater = queryPokemon({ generations: [1], hasAnyOfTypes: ['fire', 'water'] });
+    expect(gen1FireWater).toHaveLength(44);
+  });
+
+  it('applies the type filter across all generations when no gen is selected (All Fire = 56)', () => {
+    const allFire = queryPokemon({ hasAnyOfTypes: ['fire'] });
+    expect(allFire).toHaveLength(56);
+  });
+
+  it('intersects the type filter with the gen filter (Gen-1 Dragon = the Dratini line)', () => {
+    const gen1Dragon = names(queryPokemon({ generations: [1], hasAnyOfTypes: ['dragon'] }));
+    expect(gen1Dragon).toEqual(['Dratini', 'Dragonair', 'Dragonite']);
+  });
+});
