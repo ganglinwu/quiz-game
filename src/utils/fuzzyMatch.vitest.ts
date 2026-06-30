@@ -210,4 +210,47 @@ describe('fuzzyMatchWithGenDetection (active -> all-gens fallback)', () => {
     expect(result).toMatchObject({ match: null, confidence: 'none' });
     expect(result.generation).toBeUndefined();
   });
+
+  it('an EXACT inactive-gen name beats a CLOSE active-gen near-twin (drives the right gen vote)', () => {
+    // Gen 7-9 introduced many edit-distance-1 near-twins of earlier Pokemon
+    // (Diglett/Wiglett, Dugtrio/Wugtrio, Mr. Mime/Mr. Rime, Corsola/Cursola).
+    // Naming the inactive twin by its exact name must surface THAT Pokemon and
+    // its real generation, not be silently credited as the active twin — which
+    // would also report the wrong generation and suppress the expansion vote.
+    const gen = (name: string): number | null =>
+      ({ Diglett: 1, Wiglett: 9 } as Record<string, number>)[name] ?? null;
+
+    // Gen-1 game, player names the Gen-9 "Wiglett": must resolve to Wiglett/9.
+    const inGen1 = fuzzyMatchWithGenDetection(
+      'Wiglett',
+      ['Diglett'],
+      ['Diglett', 'Wiglett'],
+      [],
+      gen
+    );
+    expect(inGen1).toMatchObject({ match: 'Wiglett', generation: 9 });
+
+    // Gen-9 game, player names the Gen-1 "Diglett": must resolve to Diglett/1.
+    const inGen9 = fuzzyMatchWithGenDetection(
+      'Diglett',
+      ['Wiglett'],
+      ['Diglett', 'Wiglett'],
+      [],
+      gen
+    );
+    expect(inGen9).toMatchObject({ match: 'Diglett', generation: 1 });
+  });
+
+  it('still prefers a CLOSE active-gen match when neither set has an exact hit', () => {
+    // "pikachb" is a typo of active Pikachu (distance 1) and matches nothing
+    // exactly anywhere, so the close active-gen match must still win.
+    const result = fuzzyMatchWithGenDetection(
+      'pikachb',
+      ['Pikachu'],
+      ['Pikachu', 'Mudkip'],
+      [],
+      getGen
+    );
+    expect(result).toMatchObject({ match: 'Pikachu', confidence: 'close', generation: 1 });
+  });
 });

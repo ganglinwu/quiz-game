@@ -109,11 +109,29 @@ export function fuzzyMatchWithGenDetection(
   getGen: (name: string) => number | null
 ): MatchResult {
   const activeResult = fuzzyMatch(input, activeItems, usedItems);
-  if (activeResult.confidence !== 'none') {
+  // An exact (or alias) match in the active set is the unambiguous common case.
+  if (activeResult.confidence === 'exact') {
     return { ...activeResult, generation: getGen(activeResult.match!) ?? undefined };
   }
 
+  // Before accepting a merely *close* active-gen match, see if the input is an
+  // exact match for some Pokemon in another generation. Gen 7-9 added many
+  // near-twins that straddle the active/inactive line within the edit-distance
+  // threshold (e.g. Gen-1 Diglett vs Gen-9 Wiglett, Gen-1 Mr. Mime vs Gen-8
+  // Mr. Rime). Without this, naming the inactive twin by its exact name would be
+  // silently credited as the active twin AND report the wrong generation,
+  // suppressing the "expand generation?" vote. Exact intent must win over a fuzzy
+  // near-miss.
   const allResult = fuzzyMatch(input, allItems, usedItems);
+  if (allResult.confidence === 'exact') {
+    return { ...allResult, generation: getGen(allResult.match!) ?? undefined };
+  }
+
+  // Neither set has an exact hit: prefer a close active-gen match, else the
+  // close all-gens match (the original active -> all fallback order).
+  if (activeResult.confidence !== 'none') {
+    return { ...activeResult, generation: getGen(activeResult.match!) ?? undefined };
+  }
   if (allResult.confidence !== 'none') {
     return { ...allResult, generation: getGen(allResult.match!) ?? undefined };
   }
