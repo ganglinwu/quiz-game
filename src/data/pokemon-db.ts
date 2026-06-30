@@ -10,7 +10,7 @@ function getDb(): SQLite.SQLiteDatabase {
   return db;
 }
 
-export const ALL_GENS = [1, 2, 3, 4, 5, 6];
+export const ALL_GENS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 export function getPokemonForGens(gens: number[]): PokemonItem[] {
   if (gens.length === 0) return [];

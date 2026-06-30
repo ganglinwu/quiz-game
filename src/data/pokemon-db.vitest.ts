@@ -83,9 +83,9 @@ describe('queryPokemon — type filter (the Pokédex type-filter feature)', () =
     expect(gen1FireWater).toHaveLength(44);
   });
 
-  it('applies the type filter across all generations when no gen is selected (All Fire = 56)', () => {
+  it('applies the type filter across all generations when no gen is selected (All Fire = 81 across Gen 1-9)', () => {
     const allFire = queryPokemon({ hasAnyOfTypes: ['fire'] });
-    expect(allFire).toHaveLength(56);
+    expect(allFire).toHaveLength(81);
   });
 
   it('intersects the type filter with the gen filter (Gen-1 Dragon = the Dratini line)', () => {

@@ -8,7 +8,7 @@ const DB_PATH = path.join(PROJECT_ROOT, 'assets', 'quiz.db');
 const ALIASES_PATH = path.join(PROJECT_ROOT, 'src', 'data', 'aliases.ts');
 const FRUITS_PATH = path.join(PROJECT_ROOT, 'src', 'data', 'fruits.json');
 
-const TOTAL_POKEMON = 721;
+const TOTAL_POKEMON = 1025;
 const FETCH_DELAY_MS = 100;
 
 const GEN_RANGES: [number, number, number][] = [
@@ -18,6 +18,9 @@ const GEN_RANGES: [number, number, number][] = [
   [4, 387, 493],
   [5, 494, 649],
   [6, 650, 721],
+  [7, 722, 809],
+  [8, 810, 905],
+  [9, 906, 1025],
 ];
 
 export interface CachedPokemon {
@@ -126,6 +129,64 @@ function formatName(apiName: string, id: number): string {
     710: 'Pumpkaboo',
     711: 'Gourgeist',
     718: 'Zygarde',
+    // Gen 7 — default-form names from PokeAPI carry a form suffix; strip to the species name
+    741: 'Oricorio',
+    745: 'Lycanroc',
+    746: 'Wishiwashi',
+    774: 'Minior',
+    778: 'Mimikyu',
+    // Gen 7 — genuine multi-word / punctuated names
+    772: 'Type: Null',
+    782: 'Jangmo-o',
+    783: 'Hakamo-o',
+    784: 'Kommo-o',
+    785: 'Tapu Koko',
+    786: 'Tapu Lele',
+    787: 'Tapu Bulu',
+    788: 'Tapu Fini',
+    // Gen 8 — form-suffix strips
+    849: 'Toxtricity',
+    875: 'Eiscue',
+    876: 'Indeedee',
+    877: 'Morpeko',
+    892: 'Urshifu',
+    902: 'Basculegion',
+    905: 'Enamorus',
+    // Gen 8 — punctuated names
+    865: "Sirfetch'd",
+    866: 'Mr. Rime',
+    // Gen 9 — form-suffix strips
+    916: 'Oinkologne',
+    925: 'Maushold',
+    931: 'Squawkabilly',
+    964: 'Palafin',
+    978: 'Tatsugiri',
+    982: 'Dudunsparce',
+    // Gen 9 — Paradox Pokemon and Treasures of Ruin (genuine multi-word names)
+    984: 'Great Tusk',
+    985: 'Scream Tail',
+    986: 'Brute Bonnet',
+    987: 'Flutter Mane',
+    988: 'Slither Wing',
+    989: 'Sandy Shocks',
+    990: 'Iron Treads',
+    991: 'Iron Bundle',
+    992: 'Iron Hands',
+    993: 'Iron Jugulis',
+    994: 'Iron Moth',
+    995: 'Iron Thorns',
+    1001: 'Wo-Chien',
+    1002: 'Chien-Pao',
+    1003: 'Ting-Lu',
+    1004: 'Chi-Yu',
+    1005: 'Roaring Moon',
+    1006: 'Iron Valiant',
+    1009: 'Walking Wake',
+    1010: 'Iron Leaves',
+    1020: 'Gouging Fire',
+    1021: 'Raging Bolt',
+    1022: 'Iron Boulder',
+    1023: 'Iron Crown',
   };
   if (overrides[id]) return overrides[id];
 
