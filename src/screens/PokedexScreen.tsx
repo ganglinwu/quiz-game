@@ -200,11 +200,13 @@ export default function PokedexScreen({ navigation }: Props) {
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.grid}
         keyboardDismissMode="on-drag"
-        getItemLayout={(_data, index) => ({
-          length: cellSize + 24 + GRID_GAP,
-          offset: (cellSize + 24 + GRID_GAP) * Math.floor(index / NUM_COLUMNS),
-          index,
-        })}
+        // No getItemLayout: cells are variable-height (a Legendary/Mythical
+        // ShimmerBadge renders inline, ~24px taller, on ~9% of the 1025
+        // Pokemon). A fixed-height getItemLayout would mis-predict row offsets,
+        // and that error accumulates over the long list into multi-screen drift
+        // that makes FlatList window the wrong region (blank gaps on scroll).
+        // The screen has no scrollToIndex/initialScrollIndex, so letting
+        // FlatList measure natively is both correct and sufficient here.
       />
 
       <PokedexFilterModal
