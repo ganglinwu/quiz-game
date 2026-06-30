@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView } from 'react-native';
 import { ALL_GENS, getPokemonCountByGen, getGenForPokemon } from '../data/pokemon-db';
 
 interface Props {
@@ -29,47 +29,53 @@ export default function GenerationSettingsModal({
         <View style={styles.modal}>
           <Text style={styles.title}>Generations</Text>
 
-          {ALL_GENS.map((gen) => {
-            const active = activeGenerations.includes(gen);
-            const count = getPokemonCountByGen(gen);
-            const hasUsedItems = usedGens.has(gen);
-            const canRemove = active && activeGenerations.length > 1 && !hasUsedItems;
+          {/* Scrolls so the now-9 generation rows (Gen 1-9 after the gen-7-9
+              expansion) can't overflow the top of this bottom-anchored sheet and
+              clip the first rows on smaller devices — mirrors QuizFilterModal /
+              PokedexFilterModal (maxHeight + ScrollView). */}
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {ALL_GENS.map((gen) => {
+              const active = activeGenerations.includes(gen);
+              const count = getPokemonCountByGen(gen);
+              const hasUsedItems = usedGens.has(gen);
+              const canRemove = active && activeGenerations.length > 1 && !hasUsedItems;
 
-            return (
-              <View key={gen} style={styles.row}>
-                <View>
-                  <Text style={[styles.genLabel, active && styles.genLabelActive]}>
-                    Gen {gen} ({count})
-                  </Text>
-                  {active && hasUsedItems && (
-                    <Text style={styles.hint}>Pokemon from this gen have been named</Text>
+              return (
+                <View key={gen} style={styles.row}>
+                  <View>
+                    <Text style={[styles.genLabel, active && styles.genLabelActive]}>
+                      Gen {gen} ({count})
+                    </Text>
+                    {active && hasUsedItems && (
+                      <Text style={styles.hint}>Pokemon from this gen have been named</Text>
+                    )}
+                  </View>
+                  {active ? (
+                    <TouchableOpacity
+                      style={[styles.toggleBtn, styles.removeBtn, !canRemove && styles.disabledBtn]}
+                      disabled={!canRemove}
+                      onPress={() => {
+                        onProposeRemove(gen);
+                        onClose();
+                      }}
+                    >
+                      <Text style={[styles.toggleText, !canRemove && styles.disabledText]}>Remove</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      style={[styles.toggleBtn, styles.addBtn]}
+                      onPress={() => {
+                        onProposeAdd(gen);
+                        onClose();
+                      }}
+                    >
+                      <Text style={styles.toggleText}>Add</Text>
+                    </TouchableOpacity>
                   )}
                 </View>
-                {active ? (
-                  <TouchableOpacity
-                    style={[styles.toggleBtn, styles.removeBtn, !canRemove && styles.disabledBtn]}
-                    disabled={!canRemove}
-                    onPress={() => {
-                      onProposeRemove(gen);
-                      onClose();
-                    }}
-                  >
-                    <Text style={[styles.toggleText, !canRemove && styles.disabledText]}>Remove</Text>
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity
-                    style={[styles.toggleBtn, styles.addBtn]}
-                    onPress={() => {
-                      onProposeAdd(gen);
-                      onClose();
-                    }}
-                  >
-                    <Text style={styles.toggleText}>Add</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            );
-          })}
+              );
+            })}
+          </ScrollView>
 
           <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
             <Text style={styles.closeText}>Close</Text>
@@ -92,6 +98,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 24,
     paddingBottom: 48,
+    maxHeight: '80%',
   },
   title: {
     color: '#ffffff',
