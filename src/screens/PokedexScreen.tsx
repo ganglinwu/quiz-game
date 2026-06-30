@@ -105,6 +105,16 @@ export default function PokedexScreen({ navigation }: Props) {
 
   const keyExtractor = useCallback((item: PokemonItem) => String(item.pokedexNumber), []);
 
+  // A gen+type combination can legitimately match nothing (e.g. Gen 1 + Dark —
+  // the Dark type debuted in Gen 2), and so can a search miss. Without this the
+  // grid just goes blank with a bare "0" count, which reads as a broken screen.
+  const ListEmpty = (
+    <View style={styles.emptyState}>
+      <Text style={styles.emptyTitle}>No Pokémon found</Text>
+      <Text style={styles.emptyHint}>Try a different type, generation, or search.</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -197,9 +207,10 @@ export default function PokedexScreen({ navigation }: Props) {
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         numColumns={NUM_COLUMNS}
-        columnWrapperStyle={styles.row}
+        columnWrapperStyle={pokemon.length > 0 ? styles.row : undefined}
         contentContainerStyle={styles.grid}
         keyboardDismissMode="on-drag"
+        ListEmptyComponent={ListEmpty}
         // No getItemLayout: cells are variable-height (a Legendary/Mythical
         // ShimmerBadge renders inline, ~24px taller, on ~9% of the 1025
         // Pokemon). A fixed-height getItemLayout would mis-predict row offsets,
@@ -391,5 +402,21 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
     marginTop: 2,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingTop: 64,
+    paddingHorizontal: 32,
+  },
+  emptyTitle: {
+    color: '#d0d0e0',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  emptyHint: {
+    color: '#a0a0b0',
+    fontSize: 13,
+    marginTop: 6,
+    textAlign: 'center',
   },
 });
