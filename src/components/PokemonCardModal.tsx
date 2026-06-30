@@ -60,6 +60,9 @@ const GEN_REGIONS: Record<number, { numeral: string; region: string }> = {
   4: { numeral: 'IV', region: 'Sinnoh' },
   5: { numeral: 'V', region: 'Unova' },
   6: { numeral: 'VI', region: 'Kalos' },
+  7: { numeral: 'VII', region: 'Alola' },
+  8: { numeral: 'VIII', region: 'Galar' },
+  9: { numeral: 'IX', region: 'Paldea' },
 };
 
 function getCryUrl(name: string): string {
