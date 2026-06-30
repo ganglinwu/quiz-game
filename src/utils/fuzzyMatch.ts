@@ -15,7 +15,10 @@ export interface MatchResult {
 }
 
 function normalize(s: string): string {
-  return s.toLowerCase().trim().replace(/[^a-z]/g, '');
+  // Keep digits: stripping them collapses distinct names onto one key (e.g.
+  // "Porygon2" -> "porygon" == "Porygon"), which would falsely flag Porygon2 as
+  // a duplicate of Porygon and make it unnameable when both are in the pool.
+  return s.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
 }
 
 function getThreshold(input: string): number {

@@ -36,13 +36,16 @@ function getGenLookup(): Map<string, number> {
     'SELECT name, generation FROM pokemon'
   );
   for (const row of rows) {
-    _genLookup.set(row.name.toLowerCase().replace(/[^a-z]/g, ''), row.generation);
+    // Keep digits in the key: stripping them collides Porygon (Gen 1) and
+    // Porygon2 (Gen 2) onto "porygon", so the second write would overwrite the
+    // first and getGenForPokemon would return the wrong generation.
+    _genLookup.set(row.name.toLowerCase().replace(/[^a-z0-9]/g, ''), row.generation);
   }
   return _genLookup;
 }
 
 export function getGenForPokemon(name: string): number | null {
-  return getGenLookup().get(name.toLowerCase().replace(/[^a-z]/g, '')) ?? null;
+  return getGenLookup().get(name.toLowerCase().replace(/[^a-z0-9]/g, '')) ?? null;
 }
 
 export function getPokemonCountByGen(gen: number): number {

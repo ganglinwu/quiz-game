@@ -139,6 +139,34 @@ describe('findDuplicate (real quiz.db)', () => {
   it('returns null when the item has not been used', () => {
     expect(findDuplicate('charizard', ['Pikachu'])).toBeNull();
   });
+
+  it('does NOT treat Porygon2 as a duplicate of Porygon (digits are significant)', () => {
+    // normalize() keeps digits, so "Porygon2" -> "porygon2" stays distinct from
+    // "Porygon" -> "porygon". Stripping digits used to collapse them, making
+    // Porygon2 unnameable once Porygon was used (and vice versa).
+    expect(findDuplicate('Porygon2', ['Porygon'])).toBeNull();
+    expect(findDuplicate('Porygon', ['Porygon2'])).toBeNull();
+    // a real re-entry is still caught
+    expect(findDuplicate('Porygon2', ['Porygon2'])).toBe('Porygon2');
+  });
+});
+
+describe('fuzzyMatch — digit-bearing names stay distinct (Porygon / Porygon2)', () => {
+  it('lets Porygon2 be named while Porygon is already used', () => {
+    const result = fuzzyMatch('Porygon2', ['Porygon', 'Porygon2'], ['Porygon']);
+    expect(result).toMatchObject({ match: 'Porygon2', distance: 0, confidence: 'exact' });
+  });
+
+  it('matches the exact-named member rather than its digit-twin', () => {
+    expect(fuzzyMatch('Porygon', ['Porygon', 'Porygon2'], [])).toMatchObject({
+      match: 'Porygon',
+      distance: 0,
+    });
+    expect(fuzzyMatch('Porygon2', ['Porygon', 'Porygon2'], [])).toMatchObject({
+      match: 'Porygon2',
+      distance: 0,
+    });
+  });
 });
 
 describe('fuzzyMatchWithGenDetection (active -> all-gens fallback)', () => {

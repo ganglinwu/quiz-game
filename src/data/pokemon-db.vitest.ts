@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getEvolutionChain, queryPokemon } from './pokemon-db';
+import { getEvolutionChain, getGenForPokemon, queryPokemon } from './pokemon-db';
 
 // These tests lock in the fix for the user's #1 reported bug: in a single-
 // generation context, an evolution chain (and the base/middle/final classification
@@ -61,6 +61,22 @@ describe('queryPokemon — generation-relative evolution stage', () => {
     const baseAll = names(queryPokemon({ evolutionStage: 'base' }));
     expect(baseAll).not.toContain('Pikachu');
     expect(baseAll).toContain('Pichu');
+  });
+});
+
+describe('getGenForPokemon — digit-bearing names keep their own generation', () => {
+  // The name→generation lookup keys on the digit-preserving normalized name.
+  // Stripping digits collided Porygon (Gen 1) and Porygon2 (Gen 2) onto the same
+  // "porygon" key, so whichever row was inserted last silently overwrote the
+  // other's generation — getGenForPokemon('Porygon') used to return 2.
+  it('reports Porygon as Gen 1 and Porygon2 as Gen 2 (no key collision)', () => {
+    expect(getGenForPokemon('Porygon')).toBe(1);
+    expect(getGenForPokemon('Porygon2')).toBe(2);
+  });
+
+  it('still resolves a plain name and is punctuation/case insensitive', () => {
+    expect(getGenForPokemon('pikachu')).toBe(1);
+    expect(getGenForPokemon("Farfetch'd")).toBe(1);
   });
 });
 
