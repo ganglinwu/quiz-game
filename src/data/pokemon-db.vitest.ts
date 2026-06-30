@@ -39,6 +39,56 @@ describe('getEvolutionChain — generation scoping (the #1 reported bug)', () =>
   });
 });
 
+describe('getEvolutionChain — Gen 7-9 cross-generation lineages', () => {
+  // The Gen 7-9 expansion (721 → 1025 Pokémon) added many evolutions that link
+  // back to much-earlier-gen pre-evolutions via evolves_from_id. These guard that
+  // (a) the Pokédex full chain traces the whole real-world lineage across the new
+  // data, and (b) gen-scoping still produces a contiguous, correctly re-rooted
+  // chain when the active member's pre-evolution sits in an inactive generation —
+  // the user's two stated requirements, exercised against the modern cross-gen data.
+
+  it('Pokédex full chain spans Gen 1 → 2 → 8 for Scyther → Scizor → Kleavor', () => {
+    expect(names(getEvolutionChain(123))).toEqual(['Scyther', 'Scizor', 'Kleavor']);
+  });
+
+  it('Pokédex full chain spans Gen 1 → 9 for Mankey → Primeape → Annihilape', () => {
+    expect(names(getEvolutionChain(56))).toEqual(['Mankey', 'Primeape', 'Annihilape']);
+  });
+
+  it('Pokédex full chain spans Gen 2 → 9 for Girafarig → Farigiraf', () => {
+    expect(names(getEvolutionChain(203))).toEqual(['Girafarig', 'Farigiraf']);
+  });
+
+  it('drops the Gen-8/9 evolutions in a Gen-1 context (Scyther alone, Mankey → Primeape)', () => {
+    expect(names(getEvolutionChain(123, [1]))).toEqual(['Scyther']);
+    expect(names(getEvolutionChain(56, [1]))).toEqual(['Mankey', 'Primeape']);
+  });
+
+  it('re-roots a Gen-9 evolution to stand alone when its earlier-gen pre-evo is inactive', () => {
+    // Annihilape (Gen 9) evolves from Primeape (Gen 1); in a Gen-9-only context the
+    // chain re-roots to just Annihilape rather than orphaning it / returning nothing.
+    expect(names(getEvolutionChain(56, [9]))).toEqual(['Annihilape']);
+    expect(names(getEvolutionChain(203, [9]))).toEqual(['Farigiraf']);
+    // Kingambit (Gen 9) re-roots even though BOTH Pawniard and Bisharp (Gen 5) are inactive.
+    expect(names(getEvolutionChain(625, [9]))).toEqual(['Kingambit']);
+  });
+
+  it('re-roots a surviving multi-member sub-chain when only the base is inactive', () => {
+    // Scyther chain scoped to {2,8} drops the Gen-1 base (Scyther); Scizor's parent
+    // is now absent so it re-roots, and Kleavor stays its child: Scizor → Kleavor.
+    // This exercises the BFS re-root branch on Gen 7-9 data (≥2 surviving members),
+    // not just the single-member early return.
+    expect(names(getEvolutionChain(123, [2, 8]))).toEqual(['Scizor', 'Kleavor']);
+  });
+
+  it('keeps only the contiguous in-gen prefix when a middle member is inactive', () => {
+    // Kleavor (Gen 8) is excluded from {1,2,9}, so the chain truncates at Scyther → Scizor.
+    expect(names(getEvolutionChain(123, [1, 2, 9]))).toEqual(['Scyther', 'Scizor']);
+    // The full Mankey line is contiguous across {1,2,9} (no inactive gap), so all three show.
+    expect(names(getEvolutionChain(56, [1, 2, 9]))).toEqual(['Mankey', 'Primeape', 'Annihilape']);
+  });
+});
+
 describe('queryPokemon — generation-relative evolution stage', () => {
   const gen1Stage = (stage: 'base' | 'middle' | 'final') =>
     names(queryPokemon({ generations: [1], evolutionStage: stage }));
