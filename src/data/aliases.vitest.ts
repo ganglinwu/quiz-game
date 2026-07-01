@@ -90,12 +90,11 @@ describe('alias source <-> baked artifact (aliases.ts vs quiz.db)', () => {
   const srcKeys = Object.keys(sourceAliases);
   const bakedKeys = Object.keys(baked);
 
-  it('all but one aliases.ts entry survives verbatim into quiz.db', () => {
+  it('every aliases.ts entry survives verbatim into quiz.db', () => {
     // generate-db inserts alias keys/values verbatim (no casing/normalization),
-    // so with the single documented exception below the shipped quiz.db mirrors
-    // the current aliases.ts one-for-one. Any OTHER drift here means aliases.ts
-    // was edited without re-running `npm run generate-db`, leaving stale voice
-    // data in the bundled asset.
+    // so the shipped quiz.db mirrors the current aliases.ts one-for-one. Any
+    // drift here means aliases.ts was edited without re-running
+    // `npm run generate-db`, leaving stale voice data in the bundled asset.
     expect(srcKeys.length).toBe(bakedKeys.length);
 
     const sourceOnly = srcKeys.filter((k) => !(k in baked));
@@ -104,19 +103,13 @@ describe('alias source <-> baked artifact (aliases.ts vs quiz.db)', () => {
       (k) => k in baked && baked[k] !== sourceAliases[k],
     );
 
-    // KNOWN BUILD BUG (not desired behavior — pinned so it can't silently
-    // spread): parseAliases() in scripts/generate-db.ts uses the regex
-    //   /['"]([^'"]+)['"]\s*:\s*['"]([^'"]+)['"]/
-    // whose key group [^'"]+ stops at the first quote char, so a quoted key that
-    // itself contains an apostrophe is mis-parsed. The only such key is
-    //   "farfetch'd": 'Farfetchd'
-    // which the regex reads as the bogus alias `d` -> Farfetchd, silently
-    // DROPPING the intended `farfetch'd` alias and INVENTING a lone-letter `d`
-    // alias. Fix = make the regex match a same-quote-delimited key (backref) and
-    // regenerate quiz.db; then this pin collapses to empty and this test flips
-    // to the strict clean-sync assertion.
-    expect(sourceOnly).toEqual(["farfetch'd"]);
-    expect(dbOnly).toEqual(['d']);
+    // Clean sync: parseAliases() now uses a same-quote backreference regex, so
+    // every key — including the apostrophe key "farfetch'd" — bakes into quiz.db
+    // verbatim. (The prior /['"]([^'"]+)['"].../ stopped the key group at the
+    // first quote char, mis-parsing "farfetch'd" into a bogus lone-letter `d`
+    // alias and dropping the intended key; regex fixed + quiz.db regenerated.)
+    expect(sourceOnly).toEqual([]);
+    expect(dbOnly).toEqual([]);
     expect(valueMismatch).toEqual([]);
   });
 });

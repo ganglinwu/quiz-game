@@ -237,10 +237,16 @@ export function parseAliases(): Record<string, string> {
   const content = fs.readFileSync(ALIASES_PATH, 'utf-8');
   const aliases: Record<string, string> = {};
 
-  const regex = /['"]([^'"]+)['"]\s*:\s*['"]([^'"]+)['"]/g;
+  // Match a same-quote-delimited key and value via backreferences (\1, \3), so a
+  // quoted string containing the OTHER quote isn't truncated at the inner one.
+  // The prior /['"]([^'"]+)['"].../ stopped the key group at the first quote
+  // char, mis-parsing "farfetch'd" into a bogus lone-letter `d` alias and
+  // dropping the intended key. `.*?` is lazy so it still closes at the matching
+  // quote (values here contain no quotes; the only apostrophe key is "farfetch'd").
+  const regex = /(['"])(.*?)\1\s*:\s*(['"])(.*?)\3/g;
   let match;
   while ((match = regex.exec(content)) !== null) {
-    aliases[match[1]] = match[2];
+    aliases[match[2]] = match[4];
   }
 
   return aliases;
