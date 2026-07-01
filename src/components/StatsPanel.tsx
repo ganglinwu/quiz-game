@@ -2,19 +2,11 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { GameStats } from '../types';
 import { getPlayerColor } from '../utils/colors';
+import { formatDuration } from '../utils/timeFormat';
 
 interface Props {
   stats: GameStats;
   players: string[];
-}
-
-function formatTime(ms: number): string {
-  if (ms < 1000) return `${ms}ms`;
-  const seconds = Math.round(ms / 1000);
-  if (seconds < 60) return `${seconds}s`;
-  const minutes = Math.floor(seconds / 60);
-  const remaining = seconds % 60;
-  return `${minutes}m ${remaining}s`;
 }
 
 export default function StatsPanel({ stats, players }: Props) {
@@ -28,24 +20,24 @@ export default function StatsPanel({ stats, players }: Props) {
           <View key={player}>
             <Row
               label={player}
-              value={`${s.totalItems} items · avg ${formatTime(s.avgTurnTime)}`}
+              value={`${s.totalItems} items · avg ${formatDuration(s.avgTurnTime)}`}
               color={color}
             />
           </View>
         );
       })}
       <Row label="Total turns" value={stats.totalTurns.toString()} />
-      <Row label="Game time" value={formatTime(stats.totalGameTime)} />
+      <Row label="Game time" value={formatDuration(stats.totalGameTime)} />
       {stats.fastestTurn && (
         <Row
           label="Fastest turn"
-          value={`${stats.fastestTurn.player} - ${stats.fastestTurn.item} (${formatTime(stats.fastestTurn.time)})`}
+          value={`${stats.fastestTurn.player} - ${stats.fastestTurn.item} (${formatDuration(stats.fastestTurn.time)})`}
         />
       )}
       {stats.slowestTurn && (
         <Row
           label="Slowest turn"
-          value={`${stats.slowestTurn.player} - ${stats.slowestTurn.item} (${formatTime(stats.slowestTurn.time)})`}
+          value={`${stats.slowestTurn.player} - ${stats.slowestTurn.item} (${formatDuration(stats.slowestTurn.time)})`}
         />
       )}
     </View>
