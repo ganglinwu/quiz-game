@@ -9,6 +9,7 @@ import {
   Pressable,
 } from 'react-native';
 import { getArtworkUrl } from '../utils/pokeApi';
+import { getCryUrl, statColor } from '../utils/pokemonCard';
 import { getEvolutionChain, getPokemonMeta, type EvolutionChainMember } from '../data/pokemon-db';
 import { GEN_REGIONS } from '../data/genRegions';
 import { useAudio } from '../audio';
@@ -52,11 +53,6 @@ interface Props {
    *  Gen-1 context shows Pikachu → Raichu, not Pichu → Pikachu → Raichu). */
   generations?: number[];
   onClose: () => void;
-}
-
-function getCryUrl(name: string): string {
-  const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-  return `https://play.pokemonshowdown.com/audio/cries/${slug}.mp3`;
 }
 
 export default function PokemonCardModal({ visible, pokemonName, pokemonId, generations, onClose }: Props) {
@@ -306,12 +302,6 @@ const STAT_LABELS: Record<string, string> = {
   'special-defense': 'SP.DEF',
   speed: 'SPD',
 };
-
-function statColor(value: number): string {
-  if (value >= 100) return '#4CAF50';
-  if (value >= 60) return '#FFC107';
-  return '#F44336';
-}
 
 const styles = StyleSheet.create({
   backdrop: {
