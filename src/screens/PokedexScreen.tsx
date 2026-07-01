@@ -64,11 +64,16 @@ export default function PokedexScreen({ navigation }: Props) {
   const pokemon = useMemo<PokemonItem[]>(() => {
     // Route through queryPokemon whenever a stat or type filter is active (it
     // can express both); otherwise use the lighter gen/all browse queries.
+    // `types` is an INTERSECTION (AND): selecting Fire + Flying shows only
+    // Pokémon that are both (e.g. Charizard, Moltres), not the union of the two.
+    // Since a Pokémon has at most 2 types, selecting 3+ types yields nothing —
+    // the ListEmptyComponent covers that gracefully. (Union semantics live in
+    // queryPokemon's separate `hasAnyOfTypes` option, used only by quiz mode.)
     let list: PokemonItem[] =
       selectedStat || selectedTypes.length > 0
         ? queryPokemon({
             generations: selectedGen ? [selectedGen] : undefined,
-            hasAnyOfTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
+            types: selectedTypes.length > 0 ? selectedTypes : undefined,
             statRank: selectedStat ? { stat: selectedStat, topN: 20 } : undefined,
           })
         : selectedGen

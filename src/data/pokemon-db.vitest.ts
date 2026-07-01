@@ -130,7 +130,10 @@ describe('getGenForPokemon — digit-bearing names keep their own generation', (
   });
 });
 
-describe('queryPokemon — type filter (the Pokédex type-filter feature)', () => {
+describe('queryPokemon — hasAnyOfTypes (the query engine OR capability, used by quiz mode)', () => {
+  // `hasAnyOfTypes` is a UNION over the listed types. The Pokédex type filter no
+  // longer uses it (it uses `types`, an intersection — see the block below); the
+  // remaining consumer is quiz mode's "strong against" constraint, which needs OR.
   it('matches a type on either slot (type1 OR type2): Gen-1 Fire is exactly the 12 fire Pokémon', () => {
     const gen1Fire = names(queryPokemon({ generations: [1], hasAnyOfTypes: ['fire'] }));
     expect(gen1Fire).toEqual([
@@ -144,12 +147,12 @@ describe('queryPokemon — type filter (the Pokédex type-filter feature)', () =
     expect(gen1Flying).toContain('Charizard');
   });
 
-  it('treats multiple selected types as a union (OR): Gen-1 Fire-or-Water = 44', () => {
+  it('treats multiple types as a union (OR): Gen-1 Fire-or-Water = 44', () => {
     const gen1FireWater = queryPokemon({ generations: [1], hasAnyOfTypes: ['fire', 'water'] });
     expect(gen1FireWater).toHaveLength(44);
   });
 
-  it('applies the type filter across all generations when no gen is selected (All Fire = 81 across Gen 1-9)', () => {
+  it('applies across all generations when no gen is selected (All Fire = 81 across Gen 1-9)', () => {
     const allFire = queryPokemon({ hasAnyOfTypes: ['fire'] });
     expect(allFire).toHaveLength(81);
   });
@@ -157,5 +160,40 @@ describe('queryPokemon — type filter (the Pokédex type-filter feature)', () =
   it('intersects the type filter with the gen filter (Gen-1 Dragon = the Dratini line)', () => {
     const gen1Dragon = names(queryPokemon({ generations: [1], hasAnyOfTypes: ['dragon'] }));
     expect(gen1Dragon).toEqual(['Dratini', 'Dragonair', 'Dragonite']);
+  });
+});
+
+describe('queryPokemon — types (the Pokédex type filter, an INTERSECTION/AND)', () => {
+  // The Pokédex funnel selects `types`, where each selected type is a separate
+  // AND condition: a Pokémon must carry EVERY selected type (in either slot).
+  // This locks in the union→intersection fix the objective asked for.
+  it('a single type behaves like OR-on-slots: Gen-1 Fire is still the 12 fire Pokémon', () => {
+    const gen1Fire = names(queryPokemon({ generations: [1], types: ['fire'] }));
+    expect(gen1Fire).toHaveLength(12);
+    expect(gen1Fire).toContain('Charizard'); // fire/flying, matched via type1
+  });
+
+  it('two types intersect: Gen-1 Fire AND Flying = only the dual-typed Charizard & Moltres', () => {
+    const gen1FireFlying = names(queryPokemon({ generations: [1], types: ['fire', 'flying'] }));
+    expect(gen1FireFlying).toEqual(['Charizard', 'Moltres']);
+  });
+
+  it('intersection is far narrower than union for the same pair (2 vs 29 in Gen 1)', () => {
+    const intersection = queryPokemon({ generations: [1], types: ['fire', 'flying'] });
+    const union = queryPokemon({ generations: [1], hasAnyOfTypes: ['fire', 'flying'] });
+    expect(intersection).toHaveLength(2);
+    expect(union).toHaveLength(29);
+  });
+
+  it('3+ types can never match (a Pokémon has at most 2 types): Fire AND Water AND Flying = empty', () => {
+    const impossible = queryPokemon({ types: ['fire', 'water', 'flying'] });
+    expect(impossible).toHaveLength(0);
+  });
+
+  it('spans generations when no gen is selected: Water AND Flying returns the cross-gen dual-types', () => {
+    const waterFlying = names(queryPokemon({ types: ['water', 'flying'] }));
+    expect(waterFlying).toEqual(
+      expect.arrayContaining(['Gyarados', 'Wingull', 'Pelipper', 'Swanna']),
+    );
   });
 });

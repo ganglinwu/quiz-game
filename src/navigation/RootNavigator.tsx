@@ -32,7 +32,16 @@ export default function RootNavigator() {
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Pokedex" component={PokedexScreen} />
       <Stack.Screen name="PlayerSetup" component={PlayerSetupScreen} />
-      <Stack.Screen name="Game" component={GameScreen} />
+      <Stack.Screen
+        name="Game"
+        component={GameScreen}
+        // Once a game is in progress there is no in-app "back" (GameScreen only
+        // ever navigation.replace()s forward to Result). Disable the iOS edge-
+        // swipe gesture so a stray swipe can't drop the player back to
+        // PlayerSetup and silently discard the whole in-progress game — same
+        // rationale as the Result screen below.
+        options={{ gestureEnabled: false }}
+      />
       <Stack.Screen
         name="Result"
         component={ResultScreen}
