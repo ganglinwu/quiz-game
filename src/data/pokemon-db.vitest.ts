@@ -89,6 +89,77 @@ describe('getEvolutionChain — Gen 7-9 cross-generation lineages', () => {
   });
 });
 
+describe('getEvolutionChain — branching lineages (the Pokédex card-modal path)', () => {
+  // Every "full chain" test above is LINEAR (Pichu/Scyther/Mankey lines), so the
+  // BFS that flattens a branchy family — the byParent map + queue in
+  // getEvolutionChain — is only exercised through gen-scoped re-rooting, never on a
+  // full national lineage with real branches. But the Pokédex/quiz card modal renders
+  // the WHOLE chain, branches included. These lock in that branch enumeration.
+  //
+  // Sibling order in the output is deterministic: the BFS visits the root first, and
+  // children are pushed in the order the DB returns them (rowid = pokedex-id order,
+  // no ORDER BY), so the flattened order is root-then-siblings-by-id.
+
+  it('flattens Eevee’s full 9-member national fan (base + 8 eeveelutions)', () => {
+    expect(names(getEvolutionChain(133))).toEqual([
+      'Eevee',
+      'Vaporeon',
+      'Jolteon',
+      'Flareon',
+      'Espeon',
+      'Umbreon',
+      'Leafeon',
+      'Glaceon',
+      'Sylveon',
+    ]);
+  });
+
+  it('roots a 3-way split at the parent, not the DB id order (Tyrogue before Hitmonlee)', () => {
+    // Tyrogue is id 236 while Hitmonlee/Hitmonchan are ids 106/107, so a naive
+    // id-ordered pass would list the children first. BFS re-roots at the from=null
+    // base, proving the flatten is topological (parentage), not raw row order.
+    expect(names(getEvolutionChain(236))).toEqual([
+      'Tyrogue',
+      'Hitmonlee',
+      'Hitmonchan',
+      'Hitmontop',
+    ]);
+  });
+
+  it('enumerates a Y-branch at a MIDDLE member (Poliwhirl → Poliwrath / Politoed)', () => {
+    expect(names(getEvolutionChain(60))).toEqual([
+      'Poliwag',
+      'Poliwhirl',
+      'Poliwrath',
+      'Politoed',
+    ]);
+  });
+
+  it('enumerates a base-level split (Slowpoke → Slowbro / Slowking)', () => {
+    expect(names(getEvolutionChain(79))).toEqual(['Slowpoke', 'Slowbro', 'Slowking']);
+  });
+
+  it('gen-scopes a branchy base to ALL surviving siblings, exactly (Eevee in Gen 1)', () => {
+    // The existing gen-scoping test only checks Eevee is first and Vaporeon is in /
+    // Espeon+Sylveon are out; it never pins the full surviving set or length. In Gen 1
+    // exactly the three Gen-1 eeveelutions remain — a branch-completeness guard.
+    expect(names(getEvolutionChain(133, [1]))).toEqual([
+      'Eevee',
+      'Vaporeon',
+      'Jolteon',
+      'Flareon',
+    ]);
+  });
+
+  it('prunes the inactive arm of a Y-branch, leaving the surviving arm contiguous', () => {
+    // Politoed (Gen 2) drops out of a Gen-1 Poliwag chain; the Poliwrath arm stays and
+    // the result collapses back to a linear Poliwag → Poliwhirl → Poliwrath.
+    expect(names(getEvolutionChain(60, [1]))).toEqual(['Poliwag', 'Poliwhirl', 'Poliwrath']);
+    // The base-level Slowpoke split likewise loses its Gen-2 arm (Slowking).
+    expect(names(getEvolutionChain(79, [1]))).toEqual(['Slowpoke', 'Slowbro']);
+  });
+});
+
 describe('queryPokemon — generation-relative evolution stage', () => {
   const gen1Stage = (stage: 'base' | 'middle' | 'final') =>
     names(queryPokemon({ generations: [1], evolutionStage: stage }));
